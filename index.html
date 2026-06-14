@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:    #F7F9FC;
+  --white: #FFFFFF;
+  --blue:  #5B9EC9;
+  --blue-l:#B8D9EF;
+  --blue-ll:#E4F3FB;
+  --blue-d:#2A6FA0;
+  --line:  #DDE8F0;
+  --ink:   #1C2B38;
+  --ink2:  #4A6070;
+  --ink3:  #8AAABB;
+  --ink4:  #C0D4DF;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans SC', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+/* subtle top-right glow */
+body::before {
+  content: '';
+  position: fixed; top: -200px; right: -150px;
+  width: 600px; height: 600px;
+  background: radial-gradient(ellipse, rgba(155,210,240,0.18) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── nav ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(247,249,252,0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  max-width: 680px; margin: 0 auto;
+  padding: 0 2rem; height: 54px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 9px;
+  text-decoration: none;
+}
+.nav-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--blue-l));
+  flex-shrink: 0;
+}
+.nav-name {
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink);
+}
+.nav-links { display: flex; gap: 0; list-style: none; }
+.nav-links a {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3); text-decoration: none;
+  padding: 6px 12px; border-radius: 99px;
+  transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--ink); background: var(--blue-ll); }
+
+/* ── page ── */
+.page {
+  max-width: 680px; margin: 0 auto;
+  padding: 0 2rem 8rem;
+  position: relative; z-index: 1;
+}
+
+/* ── section ── */
+.section {
+  padding: 6rem 0 0;
+}
+
+/* ── hero ── */
+.hero { padding-top: 7rem; }
+
+.hero-eyebrow {
+  font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--blue);
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 2rem;
+}
+.hero-eyebrow::before {
+  content: ''; width: 18px; height: 1px;
+  background: var(--blue); border-radius: 1px; display: block;
+}
+
+.hero-name {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(3.2rem, 9vw, 5.5rem);
+  font-weight: 300; color: var(--ink);
+  line-height: 1.05; letter-spacing: -0.025em;
+  margin-bottom: 2.5rem;
+}
+
+.hero-bio {
+  font-size: 15px; color: var(--ink2);
+  line-height: 2; max-width: 400px;
+}
+
+/* ── divider ── */
+.section-rule {
+  width: 100%; height: 1px;
+  background: var(--line);
+  margin: 6rem 0 0;
+}
+
+/* ── section label ── */
+.section-label {
+  font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--blue);
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 3rem;
+}
+.section-label::before {
+  content: ''; width: 14px; height: 1px;
+  background: var(--blue); border-radius: 1px; display: block;
+}
+
+/* ── about ── */
+.about-layout {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 3.5rem;
+  align-items: start;
+}
+.about-name {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.5rem; font-weight: 300; color: var(--ink);
+  margin-bottom: 1.4rem; line-height: 1.4;
+}
+.about-text p {
+  font-size: 14px; color: var(--ink2);
+  line-height: 2; margin-bottom: 1rem;
+}
+.about-text p:last-child { margin-bottom: 0; }
+
+.about-photo {
+  aspect-ratio: 3/4;
+  background: var(--blue-ll);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+}
+.about-photo svg { stroke: var(--blue-l); width: 22px; height: 22px; fill: none; }
+.about-photo span { font-size: 10px; letter-spacing: 0.1em; color: var(--ink4); }
+
+/* ── writing ── */
+.writing-list { display: flex; flex-direction: column; }
+
+.writing-item {
+  display: flex; align-items: baseline;
+  justify-content: space-between; gap: 2rem;
+  padding: 1.3rem 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none; color: inherit;
+  transition: padding-left .18s;
+}
+.writing-item:first-child { border-top: 1px solid var(--line); }
+.writing-item:hover { padding-left: 8px; }
+.writing-item:hover .wi-title { color: var(--ink); }
+
+.wi-left { display: flex; align-items: baseline; gap: 1rem; min-width: 0; }
+.wi-tag {
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--blue); white-space: nowrap; flex-shrink: 0;
+}
+.wi-title {
+  font-size: 14px; color: var(--ink2);
+  line-height: 1.4; transition: color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wi-date {
+  font-size: 11px; color: var(--ink4);
+  white-space: nowrap; flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.view-all {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 1.5rem;
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--blue); text-decoration: none;
+  padding: 6px 16px;
+  background: var(--blue-ll); border: 1px solid var(--blue-l);
+  border-radius: 99px;
+  transition: background .15s;
+}
+.view-all:hover { background: #cce9f8; }
+
+/* ── gallery ── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.gcell {
+  aspect-ratio: 1;
+  background: var(--blue-ll);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .22s;
+  cursor: pointer;
+}
+.gcell:hover { transform: scale(1.03); }
+.gcell:nth-child(2) { background: #EBF2EE; }
+.gcell:nth-child(3) { background: #EEF0F5; }
+.gcell:nth-child(4) { background: #F0ECEE; }
+.gcell:nth-child(5) { background: #EAF0EE; }
+.gcell:nth-child(6) { background: #E8F0F6; }
+.gcell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcell-hint { font-size: 10px; letter-spacing: 0.1em; color: var(--ink4); }
+
+/* ── footer ── */
+footer {
+  margin-top: 7rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+}
+footer p { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink4); }
+
+@media (max-width: 600px) {
+  .nav-inner { padding: 0 1.4rem; }
+  .page { padding: 0 1.4rem 6rem; }
+  .about-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .about-photo { aspect-ratio: 3/2; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero { padding-top: 5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="nav-dot"></span>
+      <span class="nav-name">ling</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#writing">Writing</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-eyebrow">Personal Archive</p>
+    <h1 class="hero-name">ling</h1>
+    <p class="hero-bio">在光与文字之间慢慢走。<br>记录一些看见的、感受到的、想留下来的事情。</p>
+  </section>
+
+  <!-- About -->
+  <div class="section-rule"></div>
+  <section class="section" id="about">
+    <p class="section-label">About</p>
+    <div class="about-layout">
+      <div class="about-text">
+        <h2 class="about-name">你好，我是 ling</h2>
+        <p>一个喜欢在城市边缘漫步的人，习惯用镜头和文字记录那些一不留神就会消失的瞬间。</p>
+        <p>偶尔写随笔，偶尔拍照片，有时候两件事同时发生。不追求宏大叙事，只想把细小的感受好好说清楚。</p>
+        <p>欢迎来这里坐坐。</p>
+      </div>
+      <div class="about-photo">
+        <svg viewBox="0 0 24 24" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>照片</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Writing -->
+  <div class="section-rule"></div>
+  <section class="section" id="writing">
+    <p class="section-label">Writing</p>
+    <div class="writing-list" id="index-writing-list">
+      <div style="padding:1rem 0;font-size:12px;color:var(--ink4);letter-spacing:0.06em">加载中…</div>
+    </div>
+    <a href="writing.html" class="view-all">全部文章 →</a>
+  </section>
+
+  <!-- Gallery -->
+  <div class="section-rule"></div>
+  <section class="section" id="gallery">
+    <p class="section-label">Photography</p>
+    <div class="gallery-grid">
+      <div class="gcell"><span class="gcell-hint">图片</span></div>
+      <div class="gcell"><span class="gcell-hint">图片</span></div>
+      <div class="gcell"><span class="gcell-hint">图片</span></div>
+      <div class="gcell"><span class="gcell-hint">图片</span></div>
+      <div class="gcell"><span class="gcell-hint">图片</span></div>
+      <div class="gcell"><span class="gcell-hint">图片</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 ling</p>
+    <p>Photography · Writing · Archive</p>
+  </footer>
+
+</div>
+
+<script>
+// Load latest 3 posts from posts/index.json
+fetch('posts/index.json')
+  .then(r => r.json())
+  .then(posts => {
+    const list = document.getElementById('index-writing-list');
+    if (!posts || posts.length === 0) {
+      list.innerHTML = '<div style="padding:1rem 0;font-size:12px;color:var(--ink4)">还没有文章</div>';
+      return;
+    }
+    const latest = posts.slice(0, 3);
+    list.innerHTML = latest.map(p => `
+      <a href="posts/${p.slug}.html" class="writing-item">
+        <div class="wi-left">
+          <span class="wi-tag">${p.tag || '随笔'}</span>
+          <span class="wi-title">${p.title}</span>
+        </div>
+        <span class="wi-date">${p.date || ''}</span>
+      </a>
+    `).join('');
+  })
+  .catch(() => {
+    document.getElementById('index-writing-list').innerHTML =
+      '<div style="padding:1rem 0;font-size:12px;color:var(--ink4)">暂无文章</div>';
+  });
+</script>
+</body>
+</html>
