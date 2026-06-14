@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雨天拍照这件事 — ling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F9FC;--blue:#5B9EC9;--blue-l:#B8D9EF;--blue-ll:#E4F3FB;--blue-d:#2A6FA0;--line:#DDE8F0;--ink:#1C2B38;--ink2:#4A6070;--ink3:#8AAABB;--ink4:#C0D4DF;}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC','Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;top:-200px;right:-150px;width:600px;height:600px;background:radial-gradient(ellipse,rgba(155,210,240,0.18) 0%,transparent 65%);pointer-events:none;z-index:0;}
+nav{position:sticky;top:0;z-index:100;background:rgba(247,249,252,0.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);}
+.nav-inner{max-width:680px;margin:0 auto;padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));}
+.nav-name{font-size:13px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);}
+.nav-back{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3);text-decoration:none;padding:6px 12px;border-radius:99px;transition:color .15s,background .15s;}
+.nav-back:hover{color:var(--ink);background:var(--blue-ll);}
+.page{max-width:680px;margin:0 auto;padding:0 2rem 8rem;position:relative;z-index:1;}
+.article-header{padding-top:6rem;padding-bottom:4rem;border-bottom:1px solid var(--line);}
+.ah-eyebrow{font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:10px;margin-bottom:2rem;}
+.ah-eyebrow::before{content:'';width:14px;height:1px;background:var(--blue);display:block;}
+.ah-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;}
+.ah-tag{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);padding:3px 12px;border:1px solid var(--blue-l);background:var(--blue-ll);border-radius:99px;}
+.ah-date{font-size:11px;color:var(--ink4);font-family:'Inter',sans-serif;letter-spacing:0.06em;}
+.ah-title{font-family:'Noto Serif SC',serif;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:300;color:var(--ink);line-height:1.35;letter-spacing:-0.015em;margin-bottom:1.4rem;}
+.ah-lead{font-size:14px;color:var(--ink3);line-height:1.85;max-width:480px;padding-left:1rem;border-left:1.5px solid var(--blue-l);}
+.cover-wrap{margin:3.5rem 0;}
+.cover-box{width:100%;aspect-ratio:16/9;background:var(--blue-ll);border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+.cover-box img{width:100%;height:100%;object-fit:cover;display:block;}
+.cover-cap{margin-top:0.7rem;font-size:11px;letter-spacing:0.05em;color:var(--ink4);font-style:italic;text-align:center;}
+.article-body{padding-top:3.5rem;}
+.md-body p{font-family:'Noto Serif SC',serif;font-size:16.5px;font-weight:300;color:var(--ink);line-height:2.1;margin-bottom:1.9rem;}
+.md-body h2{font-family:'Noto Serif SC',serif;font-size:1.15rem;font-weight:400;color:var(--ink);margin:3.5rem 0 1.3rem;padding-bottom:0.6rem;border-bottom:1px solid var(--line);}
+.md-body h3{font-family:'Noto Serif SC',serif;font-size:1rem;font-weight:400;color:var(--ink2);margin:2.5rem 0 1rem;}
+.md-body blockquote{margin:2.5rem 0;padding:0.2rem 0 0.2rem 1.4rem;border-left:1.5px solid var(--blue-l);}
+.md-body blockquote p{color:var(--ink3)!important;font-style:italic;font-size:15px!important;margin-bottom:0!important;line-height:1.9!important;}
+.md-body img{width:100%;display:block;border-radius:8px;border:1px solid var(--line);margin:2.5rem 0 0.6rem;}
+.md-body hr{border:none;height:1px;background:var(--line);margin:3.5rem 0;}
+.md-body ul,.md-body ol{padding-left:1.5rem;margin-bottom:1.9rem;}
+.md-body li{font-family:'Noto Serif SC',serif;font-size:15.5px;font-weight:300;color:var(--ink);line-height:2;margin-bottom:0.2rem;}
+.md-body ul li::marker{color:var(--blue-l);}
+.md-body strong{font-weight:500;color:var(--ink);}
+.md-body em{font-style:italic;color:var(--ink2);}
+.md-body a{color:var(--blue);text-decoration-color:var(--blue-l);text-underline-offset:3px;}
+.md-body code{font-family:'Inter',monospace;font-size:13px;background:var(--blue-ll);color:var(--blue-d);padding:2px 7px;border-radius:5px;border:1px solid var(--line);}
+.article-footer{margin-top:6rem;padding-top:2rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.article-footer p{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink4);}
+.back-link{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);text-decoration:none;padding:6px 16px;background:var(--blue-ll);border:1px solid var(--blue-l);border-radius:99px;transition:background .15s;}
+.back-link:hover{background:#cce9f8;}
+@media(max-width:600px){.nav-inner,.page{padding-left:1.4rem;padding-right:1.4rem;}.article-header{padding-top:4rem;}}
+</style>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <a href="../index.html" class="nav-logo"><span class="nav-dot"></span><span class="nav-name">ling</span></a>
+  <a href="../writing.html" class="nav-back">← 全部文章</a>
+</div></nav>
+<div class="page">
+  <header class="article-header">
+    <p class="ah-eyebrow">Writing</p>
+    <div class="ah-meta">
+      <span class="ah-tag">摄影记</span>
+      <span class="ah-date">2025.04.02</span>
+    </div>
+    <h1 class="ah-title">雨天拍照这件事</h1>
+    <p class="ah-lead">相机怕水，但雨天的光是平时遇不到的。</p>
+  </header>
+  <div class="cover-wrap">
+    <div class="cover-box">
+      <img src="https://images.unsplash.com/photo-1428592953211-077101b2021b?w=1200&auto=format&fit=crop" alt="cover">
+    </div>
+    <p class="cover-cap">下雨的街道，积水里有整个天空</p>
+  </div>
+  <article class="article-body">
+    <div class="md-body" id="md-output"></div>
+  </article>
+  <footer class="article-footer">
+    <p id="wc-out">© 2025 ling</p>
+    <a href="../writing.html" class="back-link">← 全部文章</a>
+  </footer>
+</div>
+<script id="md-src" type="text/plain">
+下雨天出门拍照是一件需要下定决心的事。
+
+不是因为麻烦，是因为相机怕水，每次都要在"今天光线很好"和"但是会淋湿"之间反复权衡。大多数时候我选择不去，然后在家里看窗外的雨发呆，觉得错过了什么。
+
+这次我去了。
+
+## 雨里的光
+
+雨天的漫射光是摄影师很喜欢说的东西，但亲身感受之前我一直不太理解那是什么意思。
+
+直到站在街上，发现周围一切都变得均匀了——没有硬影子，没有过曝的高光，每个细节都清晰地待在原位，像是被什么仔细地擦拭过。
+
+![](https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=900&auto=format&fit=crop)
+
+*路灯映在水里，比真实的更亮*
+
+积水是意外的收获。地面上每一滩水都是一面镜子，天空、路灯、行人，全部倒进去。我蹲下来，把镜头放得很低，发现地面上有另一个世界。
+
+> 有时候换一个视角不需要走很远，只需要蹲下来。
+
+## 关于淋雨这件事
+
+我还是淋湿了一点。
+
+包用外套盖着，相机用手挡着，自己就这样暴露在外面。走了大概两个小时，回家换衣服的时候发现肩膀全湿了，但是不觉得冷，也不觉得后悔。
+
+拍了大概两百张，回来选了十几张留下来。雨停之后我又出去了一次，想看看干燥的地面和刚才有什么不同。
+
+区别很大。那种漫射的、均匀的光消失了，影子回来了，一切都变得普通了。
+
+---
+
+所以雨天还是要出去的。相机可以擦干，但那个光等不了。
+</script>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  marked.use({ breaks: true, gfm: true });
+  var body = document.getElementById('md-src').textContent.trim();
+  document.getElementById('md-output').innerHTML = marked.parse(body);
+  document.querySelectorAll('.md-body img').forEach(function(img) {
+    var par = img.closest('p'); if (!par) return;
+    var next = par.nextElementSibling;
+    if (next && next.tagName === 'P' && next.querySelector('em') && next.childNodes.length === 1)
+      next.style.cssText = 'font-size:11px;color:var(--ink4);font-style:italic;text-align:center;margin-top:-1.2rem;margin-bottom:2.2rem;';
+  });
+  var text = document.getElementById('md-output').textContent || '';
+  var n = (text.match(/[\u4e00-\u9fa5]/g)||[]).length + (text.match(/[a-zA-Z]+/g)||[]).length;
+  document.getElementById('wc-out').textContent = '© 2025 ling · ' + n + ' 字';
+});
+</script>
+</body>
+</html>
