@@ -226,6 +226,7 @@ nav {
   display: flex; align-items: center; justify-content: center;
   transition: transform .22s;
   cursor: pointer;
+  text-decoration: none;
 }
 .gcell:hover { transform: scale(1.03); }
 .gcell:nth-child(2) { background: #EBF2EE; }
@@ -311,13 +312,8 @@ footer p { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; c
   <div class="section-rule"></div>
   <section class="section" id="gallery">
     <p class="section-label">Photography</p>
-    <div class="gallery-grid">
-      <div class="gcell"><span class="gcell-hint">图片</span></div>
-      <div class="gcell"><span class="gcell-hint">图片</span></div>
-      <div class="gcell"><span class="gcell-hint">图片</span></div>
-      <div class="gcell"><span class="gcell-hint">图片</span></div>
-      <div class="gcell"><span class="gcell-hint">图片</span></div>
-      <div class="gcell"><span class="gcell-hint">图片</span></div>
+    <div class="gallery-grid" id="index-gallery-grid">
+      <div class="gcell"><span class="gcell-hint">加载中…</span></div>
     </div>
     <a href="gallery.html" class="view-all">查看全部 →</a>
   </section>
@@ -354,6 +350,24 @@ fetch('posts/index.json')
     document.getElementById('index-writing-list').innerHTML =
       '<div style="padding:1rem 0;font-size:12px;color:var(--ink4)">暂无文章</div>';
   });
+</script>
+
+<script src="gallery/photos.js"></script>
+<script>
+// Render first 6 photos from gallery/photos.js into the homepage preview grid
+(function () {
+  const grid = document.getElementById('index-gallery-grid');
+  if (typeof PHOTOS === 'undefined' || !PHOTOS.length) {
+    grid.innerHTML = '<div class="gcell"><span class="gcell-hint">还没有照片</span></div>';
+    return;
+  }
+  const preview = PHOTOS.slice(0, 6);
+  grid.innerHTML = preview.map(p => `
+    <a href="gallery.html" class="gcell">
+      <img src="${p.src}" alt="${p.cap || ''}" loading="lazy">
+    </a>
+  `).join('');
+})();
 </script>
 </body>
 </html>
