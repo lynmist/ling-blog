@@ -44,6 +44,8 @@ body { font-family: 'Noto Sans SC','Inter',sans-serif; background: var(--bg); co
 .field label { display: block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
 .field input { width: 100%; padding: 7px 10px; font-size: 13px; color: var(--ink); font-family: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; outline: none; transition: border-color .15s; }
 .field input:focus { border-color: var(--blue-l); background: var(--panel); }
+.field select { width: 100%; padding: 7px 10px; font-size: 13px; color: var(--ink); font-family: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; outline: none; cursor: pointer; transition: border-color .15s; }
+.field select:focus { border-color: var(--blue-l); background: var(--panel); }
 .slug-preview { margin-top: 4px; font-size: 10px; color: var(--ink3); font-family: 'Inter',monospace; letter-spacing: 0.04em; }
 
 .article-list { flex: 1; }
@@ -162,6 +164,13 @@ body { font-family: 'Noto Sans SC','Inter',sans-serif; background: var(--bg); co
       <div class="field">
         <label>封面说明</label>
         <input id="f-cover-cap" type="text" placeholder="图片说明">
+      </div>
+      <div class="field">
+        <label>样式主题</label>
+        <select id="f-theme">
+          <option value="post-blue">蔚蓝（默认）</option>
+          <option value="post-warm">暖调</option>
+        </select>
       </div>
     </div>
     <div class="sidebar-section" style="padding-bottom:0.6rem">
@@ -309,7 +318,9 @@ function loadDraft(id) {
   document.getElementById('f-date').value     = a.date     || today();
   document.getElementById('f-cover').value    = a.cover    || '';
   document.getElementById('f-cover-cap').value= a.coverCap || '';
+  document.getElementById('f-theme').value    = a.theme    || 'post-blue';
   document.getElementById('md-editor').value  = a.body     || '';
+  applyPreviewTheme();
   updateSlugPreview();
   updatePreview();
   updateCount();
@@ -318,7 +329,7 @@ function loadDraft(id) {
 
 function newDraft() {
   const id = 'draft_' + Date.now();
-  drafts.unshift({ id, title:'', slug:'', lead:'', tag:'随笔', date:today(), cover:'', coverCap:'', body:'' });
+  drafts.unshift({ id, title:'', slug:'', lead:'', tag:'随笔', date:today(), cover:'', coverCap:'', theme:'post-blue', body:'' });
   saveDrafts(drafts);
   loadDraft(id);
 }
@@ -343,6 +354,7 @@ function autoSave() {
     date:     document.getElementById('f-date').value,
     cover:    document.getElementById('f-cover').value,
     coverCap: document.getElementById('f-cover-cap').value,
+    theme:    document.getElementById('f-theme').value,
     body:     document.getElementById('md-editor').value,
   };
   saveDrafts(drafts);
@@ -410,6 +422,7 @@ function getData() {
     date:     document.getElementById('f-date').value,
     cover:    document.getElementById('f-cover').value,
     coverCap: document.getElementById('f-cover-cap').value,
+    theme:    document.getElementById('f-theme').value || 'post-blue',
     body:     document.getElementById('md-editor').value,
   };
 }
@@ -423,56 +436,8 @@ function buildPostHTML(d) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="../css/${d.theme}.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"><\/script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F9FC;--blue:#5B9EC9;--blue-l:#B8D9EF;--blue-ll:#E4F3FB;--blue-d:#2A6FA0;--line:#DDE8F0;--ink:#1C2B38;--ink2:#4A6070;--ink3:#8AAABB;--ink4:#C0D4DF;}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC','Inter',sans-serif;-webkit-font-smoothing:antialiased;}
-body::before{content:'';position:fixed;top:-200px;right:-150px;width:600px;height:600px;background:radial-gradient(ellipse,rgba(155,210,240,0.18) 0%,transparent 65%);pointer-events:none;z-index:0;}
-nav{position:sticky;top:0;z-index:100;background:rgba(247,249,252,0.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);}
-.nav-inner{max-width:680px;margin:0 auto;padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;}
-.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
-.nav-dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-l));}
-.nav-name{font-size:13px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);}
-.nav-back{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3);text-decoration:none;padding:6px 12px;border-radius:99px;transition:color .15s,background .15s;}
-.nav-back:hover{color:var(--ink);background:var(--blue-ll);}
-.page{max-width:680px;margin:0 auto;padding:0 2rem 8rem;position:relative;z-index:1;}
-.article-header{padding-top:6rem;padding-bottom:4rem;border-bottom:1px solid var(--line);}
-.ah-eyebrow{font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:10px;margin-bottom:2rem;}
-.ah-eyebrow::before{content:'';width:14px;height:1px;background:var(--blue);display:block;}
-.ah-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;}
-.ah-tag{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);padding:3px 12px;border:1px solid var(--blue-l);background:var(--blue-ll);border-radius:99px;}
-.ah-date{font-size:11px;color:var(--ink4);font-family:'Inter',sans-serif;letter-spacing:0.06em;}
-.ah-title{font-family:'Noto Serif SC',serif;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:300;color:var(--ink);line-height:1.35;letter-spacing:-0.015em;margin-bottom:1.4rem;}
-.ah-lead{font-size:14px;color:var(--ink3);line-height:1.85;max-width:480px;padding-left:1rem;border-left:1.5px solid var(--blue-l);}
-.cover-wrap{margin:3.5rem 0;}
-.cover-box{width:100%;aspect-ratio:16/9;background:var(--blue-ll);border-radius:10px;overflow:hidden;border:1px solid var(--line);}
-.cover-box img{width:100%;height:100%;object-fit:cover;display:block;}
-.cover-cap{margin-top:0.7rem;font-size:11px;letter-spacing:0.05em;color:var(--ink4);font-style:italic;text-align:center;}
-.article-body{padding-top:3.5rem;}
-.md-body p{font-family:'Noto Serif SC',serif;font-size:16.5px;font-weight:300;color:var(--ink);line-height:2.1;margin-bottom:1.9rem;}
-.md-body h2{font-family:'Noto Serif SC',serif;font-size:1.15rem;font-weight:400;color:var(--ink);margin:3.5rem 0 1.3rem;padding-bottom:0.6rem;border-bottom:1px solid var(--line);}
-.md-body h3{font-family:'Noto Serif SC',serif;font-size:1rem;font-weight:400;color:var(--ink2);margin:2.5rem 0 1rem;}
-.md-body blockquote{margin:2.5rem 0;padding:0.2rem 0 0.2rem 1.4rem;border-left:1.5px solid var(--blue-l);}
-.md-body blockquote p{color:var(--ink3)!important;font-style:italic;font-size:15px!important;margin-bottom:0!important;line-height:1.9!important;}
-.md-body img{width:100%;display:block;border-radius:8px;border:1px solid var(--line);margin:2.5rem 0 0.6rem;}
-.md-body hr{border:none;height:1px;background:var(--line);margin:3.5rem 0;}
-.md-body ul,.md-body ol{padding-left:1.5rem;margin-bottom:1.9rem;}
-.md-body li{font-family:'Noto Serif SC',serif;font-size:15.5px;font-weight:300;color:var(--ink);line-height:2;margin-bottom:0.2rem;}
-.md-body ul li::marker{color:var(--blue-l);}
-.md-body strong{font-weight:500;color:var(--ink);}
-.md-body em{font-style:italic;color:var(--ink2);}
-.md-body a{color:var(--blue);text-decoration-color:var(--blue-l);text-underline-offset:3px;}
-.md-body code{font-family:'Inter',monospace;font-size:13px;background:var(--blue-ll);color:var(--blue-d);padding:2px 7px;border-radius:5px;border:1px solid var(--line);}
-.md-body pre{background:var(--blue-ll);border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.4rem;overflow-x:auto;margin-bottom:1.9rem;}
-.md-body pre code{background:none;border:none;padding:0;color:var(--ink2);}
-.article-footer{margin-top:6rem;padding-top:2rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
-.article-footer p{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink4);}
-.back-link{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);text-decoration:none;padding:6px 16px;background:var(--blue-ll);border:1px solid var(--blue-l);border-radius:99px;transition:background .15s;}
-.back-link:hover{background:#cce9f8;}
-@media(max-width:600px){.nav-inner,.page{padding-left:1.4rem;padding-right:1.4rem;}.article-header{padding-top:4rem;}}
-</style>
 </head>
 <body>
 <nav><div class="nav-inner">
@@ -499,22 +464,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(247,249,252,0.9);backdrop-
   </footer>
 </div>
 <script id="md-src" type="text/plain">${d.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}<\/script>
-<script>
-window.addEventListener('DOMContentLoaded',function(){
-  marked.use({breaks:true,gfm:true});
-  var body=document.getElementById('md-src').textContent;
-  document.getElementById('md-output').innerHTML=marked.parse(body);
-  document.querySelectorAll('.md-body img').forEach(function(img){
-    var par=img.closest('p');if(!par)return;
-    var next=par.nextElementSibling;
-    if(next&&next.tagName==='P'&&next.querySelector('em')&&next.childNodes.length===1)
-      next.style.cssText='font-size:11px;color:var(--ink4);font-style:italic;text-align:center;margin-top:-1.2rem;margin-bottom:2.2rem;';
-  });
-  var text=document.getElementById('md-output').textContent||'';
-  var n=(text.match(/[\u4e00-\u9fa5]/g)||[]).length+(text.match(/[a-zA-Z]+/g)||[]).length;
-  document.getElementById('wc-out').textContent='© 2025 ling · '+n+' 字';
-});
-<\/script>
+<script src="../css/post.js"><\/script>
 </body>
 </html>`;
 }
@@ -558,12 +508,31 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ── theme swatches for live preview (scoped to .preview-scroll only) ──
+const THEMES = {
+  'post-blue': { blue:'#5B9EC9', blueL:'#B8D9EF', blueLl:'#E4F3FB' },
+  'post-warm': { blue:'#C98B5B', blueL:'#E8D2BC', blueLl:'#F3E9DD' },
+};
+function applyPreviewTheme() {
+  const key = document.getElementById('f-theme').value || 'post-blue';
+  const t = THEMES[key] || THEMES['post-blue'];
+  const scroll = document.querySelector('.preview-scroll');
+  scroll.style.setProperty('--blue', t.blue);
+  scroll.style.setProperty('--blue-l', t.blueL);
+  scroll.style.setProperty('--blue-ll', t.blueLl);
+}
+
 // ── bind events ──
 function bindEvents() {
   document.getElementById('btn-new').addEventListener('click', newDraft);
   document.getElementById('btn-preview').addEventListener('click', () => {
     const d = getData();
-    const html = buildPostHTML(d);
+    let html = buildPostHTML(d);
+    // blob:// pages can't resolve relative ../css/*.css — swap to the live site's absolute URL for preview only
+    html = html.replace(`../css/${d.theme}.css`, `https://yling2719.top/css/${d.theme}.css`)
+                .replace('../css/post.js', 'https://yling2719.top/css/post.js')
+                .replace(/href="\.\.\/index\.html"/g, 'href="https://yling2719.top/index.html"')
+                .replace(/href="\.\.\/writing\.html"/g, 'href="https://yling2719.top/writing.html"');
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     window.open(URL.createObjectURL(blob), '_blank');
   });
@@ -589,9 +558,10 @@ function bindEvents() {
   });
 
   // field inputs
-  ['f-title','f-lead','f-tag','f-date','f-cover','f-cover-cap'].forEach(id => {
+  ['f-title','f-lead','f-tag','f-date','f-cover','f-cover-cap','f-theme'].forEach(id => {
     document.getElementById(id).addEventListener('input', updatePreview);
   });
+  document.getElementById('f-theme').addEventListener('change', applyPreviewTheme);
   document.getElementById('f-slug').addEventListener('input', () => {
     updateSlugPreview();
     autoSave();
