@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摄影 — ling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="gallery/gallery.css" rel="stylesheet">
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="nav-dot"></span>
+      <span class="nav-name">ling</span>
+    </a>
+    <a href="index.html" class="nav-back">← Back</a>
+  </div>
+</nav>
+
+<div class="page">
+  <header class="page-header">
+    <p class="page-eyebrow">Photography</p>
+    <h1 class="page-title">摄影</h1>
+    <p class="page-sub">一些走着走着拍下来的瞬间，没有太多设计，只是觉得当时的光很好。</p>
+  </header>
+
+  <div class="masonry" id="masonry">
+    <div class="empty"><p>加载中…</p></div>
+  </div>
+
+  <footer>
+    <p>© 2025 ling</p>
+    <p>Photography · Archive</p>
+  </footer>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <a class="lightbox-close lightbox-source" id="lb-source" href="#" target="_blank" rel="noopener" title="查看原图来源">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  </a>
+  <div class="lightbox-close" id="lb-close">✕</div>
+  <div class="lightbox-nav lightbox-prev" id="lb-prev">‹</div>
+  <div class="lightbox-nav lightbox-next" id="lb-next">›</div>
+  <div class="lightbox-inner">
+    <div class="lightbox-img-wrap">
+      <img id="lb-img" src="" alt="">
+    </div>
+    <p class="lightbox-cap" id="lb-cap"></p>
+    <div class="lightbox-meta">
+      <span id="lb-index"></span>
+    </div>
+  </div>
+</div>
+
+<script src="gallery/photos.js"></script>
+<script src="gallery/gallery.js"></script>
+
+</body>
+</html>
