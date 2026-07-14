@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>页面不存在 — ling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="css/base.css" rel="stylesheet">
+<style>
+.error-page {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 4rem;
+}
+.error-code {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(5rem, 18vw, 10rem);
+  font-weight: 300;
+  color: var(--blue-l);
+  line-height: 1;
+  margin-bottom: 1.5rem;
+}
+.error-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+.error-desc {
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+.error-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  text-decoration: none;
+  padding: 8px 20px;
+  background: var(--blue-ll);
+  border: 1px solid var(--blue-l);
+  border-radius: 99px;
+  transition: background .15s;
+}
+.error-back:hover { background: #cce9f8; }
+footer { margin-top: 4rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-dot"></span><span class="nav-name">ling</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="writing.html">Writing</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="link.html">Link</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="error-page">
+    <div class="error-code">404</div>
+    <h1 class="error-title">这里什么都没有</h1>
+    <p class="error-desc">你要找的页面可能已经搬走，或者从未存在过。</p>
+    <a href="index.html" class="error-back">← 返回首页</a>
+  </div>
+
+  <footer>
+    <p>© 2026 ling</p>
+    <p>Photography · Writing · Archive</p>
+  </footer>
+</div>
+
+</body>
+</html>
