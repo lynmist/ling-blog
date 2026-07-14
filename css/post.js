@@ -19,5 +19,5 @@ window.addEventListener('DOMContentLoaded', function () {
   var text = document.getElementById('md-output').textContent || '';
   var n = (text.match(/[\u4e00-\u9fa5]/g) || []).length + (text.match(/[a-zA-Z]+/g) || []).length;
   var wc = document.getElementById('wc-out');
-  if (wc) wc.textContent = '© 2025 ling · ' + n + ' 字';
+  if (wc) wc.textContent = '© 2026 ling · ' + n + ' 字';
 });
