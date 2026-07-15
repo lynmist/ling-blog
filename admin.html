@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <title>Admin — ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -432,6 +433,7 @@ function buildPostHTML(d) {
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
 <title>${d.title} — ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -531,6 +533,7 @@ function bindEvents() {
     // blob:// pages can't resolve relative ../css/*.css — swap to the live site's absolute URL for preview only
     html = html.replace(`../css/${d.theme}.css`, `https://yling2719.top/css/${d.theme}.css`)
                 .replace('../css/post.js', 'https://yling2719.top/css/post.js')
+                .replace('href="../favicon.ico"', 'href="https://yling2719.top/favicon.ico"')
                 .replace(/href="\.\.\/index\.html"/g, 'href="https://yling2719.top/index.html"')
                 .replace(/href="\.\.\/writing\.html"/g, 'href="https://yling2719.top/writing.html"');
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
