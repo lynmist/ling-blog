@@ -232,6 +232,18 @@ footer p { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; c
 @media (max-width: 600px) {
   .nav-inner { padding: 0 1.2rem; }
   .nav-links a { padding: 6px 8px; font-size: 10px; }
-  .theme-switch { margin-left: 6px; transform: scale(0.92); transform-origin: right center; }
+  .theme-switch { margin-left: 6px; }
+  /* collapse wide 3-state switch into a compact icon button */
+  .switch-track { width: 32px; height: 32px; padding: 0; background: var(--surface); border-color: var(--line); justify-content: center; }
+  .switch-thumb { transform: none !important; width: 24px; height: 24px; background: transparent; box-shadow: none; }
+  [data-theme-mode="system"] .switch-thumb,
+  [data-theme-mode="dark"] .switch-thumb { transform: none !important; box-shadow: none; }
+  .switch-thumb svg { width: 16px; height: 16px; }
+  .switch-thumb .sun,
+  .switch-thumb .auto,
+  .switch-thumb .moon { opacity: 0; }
+  [data-theme-mode="light"] .switch-thumb .sun { opacity: 1; }
+  [data-theme-mode="system"] .switch-thumb .auto { opacity: 1; }
+  [data-theme-mode="dark"] .switch-thumb .moon { opacity: 1; }
   .page { padding: 0 1.4rem 6rem; }
 }
