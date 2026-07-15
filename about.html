@@ -11,18 +11,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="css/base.css" rel="stylesheet">
 <style>
-.about-layout { display: grid; grid-template-columns: 1fr 140px; gap: 3.5rem; align-items: start; padding-top: 3rem; }
 .about-name { font-family: 'Noto Serif SC', serif; font-size: 1.6rem; font-weight: 300; color: var(--ink); margin-bottom: 1.6rem; line-height: 1.4; }
-.about-text p { font-size: 15px; color: var(--ink2); line-height: 2; margin-bottom: 1.2rem; }
-.about-text p:last-child { margin-bottom: 0; }
-.about-photo { aspect-ratio: 1/1; background: var(--blue-ll); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.about-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.site-section p { font-size: 15px; color: var(--ink2); line-height: 2; margin-bottom: 1.2rem; }
+.site-section p:last-child { margin-bottom: 0; }
 footer { margin-top: 6rem; }
 @media (max-width: 600px) {
-  .about-layout { grid-template-columns: 1fr; gap: 2.5rem; }
-  .about-photo { width: 150px; margin: 0 auto; border-radius: 50%; }
   .about-name { text-align: center; }
-  .about-text p { text-align: justify; }
+  .site-section p { text-align: justify; }
 }
 </style>
 </head>
@@ -53,26 +48,15 @@ footer { margin-top: 6rem; }
   <header class="page-header">
     <p class="page-eyebrow">About</p>
     <h1 class="page-title">关于</h1>
-    <p class="page-sub">在光与文字之间慢慢走。</p>
+    <p class="page-sub">这个站点是什么，以及为什么存在。</p>
   </header>
 
-   <div class="about-layout">
-    <div class="about-text">
-      <h2 class="about-name">你好，我是 ling</h2>
-      <p>一个喜欢在城市边缘漫步的人，习惯用镜头和文字记录那些一不留神就会消失的瞬间。</p>
-      <p>偶尔写随笔，偶尔拍照片，有时候两件事同时发生。不追求宏大叙事，只想把细小的感受好好说清楚。</p>
-    </div>
-    <div class="about-photo">
-      <img src="images/avatar.jpg" alt="ling">
-    </div>
-  </div>
-
-  <div class="site-section" style="padding-top: 5rem;">
+   <div class="site-section" style="padding-top: 3rem;">
     <h2 class="about-name">关于本站</h2>
     <p>这是一个缓慢更新中的个人网站，用来存放照片、文字和一些无处安放的想法。</p>
     <p>没有复杂的分类，也没有刻意的运营。它只是我生活中某些片段的存档，像一本打开的笔记本，偶尔有人翻到会很好。</p>
     <p>站点采用纯静态方式构建，托管在 GitHub Pages，通过 Cloudflare 分发。设计尽量保持简洁、安静，让内容自己说话。</p>
-    <p>如果你也做类似的个人站点，欢迎来<a href="link.html">友链</a>串门，或者通过其他方式找到我。</p>
+    <p>如果你也做类似的个人站点，欢迎来<a href="link.html">友链</a>串门。</p>
   </div>
 
   <footer>
