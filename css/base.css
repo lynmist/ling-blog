@@ -3,21 +3,23 @@
 
 /* ── theme variables ── */
 :root {
-  --bg:        #F7F9FC;
-  --surface:   #FFFFFF;
-  --nav-bg:    rgba(247,249,252,0.86);
-  --glow:      rgba(155,210,240,0.18);
-  --blue:      #5B9EC9;
-  --blue-l:    #B8D9EF;
-  --blue-ll:   #E4F3FB;
-  --blue-d:    #2A6FA0;
-  --line:      #DDE8F0;
-  --ink:       #1C2B38;
-  --ink2:      #4A6070;
-  --ink3:      #8AAABB;
-  --ink4:      #C0D4DF;
-  --hover:     #cce9f8;
-  --selection: rgba(91,158,201,0.18);
+  --bg:        #f5f7fa;
+  --surface:   #ffffff;
+  --nav-bg:    rgba(245,247,250,0.82);
+  --glow:      rgba(145,195,230,0.16);
+  --blue:      #5a9dc8;
+  --blue-l:    #b5d7ee;
+  --blue-ll:   #e3f1fa;
+  --blue-d:    #2a6fa0;
+  --line:      #dde5ee;
+  --ink:       #1c2533;
+  --ink2:      #4a5a6d;
+  --ink3:      #8798ab;
+  --ink4:      #c2cdd8;
+  --hover:     #d4ebf8;
+  --selection: rgba(90,157,200,0.18);
+  --shadow-sm: 0 1px 2px rgba(22,40,62,0.04), 0 4px 12px rgba(22,40,62,0.04);
+  --shadow-md: 0 4px 6px rgba(22,40,62,0.03), 0 10px 24px rgba(22,40,62,0.05);
 }
 
 [data-theme="dark"] {
@@ -36,6 +38,8 @@
   --ink4:      #465565;
   --hover:     #223244;
   --selection: rgba(110,179,236,0.22);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.18), 0 10px 24px rgba(0,0,0,0.22);
 }
 
 html {
@@ -66,6 +70,24 @@ body::before {
 
 /* dim images slightly in dark mode for less eye strain */
 [data-theme="dark"] img { filter: brightness(.96) contrast(1.02); }
+
+/* subtle paper grain texture */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] body::after { opacity: 0.04; mix-blend-mode: screen; }
+
+/* refined custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink4); border-radius: 99px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink3); }
 
 /* ── nav ── */
 nav {

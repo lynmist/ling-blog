@@ -138,11 +138,12 @@
   border: 1px solid var(--line);
   overflow: hidden;
   display: flex; align-items: center; justify-content: center;
-  transition: transform .22s;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
   cursor: pointer;
   text-decoration: none;
+  box-shadow: var(--shadow-sm);
 }
-.gcell:hover { transform: scale(1.03); }
+.gcell:hover { transform: scale(1.025); box-shadow: var(--shadow-md); }
 .gcell:nth-child(2) { background: #EBF2EE; }
 .gcell:nth-child(3) { background: #EEF0F5; }
 .gcell:nth-child(4) { background: #F0ECEE; }

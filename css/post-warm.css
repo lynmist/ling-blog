@@ -1,19 +1,30 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#F7F5F2;--surface:#FFFFFF;--nav-bg:rgba(247,245,242,0.86);--glow:rgba(230,180,130,0.18);--hover:#f0e2d2;--selection:rgba(201,139,91,0.16);
-  --blue:#C98B5B;--blue-l:#E8D2BC;--blue-ll:#F3E9DD;--blue-d:#A06A3B;
-  --line:#E8E0D8;--ink:#1C2B38;--ink2:#4A6070;--ink3:#8AAABB;--ink4:#C0D4DF;
+  --bg:#f9f7f4;--surface:#ffffff;--nav-bg:rgba(249,247,244,0.82);--glow:rgba(220,175,130,0.16);--hover:#f2e4d4;--selection:rgba(201,139,91,0.16);
+  --blue:#c68b5a;--blue-l:#e6d0b8;--blue-ll:#f3e8dd;--blue-d:#9f6a3a;
+  --line:#e6dfd6;--ink:#1c2533;--ink2:#4a5a6d;--ink3:#8f9aaa;--ink4:#c9c4bc;
+  --shadow-sm:0 1px 2px rgba(40,32,24,0.04),0 4px 12px rgba(40,32,24,0.04);
+  --shadow-md:0 4px 6px rgba(40,32,24,0.03),0 10px 24px rgba(40,32,24,0.05);
 }
 [data-theme="dark"]{
   --bg:#15130f;--surface:#1f1c17;--nav-bg:rgba(21,19,15,0.82);--glow:rgba(180,130,80,0.14);--hover:#3d3024;--selection:rgba(217,160,110,0.18);
   --blue:#d9a06e;--blue-l:#6b5038;--blue-ll:#3d3024;--blue-d:#f0b888;
   --line:#332c24;--ink:#f2eee8;--ink2:#c4b8a8;--ink3:#8f8373;--ink4:#5e5448;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.2),0 4px 12px rgba(0,0,0,0.15);
+  --shadow-md:0 4px 6px rgba(0,0,0,0.18),0 10px 24px rgba(0,0,0,0.22);
 }
 html{scroll-behavior:smooth;color-scheme:light dark}
 ::selection{background:var(--selection)}
 body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC','Inter',sans-serif;-webkit-font-smoothing:antialiased;transition:background .35s ease,color .35s ease}
 body::before{content:'';position:fixed;top:-200px;right:-150px;width:700px;height:700px;background:radial-gradient(ellipse,var(--glow) 0%,transparent 65%);pointer-events:none;z-index:0;transition:background .35s ease}
 [data-theme="dark"] img{filter:brightness(.96) contrast(1.02)}
+
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:9999;mix-blend-mode:multiply}
+[data-theme="dark"] body::after{opacity:.04;mix-blend-mode:screen}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--ink4);border-radius:99px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:var(--ink3)}
 
 nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);border-bottom:1px solid var(--line);transition:background .35s ease,border-color .35s ease}
 .nav-inner{max-width:680px;margin:0 auto;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between}
