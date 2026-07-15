@@ -93,6 +93,9 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 .back-link:hover{background:var(--hover)}
 
 @media(max-width:600px){
-  .nav-inner,.page{padding-left:1.4rem;padding-right:1.4rem}
+  .nav-inner{padding-left:1.2rem;padding-right:1.2rem}
+  .nav-links a{padding:6px 8px;font-size:10px}
+  .theme-switch{margin-left:6px;transform:scale(0.92);transform-origin:right center}
+  .page{padding-left:1.4rem;padding-right:1.4rem}
   .article-header{padding-top:4rem}
 }

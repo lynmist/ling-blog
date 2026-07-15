@@ -230,6 +230,8 @@ footer p { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; c
 
 /* ── mobile base ── */
 @media (max-width: 600px) {
-  .nav-inner { padding: 0 1.4rem; }
+  .nav-inner { padding: 0 1.2rem; }
+  .nav-links a { padding: 6px 8px; font-size: 10px; }
+  .theme-switch { margin-left: 6px; transform: scale(0.92); transform-origin: right center; }
   .page { padding: 0 1.4rem 6rem; }
 }
