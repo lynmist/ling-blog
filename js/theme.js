@@ -1,25 +1,45 @@
 (function () {
-  const STORAGE_KEY = 'ling-theme';
+  const MODE_KEY = 'ling-theme-mode';
+  const VALID_MODES = ['light', 'dark', 'system'];
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
 
-  function getTheme() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'light' || saved === 'dark') return saved;
-    } catch {}
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  function getSystemTheme() {
+    return media.matches ? 'dark' : 'light';
   }
 
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
+  function getMode() {
+    try {
+      const saved = localStorage.getItem(MODE_KEY);
+      if (VALID_MODES.includes(saved)) return saved;
+    } catch {}
+    return 'system';
+  }
+
+  function getEffectiveTheme(mode) {
+    return mode === 'system' ? getSystemTheme() : mode;
+  }
+
+  function applyMode(mode) {
+    const effective = getEffectiveTheme(mode);
+    document.documentElement.setAttribute('data-theme', effective);
+    document.documentElement.setAttribute('data-theme-mode', mode);
+    try { localStorage.setItem(MODE_KEY, mode); } catch {}
   }
 
   // apply before first paint to avoid flash
-  applyTheme(getTheme());
+  applyMode(getMode());
 
-  // toggle helper used by buttons
+  // react to OS-level theme changes when in system mode
+  media.addEventListener('change', () => {
+    if (getMode() === 'system') {
+      document.documentElement.setAttribute('data-theme', getSystemTheme());
+    }
+  });
+
+  // cycle: light -> system -> dark -> light
   window.toggleTheme = function () {
-    const current = document.documentElement.getAttribute('data-theme') || 'light';
-    applyTheme(current === 'dark' ? 'light' : 'dark');
+    const current = document.documentElement.getAttribute('data-theme-mode') || 'system';
+    const next = current === 'light' ? 'system' : current === 'system' ? 'dark' : 'light';
+    applyMode(next);
   };
 })();
