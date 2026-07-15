@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<script src="js/theme.js"></script>
+<title>书架 — ling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="css/base.css" rel="stylesheet">
+<style>
+.book-intro { padding-top: 3rem; font-size: 14px; color: var(--ink2); line-height: 2; max-width: 520px; }
+.book-list { display: grid; grid-template-columns: 1fr; gap: 1rem; padding-top: 3rem; }
+.book-card {
+  display: flex; align-items: flex-start; gap: 1.2rem;
+  padding: 1.4rem 1.6rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-decoration: none; color: inherit;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s, box-shadow .2s, border-color .2s, background .25s;
+}
+.book-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--blue-l); }
+.book-cover {
+  width: 56px; height: 80px;
+  background: var(--blue-ll);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 11px;
+  color: var(--blue);
+  text-align: center;
+  padding: 0.4rem;
+  line-height: 1.4;
+}
+.book-main { min-width: 0; flex: 1; }
+.book-meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+.book-type {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--blue); background: var(--blue-ll);
+  border: 1px solid var(--blue-l); border-radius: 99px;
+  padding: 1px 8px;
+}
+.book-name { font-size: 16px; font-weight: 500; color: var(--ink); margin-bottom: 0.25rem; }
+.book-author { font-size: 12px; color: var(--ink3); margin-bottom: 0.5rem; }
+.book-desc { font-size: 13px; color: var(--ink2); line-height: 1.7; }
+footer { margin-top: 6rem; }
+@media (max-width: 600px) {
+  .book-card { padding: 1.2rem; }
+  .book-cover { width: 48px; height: 70px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-dot"></span><span class="nav-name">ling</span></a>
+    <ul class="nav-links">
+      <li><a href="about.html">About</a></li>
+      <li><a href="writing.html">Writing</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="more.html">More</a></li>
+    </ul>
+    <button class="theme-switch" type="button" onclick="toggleTheme()" aria-label="切换主题">
+      <span class="switch-track">
+        <span class="switch-thumb">
+          <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg class="auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/></svg>
+          <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+      </span>
+    </button>
+  </div>
+</nav>
+
+<div class="page">
+  <header class="page-header">
+    <p class="page-eyebrow">Bookshelf</p>
+    <h1 class="page-title">书架</h1>
+    <p class="page-sub">小说、散文和其他会留下痕迹的书。</p>
+  </header>
+
+  <p class="book-intro">这里放的是一些读过之后还想再读、或者会时不时想起来的书。类型很杂，缓慢更新，像家里真实书架一样乱。</p>
+
+  <div class="book-list">
+    <div class="book-card">
+      <div class="book-cover">书</div>
+      <div class="book-main">
+        <div class="book-meta">
+          <span class="book-type">小说</span>
+        </div>
+        <div class="book-name">示例小说</div>
+        <div class="book-author">作者名</div>
+        <div class="book-desc">这是一本示例小说，你可以替换成自己真正想推荐的书。</div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover">书</div>
+      <div class="book-main">
+        <div class="book-meta">
+          <span class="book-type">其他</span>
+        </div>
+        <div class="book-name">示例非虚构</div>
+        <div class="book-author">作者名</div>
+        <div class="book-desc">这是一本示例非虚构作品，散文、随笔、传记都可以放在这里。</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 ling</p>
+    <p>Reading · Archive</p>
+  </footer>
+</div>
+
+</body>
+</html>
