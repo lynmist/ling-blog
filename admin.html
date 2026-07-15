@@ -434,6 +434,7 @@ function buildPostHTML(d) {
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="../favicon.ico" type="image/x-icon">
+<script src="../js/theme.js"></script>
 <title>${d.title} — ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -445,6 +446,10 @@ function buildPostHTML(d) {
 <nav><div class="nav-inner">
   <a href="../index.html" class="nav-logo"><span class="nav-dot"></span><span class="nav-name">ling</span></a>
   <a href="../writing.html" class="nav-back">← 全部文章</a>
+  <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="切换主题">
+    <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
 </div></nav>
 <div class="page">
   <header class="article-header">
@@ -533,6 +538,7 @@ function bindEvents() {
     // blob:// pages can't resolve relative ../css/*.css — swap to the live site's absolute URL for preview only
     html = html.replace(`../css/${d.theme}.css`, `https://yling2719.top/css/${d.theme}.css`)
                 .replace('../css/post.js', 'https://yling2719.top/css/post.js')
+                .replace('../js/theme.js', 'https://yling2719.top/js/theme.js')
                 .replace('href="../favicon.ico"', 'href="https://yling2719.top/favicon.ico"')
                 .replace(/href="\.\.\/index\.html"/g, 'href="https://yling2719.top/index.html"')
                 .replace(/href="\.\.\/writing\.html"/g, 'href="https://yling2719.top/writing.html"');

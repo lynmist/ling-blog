@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
+<script src="js/theme.js"></script>
 <title>友链 — ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +16,14 @@
 .link-card {
   display:flex; align-items:flex-start; gap:1.2rem;
   padding:1.4rem 1.6rem;
-  background:#fff;
+  background:var(--surface);
   border:1px solid var(--line);
   border-radius:12px;
   text-decoration:none; color:inherit;
-  transition:transform .18s, box-shadow .18s, border-color .18s;
+  transition:transform .18s, box-shadow .18s, border-color .18s, background .25s;
 }
 .link-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(91,158,201,0.08); border-color:var(--blue-l); }
+[data-theme="dark"] .link-card:hover { box-shadow:0 8px 24px rgba(0,0,0,0.25); }
 .link-avatar {
   width:44px; height:44px; border-radius:50%;
   background:var(--blue-ll);
@@ -52,6 +54,10 @@ footer { margin-top:6rem; }
       <li><a href="gallery.html">Gallery</a></li>
       <li><a href="link.html">Link</a></li>
     </ul>
+    <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="切换主题">
+      <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </div>
 </nav>
 

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
+<script src="js/theme.js"></script>
 <title>ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,7 +123,7 @@
   border-radius: 99px;
   transition: background .15s;
 }
-.view-all:hover { background: #cce9f8; }
+.view-all:hover { background: var(--hover); }
 
 /* ── gallery preview ── */
 .gallery-grid {
@@ -150,6 +151,12 @@
 .gcell img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .gcell-hint { font-size: 10px; letter-spacing: 0.1em; color: var(--ink4); }
 
+[data-theme="dark"] .gcell:nth-child(2) { background: #1e2a36; }
+[data-theme="dark"] .gcell:nth-child(3) { background: #222e3a; }
+[data-theme="dark"] .gcell:nth-child(4) { background: #252a34; }
+[data-theme="dark"] .gcell:nth-child(5) { background: #1f2c36; }
+[data-theme="dark"] .gcell:nth-child(6) { background: #1c2834; }
+
 @media (max-width: 600px) {
   .about-layout { grid-template-columns: 1fr; gap: 2rem; }
   .about-photo { aspect-ratio: 1/1; }
@@ -172,6 +179,10 @@
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="link.html">Link</a></li>
     </ul>
+    <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="切换主题">
+      <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </div>
 </nav>
 
