@@ -3,479 +3,787 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kimi K3 — 月之暗面迄今最强旗舰</title>
+<title>暗面来信 — Kimi K3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400;500&family=Inter:wght@200;300;400;500;600&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Noto+Sans+SC:wght@300;400;500&family=Space+Grotesk:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #030304;
-  --panel: #0a0b0d;
-  --ink: #f4f5f7;
-  --ink2: #a7adb6;
-  --ink3: #565d66;
-  --line: rgba(255,255,255,.07);
-  --moon: #e8e6df;
-  --accent: #c9c4b4;
+  --bg: #040405;
+  --ink: #ece9e2;
+  --ink2: #a3a099;
+  --ink3: #57554f;
+  --line: rgba(236,233,226,.08);
+  --gold: #c8b48a;
+  --mono: 'JetBrains Mono', monospace;
+  --grot: 'Space Grotesk', sans-serif;
+  --serif: 'Noto Serif SC', serif;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', 'Noto Sans SC', sans-serif;
+  font-family: var(--grot);
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 a { color: inherit; text-decoration: none; }
-::selection { background: rgba(201,196,180,.25); }
+::selection { background: rgba(200,180,138,.28); color: #fff; }
 
-/* film grain */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
-  opacity: .025;
-  pointer-events: none;
-  z-index: 10;
-}
+#stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-/* nav */
+/* ---------- nav ---------- */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  backdrop-filter: blur(18px);
-  background: rgba(3,3,4,.45);
-  border-bottom: 1px solid var(--line);
-}
-.nav-inner {
-  max-width: 1200px; margin: 0 auto;
-  padding: 1.1rem 2rem;
   display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 2rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(4,4,5,.55);
+  backdrop-filter: blur(16px);
 }
-.brand {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px; letter-spacing: .35em; text-transform: uppercase;
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .35em; text-transform: uppercase;
   color: var(--ink);
 }
-.nav-links { display: flex; gap: 2.2rem; font-size: 12px; letter-spacing: .12em; color: var(--ink2); }
-.nav-links a { opacity: .75; transition: opacity .25s; }
-.nav-links a:hover { opacity: 1; color: var(--ink); }
+.nav-brand b { color: var(--gold); font-weight: 400; }
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink2);
+  transition: color .25s;
+}
+.nav-links a::before { content: '· '; color: var(--gold); }
+.nav-links a:hover { color: var(--ink); }
 .nav-back {
-  font-size: 11px; letter-spacing: .1em; color: var(--ink3);
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink3);
   border: 1px solid var(--line);
   padding: .5rem 1rem; border-radius: 999px;
   transition: border-color .25s, color .25s;
 }
-.nav-back:hover { border-color: rgba(201,196,180,.4); color: var(--ink); }
+.nav-back:hover { border-color: rgba(200,180,138,.4); color: var(--ink); }
 
 main { position: relative; z-index: 2; }
 
-/* hero */
+/* ---------- hero ---------- */
 .hero {
   min-height: 100vh;
+  position: relative;
   display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  text-align: center;
-  padding: 7rem 2rem 5rem;
-  position: relative;
+  justify-content: center;
+  padding: 8rem 2rem 6rem;
+  overflow: hidden;
 }
-.moon {
-  width: min(46vw, 380px); height: min(46vw, 380px);
-  border-radius: 50%;
-  position: relative;
-  margin-bottom: 4rem;
-  background:
-    radial-gradient(circle at 34% 30%, rgba(255,255,255,.9), rgba(232,230,223,.55) 28%, rgba(120,120,115,.25) 55%, rgba(10,10,12,.9) 78%),
-    #151517;
-  box-shadow:
-    0 0 80px rgba(232,230,223,.10),
-    0 0 200px rgba(232,230,223,.05),
-    inset -18px -24px 60px rgba(0,0,0,.65);
+.hero-vertical {
+  position: absolute;
+  right: 2.2rem; top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--serif);
+  font-size: 15px; letter-spacing: 1.2em;
+  color: var(--ink3);
+  user-select: none;
 }
-.moon::after {
+.hero-vertical::before {
   content: '';
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 62% 58%, rgba(0,0,0,.22) 0 6%, transparent 7%),
-    radial-gradient(circle at 42% 66%, rgba(0,0,0,.18) 0 4%, transparent 5%),
-    radial-gradient(circle at 30% 44%, rgba(0,0,0,.2) 0 5%, transparent 6%),
-    radial-gradient(circle at 55% 30%, rgba(0,0,0,.15) 0 3%, transparent 4%);
-  opacity: .8;
+  display: block;
+  width: 1px; height: 60px;
+  background: var(--line);
+  margin: 0 auto 1.6rem;
 }
-.hero-eyebrow {
-  font-size: 11px; letter-spacing: .5em; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 1.8rem;
+.hero-grid {
+  max-width: 1200px; width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4rem;
 }
+.hero-left { position: relative; }
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2rem;
+}
+.hero-tag::before { content: '◉ '; animation: blink 2.4s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
 .hero-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(72px, 16vw, 200px);
+  font-family: var(--grot);
+  font-size: clamp(96px, 20vw, 280px);
   font-weight: 300;
-  letter-spacing: -.02em;
-  line-height: .95;
-  margin: 0;
-  background: linear-gradient(180deg, #fff 10%, #c9c4b4 60%, #5a5a52 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  line-height: .85;
+  letter-spacing: -.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236,233,226,.75);
+  user-select: none;
 }
+.hero-title em {
+  font-style: normal;
+  color: var(--ink);
+  -webkit-text-stroke: 0;
+}
+.hero-name {
+  margin-top: 2.4rem;
+  font-family: var(--serif);
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: 300;
+  letter-spacing: .28em;
+}
+.hero-name span { color: var(--ink3); font-size: .55em; letter-spacing: .4em; margin-left: 1rem; }
 .hero-sub {
-  max-width: 600px;
-  margin: 2.2rem auto 0;
-  font-size: clamp(14px, 1.8vw, 17px);
-  line-height: 2;
+  margin-top: 1.8rem;
+  max-width: 460px;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 14px; line-height: 2.1;
   color: var(--ink2);
 }
-.hero-meta {
-  margin-top: 3rem;
-  display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
-  color: var(--ink3);
+
+/* eclipse */
+.eclipse-wrap { position: relative; width: clamp(220px, 26vw, 340px); height: clamp(220px, 26vw, 340px); }
+.eclipse {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: #060607;
+  box-shadow:
+    inset -30px -20px 70px rgba(0,0,0,.9),
+    0 0 1px rgba(236,233,226,.6);
 }
-.hero-meta span { border-bottom: 1px solid var(--line); padding-bottom: .4rem; }
-.scroll-hint {
-  position: absolute; bottom: 2.4rem; left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px; letter-spacing: .4em; text-transform: uppercase;
-  color: var(--ink3);
-}
-.scroll-hint::after {
+.eclipse::before {
   content: '';
-  display: block; width: 1px; height: 44px;
-  background: linear-gradient(180deg, var(--ink3), transparent);
-  margin: .9rem auto 0;
+  position: absolute; inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg,
+    transparent 0deg,
+    rgba(236,233,226,.85) 18deg,
+    rgba(200,180,138,.5) 40deg,
+    transparent 75deg);
+  filter: blur(3px);
+  animation: corona 9s ease-in-out infinite alternate;
 }
+@keyframes corona {
+  from { transform: rotate(-6deg); opacity: .75; }
+  to   { transform: rotate(10deg); opacity: 1; }
+}
+.eclipse::after {
+  content: '';
+  position: absolute; inset: -14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,180,138,.12), transparent 60%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+.eclipse-ring {
+  position: absolute; inset: -16%;
+  border: 1px dashed rgba(236,233,226,.14);
+  border-radius: 50%;
+  animation: spin 60s linear infinite;
+}
+.eclipse-ring::after {
+  content: '';
+  position: absolute; top: -3px; left: 50%;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--gold);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* reveal on scroll */
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1); }
-.reveal.visible { opacity: 1; transform: none; }
-
-/* sections */
-.section { max-width: 1200px; margin: 0 auto; padding: 7rem 2rem; }
-.section-head { margin-bottom: 4.5rem; max-width: 720px; }
-.section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
-.section-eyebrow {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 11px; letter-spacing: .45em; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 1.2rem;
+/* telemetry strip */
+.telemetry {
+  max-width: 1200px; width: 100%;
+  margin: 5rem auto 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
 }
-.section-title {
-  font-family: 'Noto Serif SC', serif;
-  font-size: clamp(30px, 4.6vw, 52px);
-  font-weight: 400;
-  letter-spacing: -.01em;
-  line-height: 1.35;
-  margin: 0;
-}
-.section-sub {
-  margin: 1.6rem 0 0;
-  font-size: 15px; line-height: 2; color: var(--ink2);
-}
-
-/* stats */
-.stats {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-}
-.stat {
-  padding: 3.5rem 2rem;
-  text-align: center;
+.telemetry > div {
+  padding: 1.1rem 1.4rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink3);
   border-right: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
 }
-.stat:last-child { border-right: none; }
-.stat-value {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(34px, 4.5vw, 54px);
-  font-weight: 300; letter-spacing: -.02em;
-  background: linear-gradient(180deg, #fff, #6b6b62);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+.telemetry > div:last-child { border-right: none; }
+.telemetry b { color: var(--ink); font-weight: 400; }
+.telemetry .live b { color: var(--gold); }
+
+/* ---------- marquee ---------- */
+.marquee {
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 1rem 0;
 }
-.stat-label {
+.marquee-track {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--ink3);
+  animation: mq 36s linear infinite;
+}
+.marquee-track i { color: var(--gold); font-style: normal; margin: 0 1.2rem; }
+@keyframes mq { to { transform: translateX(-50%); } }
+
+/* ---------- sections ---------- */
+.section { max-width: 1200px; margin: 0 auto; padding: 7.5rem 2rem; position: relative; }
+.sec-head {
+  display: flex; align-items: baseline; gap: 2rem;
+  margin-bottom: 4rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2rem;
+}
+.sec-no {
+  font-family: var(--serif);
+  font-size: clamp(48px, 7vw, 84px);
+  font-weight: 300;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236,233,226,.4);
+  line-height: 1;
+}
+.sec-title-wrap { flex: 1; }
+.sec-kicker {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .4em; text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .8rem;
+}
+.sec-title {
+  font-family: var(--serif);
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: 400;
+  letter-spacing: .1em;
+}
+.sec-note {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink3);
+  text-align: right;
+  align-self: flex-end;
+}
+
+/* editorial body */
+.edit { display: grid; grid-template-columns: 1.1fr .9fr; gap: 5rem; align-items: start; }
+.edit-lede {
+  font-family: var(--serif);
+  font-size: clamp(19px, 2.3vw, 26px);
+  line-height: 2.1;
+  font-weight: 300;
+}
+.edit-lede::first-letter {
+  font-size: 2.6em;
+  float: left;
+  line-height: 1;
+  padding: .35rem .8rem .1rem 0;
+  color: var(--gold);
+}
+.edit-body {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13.5px; line-height: 2.2;
+  color: var(--ink2);
+}
+.edit-body p + p { margin-top: 1.4rem; }
+.edit-body .mono-note {
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  border-top: 1px dashed var(--line);
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .12em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+
+/* instrument readouts */
+.readouts {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+}
+.readout {
+  padding: 2.6rem 1.8rem 2.2rem;
+  border-right: 1px solid var(--line);
+  position: relative;
+  transition: background .3s;
+}
+.readout:last-child { border-right: none; }
+.readout:hover { background: rgba(236,233,226,.02); }
+.readout .ticks {
+  height: 10px;
+  background:
+    repeating-linear-gradient(90deg, var(--ink3) 0 1px, transparent 1px 9px);
+  opacity: .5;
+  margin-bottom: 2rem;
+}
+.readout .ticks::after {
+  content: '';
+  display: block;
+  width: 1px; height: 16px;
+  background: var(--gold);
+  margin-top: -6px;
+  margin-left: var(--pos, 50%);
+  box-shadow: 0 0 8px rgba(200,180,138,.6);
+}
+.readout-value {
+  font-family: var(--grot);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 300;
+  letter-spacing: -.02em;
+}
+.readout-value small { font-size: .42em; color: var(--ink3); }
+.readout-label {
   margin-top: .9rem;
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
   color: var(--ink3);
 }
-.stat-note { margin-top: .5rem; font-size: 11px; color: var(--ink3); }
+.readout-sub { margin-top: .5rem; font-family: 'Noto Sans SC', sans-serif; font-size: 11px; color: var(--ink3); }
 
-/* capability rows */
-.caps { border-top: 1px solid var(--line); }
-.cap {
-  display: grid; grid-template-columns: 80px 1fr 1.2fr;
+/* decode list */
+.decode { border-top: 1px solid var(--line); }
+.dec {
+  display: grid;
+  grid-template-columns: 100px 1fr 1.1fr;
   gap: 2rem; align-items: baseline;
-  padding: 2.6rem 0;
+  padding: 2.8rem 0;
   border-bottom: 1px solid var(--line);
-  transition: padding-left .35s;
+  transition: background .3s, padding-left .35s;
 }
-.cap:hover { padding-left: 1rem; }
-.cap-index {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 12px; letter-spacing: .2em; color: var(--ink3);
+.dec:hover { padding-left: 1.2rem; background: rgba(236,233,226,.015); }
+.dec-code {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .2em;
+  color: var(--gold);
 }
-.cap-name {
-  font-family: 'Noto Serif SC', serif;
-  font-size: clamp(20px, 2.6vw, 30px);
+.dec-name {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.8vw, 32px);
   font-weight: 400;
 }
-.cap-desc { font-size: 14px; line-height: 1.9; color: var(--ink2); }
+.dec-name small {
+  display: block;
+  margin-top: .5rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.dec-desc {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px; line-height: 2;
+  color: var(--ink2);
+}
 
-/* lineup */
-.lineup { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-.tier {
+/* frequencies */
+.freqs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.freq {
   border: 1px solid var(--line);
-  border-radius: 20px;
   padding: 3rem 2.6rem;
-  background: linear-gradient(160deg, rgba(255,255,255,.025), transparent 45%);
+  position: relative;
+  overflow: hidden;
   transition: border-color .3s, transform .3s;
 }
-.tier:hover { border-color: rgba(201,196,180,.25); transform: translateY(-4px); }
-.tier-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px; letter-spacing: .3em; text-transform: uppercase;
-  color: var(--accent);
-}
-.tier-ctx {
-  margin: 1.6rem 0 .4rem;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(38px, 5vw, 56px);
-  font-weight: 300; letter-spacing: -.03em;
-}
-.tier-ctx small { font-size: .45em; color: var(--ink3); font-weight: 300; }
-.tier-desc { font-size: 13px; line-height: 1.9; color: var(--ink2); }
-
-/* timeline */
-.timeline { border-left: 1px solid var(--line); margin-left: .4rem; }
-.tl-item { position: relative; padding: 0 0 3rem 2.6rem; }
-.tl-item:last-child { padding-bottom: 0; }
-.tl-item::before {
+.freq:hover { border-color: rgba(200,180,138,.35); transform: translateY(-4px); }
+.freq::after {
   content: '';
-  position: absolute; left: -4.5px; top: 8px;
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--bg); border: 1px solid var(--ink3);
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 56px;
+  background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 12px);
+  opacity: .6;
+  pointer-events: none;
 }
-.tl-item.current::before { background: var(--moon); border-color: var(--moon); box-shadow: 0 0 14px rgba(232,230,223,.4); }
-.tl-date {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--ink3);
+.freq-band {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--gold);
 }
-.tl-name {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 22px; margin: .6rem 0 .5rem;
+.freq-name {
+  margin-top: 1.4rem;
+  font-family: var(--serif);
+  font-size: 30px; font-weight: 400; letter-spacing: .06em;
 }
-.tl-desc { font-size: 13px; line-height: 1.9; color: var(--ink2); max-width: 520px; }
+.freq-val {
+  margin-top: 1.6rem;
+  font-family: var(--grot);
+  font-size: clamp(44px, 5.5vw, 64px);
+  font-weight: 300; letter-spacing: -.03em;
+  line-height: 1;
+}
+.freq-val small { font-size: .4em; color: var(--ink3); }
+.freq-desc {
+  margin-top: 1.6rem; margin-bottom: 3rem;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px; line-height: 2; color: var(--ink2);
+}
+
+/* mission log */
+.log { font-family: var(--mono); border: 1px solid var(--line); padding: 2.4rem 2.2rem; }
+.log-line {
+  display: grid;
+  grid-template-columns: 130px 150px 1fr;
+  gap: 1.6rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 12px; letter-spacing: .06em;
+  align-items: baseline;
+}
+.log-line:last-child { border-bottom: none; }
+.log-date { color: var(--ink3); }
+.log-name { color: var(--ink); font-family: var(--serif); font-size: 16px; letter-spacing: .1em; }
+.log-desc { color: var(--ink2); font-family: 'Noto Sans SC', sans-serif; font-size: 12.5px; line-height: 1.9; }
+.log-line.current .log-name { color: var(--gold); }
+.log-line.current .log-date { color: var(--gold); }
+.log-line.current .log-date::before { content: '▸ '; }
 
 /* quote */
-.quote { max-width: 860px; margin: 0 auto; text-align: center; }
+.quote { max-width: 900px; margin: 0 auto; text-align: center; padding: 8rem 2rem; }
+.quote-mark {
+  font-family: var(--serif);
+  font-size: 60px; color: var(--gold);
+  line-height: .5; display: block; margin-bottom: 2.4rem;
+}
 .quote-text {
-  font-family: 'Noto Serif SC', serif;
-  font-size: clamp(22px, 3.4vw, 36px);
-  line-height: 1.9; font-weight: 300;
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.2vw, 34px);
+  line-height: 2; font-weight: 300;
+  letter-spacing: .04em;
 }
 .quote-cite {
-  margin-top: 2.4rem;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 11px; letter-spacing: .3em; text-transform: uppercase;
+  margin-top: 2.6rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .35em; text-transform: uppercase;
   color: var(--ink3);
 }
 
 /* cta */
-.cta { text-align: center; padding: 9rem 2rem 10rem; }
-.cta .section-title { margin-bottom: 1.4rem; }
-.cta p { max-width: 520px; margin: 0 auto 2.8rem; font-size: 15px; line-height: 2; color: var(--ink2); }
+.cta {
+  border-top: 1px solid var(--line);
+  text-align: center;
+  padding: 8rem 2rem 9rem;
+}
+.cta-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 300; letter-spacing: .12em;
+}
+.cta-sub {
+  max-width: 480px; margin: 1.6rem auto 3rem;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 14px; line-height: 2; color: var(--ink2);
+}
 .btn {
   display: inline-block;
-  padding: 1rem 2.4rem;
-  border-radius: 999px;
-  font-size: 13px; letter-spacing: .08em;
-  transition: transform .25s, background .25s, border-color .25s;
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+  padding: 1.1rem 2.6rem;
+  transition: all .25s;
 }
-.btn-solid { background: var(--moon); color: #0a0a0a; font-weight: 500; }
-.btn-solid:hover { transform: translateY(-2px); }
+.btn-solid { background: var(--ink); color: #050505; }
+.btn-solid:hover { background: var(--gold); }
 .btn-ghost { border: 1px solid var(--line); color: var(--ink2); margin-left: 1rem; }
-.btn-ghost:hover { border-color: rgba(201,196,180,.4); color: var(--ink); }
+.btn-ghost:hover { border-color: rgba(200,180,138,.4); color: var(--ink); }
 
 footer {
   border-top: 1px solid var(--line);
-  padding: 3rem 2rem;
-  display: flex; justify-content: space-between; align-items: center;
   max-width: 1200px; margin: 0 auto;
-  font-size: 11px; letter-spacing: .15em; text-transform: uppercase;
+  padding: 2.6rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
   color: var(--ink3);
 }
+footer .dot { color: var(--gold); }
 
-@media (max-width: 860px) {
+/* reveal */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1); }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 900px) {
   .nav-links { display: none; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .stat:nth-child(2n) { border-right: none; }
-  .stat { border-bottom: 1px solid var(--line); }
-  .cap { grid-template-columns: 1fr; gap: .6rem; }
-  .lineup { grid-template-columns: 1fr; }
-  footer { flex-direction: column; gap: .8rem; }
+  .hero-vertical { display: none; }
+  .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .eclipse-wrap { margin: 0 auto; }
+  .telemetry { grid-template-columns: 1fr 1fr; }
+  .telemetry > div:nth-child(2n) { border-right: none; }
+  .edit { grid-template-columns: 1fr; gap: 2.5rem; }
+  .readouts { grid-template-columns: 1fr 1fr; }
+  .readout:nth-child(2n) { border-right: none; }
+  .readout { border-bottom: 1px solid var(--line); }
+  .dec { grid-template-columns: 1fr; gap: .8rem; }
+  .freqs { grid-template-columns: 1fr; }
+  .log-line { grid-template-columns: 1fr; gap: .4rem; }
+  .sec-note { display: none; }
+  footer { flex-direction: column; gap: .8rem; text-align: center; }
 }
 </style>
 </head>
 <body>
 
+<canvas id="stars"></canvas>
+
 <nav class="nav">
-  <div class="nav-inner">
-    <div class="brand">Moonshot · K3</div>
-    <div class="nav-links">
-      <a href="#overview">概览</a>
-      <a href="#caps">能力</a>
-      <a href="#lineup">型号</a>
-      <a href="#timeline">历程</a>
-    </div>
-    <a class="nav-back" href="../../labs.html">返回实验页</a>
+  <div class="nav-brand">MOONSHOT <b>//</b> K3</div>
+  <div class="nav-links">
+    <a href="#one">概览</a>
+    <a href="#two">能力</a>
+    <a href="#three">频段</a>
+    <a href="#four">航程</a>
   </div>
+  <a class="nav-back" href="../../labs.html">返回实验页</a>
 </nav>
 
 <main>
-  <section class="hero">
-    <div class="moon"></div>
-    <p class="hero-eyebrow">Moonshot AI 月之暗面</p>
-    <h1 class="hero-title">Kimi K3</h1>
-    <p class="hero-sub">月之暗面迄今最强旗舰模型。万亿级参数规模，最高百万字上下文，编程、3D 与知识任务全面登顶——并且，开放权重。</p>
-    <div class="hero-meta">
-      <span>旗舰模型</span>
-      <span>1M 上下文</span>
-      <span>Open Weight</span>
+  <header class="hero">
+    <div class="hero-vertical">月之暗面</div>
+    <div class="hero-grid">
+      <div class="hero-left">
+        <p class="hero-tag">Incoming Transmission</p>
+        <h1 class="hero-title">K<em>3</em></h1>
+        <p class="hero-name">暗面来信<span>A LETTER FROM THE FAR SIDE</span></p>
+        <p class="hero-sub">月之暗面迄今最强旗舰模型 Kimi K3。万亿级参数，百万字上下文，编程、3D 与知识任务全面登顶——以开放权重，抵达每一个人。</p>
+      </div>
+      <div class="eclipse-wrap" id="eclipse">
+        <div class="eclipse-ring"></div>
+        <div class="eclipse"></div>
+      </div>
     </div>
-    <div class="scroll-hint">Scroll</div>
-  </section>
+    <div class="telemetry">
+      <div class="live"><span>Signal</span><b>● LIVE</b></div>
+      <div><span>Origin</span><b>FAR SIDE · SPA BASIN</b></div>
+      <div><span>Context</span><b>1,000,000 TOK</b></div>
+      <div><span>Received</span><b id="clock">--:--:--</b></div>
+    </div>
+  </header>
 
-  <section class="section" id="overview">
-    <div class="section-head reveal">
-      <p class="section-eyebrow">Overview</p>
-      <h2 class="section-title">暗面之后，是更亮的光。</h2>
-      <p class="section-sub">Kimi K3 是月之暗面 2026 年 7 月发布的旗舰大模型。它把参数规模推向中国第一梯队，在主流基准上对标乃至超越国际顶级闭源模型，同时坚持开放权重，让每一个人都能下载、修改和部署。</p>
+  <div class="marquee">
+    <div class="marquee-track" id="mq">
+      KIMI K3<i>✦</i>暗面来信<i>✦</i>1M CONTEXT<i>✦</i>OPEN WEIGHT<i>✦</i>MOONSHOT AI<i>✦</i>2026.07<i>✦</i>
+      KIMI K3<i>✦</i>暗面来信<i>✦</i>1M CONTEXT<i>✦</i>OPEN WEIGHT<i>✦</i>MOONSHOT AI<i>✦</i>2026.07<i>✦</i>
     </div>
-    <div class="stats reveal">
-      <div class="stat">
-        <div class="stat-value">2.5T</div>
-        <div class="stat-label">参数规模</div>
-        <div class="stat-note">传闻量级，中国最大</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">1M</div>
-        <div class="stat-label">上下文窗口</div>
-        <div class="stat-note">百万字超长记忆</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">开源</div>
-        <div class="stat-label">开放权重</div>
-        <div class="stat-note">免费下载与修改</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">SOTA</div>
-        <div class="stat-label">基准表现</div>
-        <div class="stat-note">对标国际顶级模型</div>
-      </div>
-    </div>
-  </section>
+  </div>
 
-  <section class="section" id="caps">
-    <div class="section-head reveal">
-      <p class="section-eyebrow">Capabilities</p>
-      <h2 class="section-title">为最难的任务而生。</h2>
+  <section class="section" id="one">
+    <div class="sec-head reveal">
+      <div class="sec-no">壹</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Transmission 01 / Overview</p>
+        <h2 class="sec-title">暗面之后，是更亮的光</h2>
+      </div>
+      <p class="sec-note">Ref: MS-K3-2026<br>Clearance: Public</p>
     </div>
-    <div class="caps reveal">
-      <div class="cap">
-        <div class="cap-index">01</div>
-        <div class="cap-name">编程</div>
-        <div class="cap-desc">从单文件脚本到跨仓库工程，K3 擅长理解项目结构、自动调用工具、完成长链路开发任务，是 Kimi Code 的核心引擎。</div>
-      </div>
-      <div class="cap">
-        <div class="cap-index">02</div>
-        <div class="cap-name">游戏与 3D</div>
-        <div class="cap-desc">对 3D 场景、游戏逻辑与空间推理有专门强化，能生成可运行的游戏原型与三维内容代码。</div>
-      </div>
-      <div class="cap">
-        <div class="cap-index">03</div>
-        <div class="cap-name">知识任务</div>
-        <div class="cap-desc">百万字上下文配合深度思考模式，长文档分析、跨资料推理、复杂问答一次到位。</div>
-      </div>
-      <div class="cap">
-        <div class="cap-index">04</div>
-        <div class="cap-name">Agent 集群</div>
-        <div class="cap-desc">延续 K2 系列的 Agent 基因，支持长程任务执行与多智能体协作，把目标拆成步骤并逐一落地。</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="lineup">
-    <div class="section-head center reveal">
-      <p class="section-eyebrow">Lineup</p>
-      <h2 class="section-title">按节奏，选档位。</h2>
-      <p class="section-sub">K3 以音乐速度记号命名模型档位，在 Kimi Code 中可按模型 ID 选择。</p>
-    </div>
-    <div class="lineup reveal">
-      <div class="tier">
-        <div class="tier-name">Moderato</div>
-        <div class="tier-ctx">256<small>K</small></div>
-        <div class="tier-desc">中速档。平衡性能与成本，适合日常编码、问答与中等长度文档处理。</div>
-      </div>
-      <div class="tier">
-        <div class="tier-name">Allegretto +</div>
-        <div class="tier-ctx">1<small>M</small></div>
-        <div class="tier-desc">全速档。解锁最高 1M 上下文窗口，面向超长代码库、整本书籍与深度研究任务。</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="timeline">
-    <div class="section-head reveal">
-      <p class="section-eyebrow">Timeline</p>
-      <h2 class="section-title">三代，三步。</h2>
-    </div>
-    <div class="timeline reveal">
-      <div class="tl-item">
-        <div class="tl-date">2025.07</div>
-        <div class="tl-name">Kimi K2</div>
-        <div class="tl-desc">万亿 MoE 架构，总参数 1T、激活 32B，发布即开源，代码与 Agent 能力刷新开源 SOTA。</div>
-      </div>
-      <div class="tl-item">
-        <div class="tl-date">2026.04</div>
-        <div class="tl-name">Kimi K2.6</div>
-        <div class="tl-desc">开源原生多模态 Agent 模型，支持文本、图片与视频输入，长程任务执行再进一步。</div>
-      </div>
-      <div class="tl-item current">
-        <div class="tl-date">2026.07</div>
-        <div class="tl-name">Kimi K3</div>
-        <div class="tl-desc">迄今最强旗舰。参数规模直追国际头部梯队，最高 1M 上下文，开放权重。</div>
+    <div class="edit reveal">
+      <p class="edit-lede">这封信来自中国最大的模型之一。Kimi K3 把参数规模推向第一梯队，在主流基准上对标乃至超越国际顶级闭源模型，却选择了一条相反的路——开放权重，免费下载，任君修改。</p>
+      <div class="edit-body">
+        <p>2026 年 7 月，月之暗面发布 Kimi K3。它支持最高 100 万 token 的上下文窗口，尤其擅长编程、游戏与 3D、知识类任务，并通过 Kimi Code 向开发者开放多种模型档位。</p>
+        <p>在一个闭源模型收费高昂的时代，K3 以 open-weight 的姿态出现，像一束从月球背面打来的信号——遥远，但任何人都可以接收。</p>
+        <p class="mono-note">// Decoded by ling's lab · this page is an unofficial concept tribute</p>
       </div>
     </div>
   </section>
 
   <section class="section">
-    <div class="quote reveal">
-      <p class="quote-text">「让最强大的智能，成为每个人都能触及的基础设施。」</p>
-      <p class="quote-cite">— Moonshot AI</p>
+    <div class="sec-head reveal">
+      <div class="sec-no">读</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Telemetry / Readouts</p>
+        <h2 class="sec-title">关键读数</h2>
+      </div>
+      <p class="sec-note">Instrument Panel<br>Calibrated 2026.07</p>
+    </div>
+    <div class="readouts reveal">
+      <div class="readout">
+        <div class="ticks" style="--pos: 88%"></div>
+        <div class="readout-value">2.5<small>T</small></div>
+        <div class="readout-label">Parameters</div>
+        <div class="readout-sub">传闻量级 · 中国最大</div>
+      </div>
+      <div class="readout">
+        <div class="ticks" style="--pos: 96%"></div>
+        <div class="readout-value">1<small>M</small></div>
+        <div class="readout-label">Context Window</div>
+        <div class="readout-sub">百万字超长记忆</div>
+      </div>
+      <div class="readout">
+        <div class="ticks" style="--pos: 100%"></div>
+        <div class="readout-value">OPEN</div>
+        <div class="readout-label">Weight</div>
+        <div class="readout-sub">开放权重 · 免费商用</div>
+      </div>
+      <div class="readout">
+        <div class="ticks" style="--pos: 92%"></div>
+        <div class="readout-value">SOTA</div>
+        <div class="readout-label">Benchmarks</div>
+        <div class="readout-sub">对标国际顶级模型</div>
+      </div>
     </div>
   </section>
 
+  <section class="section" id="two">
+    <div class="sec-head reveal">
+      <div class="sec-no">贰</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Transmission 02 / Capabilities</p>
+        <h2 class="sec-title">信号解码</h2>
+      </div>
+      <p class="sec-note">4 Channels<br>Full Duplex</p>
+    </div>
+    <div class="decode reveal">
+      <div class="dec">
+        <div class="dec-code">CH-01</div>
+        <div class="dec-name">编程<small>Coding</small></div>
+        <div class="dec-desc">从单文件脚本到跨仓库工程，理解项目结构、自动调用工具、完成长链路开发任务——Kimi Code 的核心引擎。</div>
+      </div>
+      <div class="dec">
+        <div class="dec-code">CH-02</div>
+        <div class="dec-name">游戏与 3D<small>Gaming / 3D</small></div>
+        <div class="dec-desc">对 3D 场景、游戏逻辑与空间推理专门强化，能生成可运行的游戏原型与三维内容代码。</div>
+      </div>
+      <div class="dec">
+        <div class="dec-code">CH-03</div>
+        <div class="dec-name">知识任务<small>Knowledge</small></div>
+        <div class="dec-desc">百万字上下文配合深度思考，长文档分析、跨资料推理、复杂问答一次到位。</div>
+      </div>
+      <div class="dec">
+        <div class="dec-code">CH-04</div>
+        <div class="dec-name">Agent 集群<small>Agent Swarm</small></div>
+        <div class="dec-desc">延续 K2 系列的 Agent 基因，支持长程任务执行与多智能体协作，把目标拆成步骤逐一落地。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="three">
+    <div class="sec-head reveal">
+      <div class="sec-no">叁</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Transmission 03 / Frequencies</p>
+        <h2 class="sec-title">两个频段</h2>
+      </div>
+      <p class="sec-note">Tempo-named<br>Model IDs</p>
+    </div>
+    <div class="freqs reveal">
+      <div class="freq">
+        <div class="freq-band">Band I · Moderato</div>
+        <div class="freq-name">中速档</div>
+        <div class="freq-val">256<small>K</small></div>
+        <div class="freq-desc">平衡性能与成本，适合日常编码、问答与中等长度文档处理。</div>
+      </div>
+      <div class="freq">
+        <div class="freq-band">Band II · Allegretto +</div>
+        <div class="freq-name">全速档</div>
+        <div class="freq-val">1<small>M</small></div>
+        <div class="freq-desc">解锁最高 1M 上下文窗口，面向超长代码库、整本书籍与深度研究任务。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="four">
+    <div class="sec-head reveal">
+      <div class="sec-no">肆</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Transmission 04 / Mission Log</p>
+        <h2 class="sec-title">航程记录</h2>
+      </div>
+      <p class="sec-note">3 Entries<br>Status: Ongoing</p>
+    </div>
+    <div class="log reveal">
+      <div class="log-line">
+        <span class="log-date">2025.07</span>
+        <span class="log-name">Kimi K2</span>
+        <span class="log-desc">万亿 MoE，总参 1T / 激活 32B，发布即开源，代码与 Agent 刷新开源 SOTA。</span>
+      </div>
+      <div class="log-line">
+        <span class="log-date">2026.04</span>
+        <span class="log-name">Kimi K2.6</span>
+        <span class="log-desc">开源原生多模态 Agent 模型，支持文本、图片与视频输入。</span>
+      </div>
+      <div class="log-line current">
+        <span class="log-date">2026.07</span>
+        <span class="log-name">Kimi K3</span>
+        <span class="log-desc">迄今最强旗舰。万亿级参数，最高 1M 上下文，开放权重。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote reveal">
+    <span class="quote-mark">“</span>
+    <p class="quote-text">让最强大的智能，<br>成为每个人都能触及的基础设施。</p>
+    <p class="quote-cite">— Moonshot AI</p>
+  </section>
+
   <section class="cta reveal">
-    <h2 class="section-title">在暗面，见新光。</h2>
-    <p>Kimi K3 已上线 Kimi 官网、App 与开放平台 API，开放权重版本可供下载与部署。</p>
+    <h2 class="cta-title">在暗面，见新光</h2>
+    <p class="cta-sub">Kimi K3 已上线 Kimi 官网、App 与开放平台 API，开放权重版本可供下载与部署。</p>
     <a class="btn btn-solid" href="https://www.kimi.com" target="_blank" rel="noopener">访问 Kimi 官网</a>
     <a class="btn btn-ghost" href="../../labs.html">返回实验列表</a>
   </section>
 </main>
 
 <footer>
-  <span>Kimi K3 · Concept Page</span>
-  <span>Powered by ling's Lab</span>
+  <span><span class="dot">✦</span> 暗面来信 · Kimi K3 Concept</span>
+  <span>Unofficial tribute · ling's lab</span>
 </footer>
 
 <script>
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      io.unobserve(e.target);
-    }
+/* starfield */
+const cv = document.getElementById('stars');
+const cx = cv.getContext('2d');
+let W, H, stars;
+function init() {
+  W = cv.width = innerWidth;
+  H = cv.height = innerHeight;
+  stars = Array.from({ length: Math.min(160, W / 8) }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.1 + .2,
+    s: Math.random() * .08 + .015,
+    p: Math.random() * Math.PI * 2
+  }));
+}
+function tick(t) {
+  cx.clearRect(0, 0, W, H);
+  for (const s of stars) {
+    s.y -= s.s;
+    if (s.y < -2) s.y = H + 2;
+    const a = .25 + .55 * Math.abs(Math.sin(t / 1400 + s.p));
+    cx.globalAlpha = a;
+    cx.fillStyle = '#ece9e2';
+    cx.beginPath();
+    cx.arc(s.x, s.y, s.r, 0, 7);
+    cx.fill();
+  }
+  cx.globalAlpha = 1;
+  requestAnimationFrame(tick);
+}
+init();
+addEventListener('resize', init);
+requestAnimationFrame(tick);
+
+/* eclipse parallax */
+const ec = document.getElementById('eclipse');
+addEventListener('mousemove', e => {
+  const x = (e.clientX / innerWidth - .5) * 14;
+  const y = (e.clientY / innerHeight - .5) * 14;
+  ec.style.transform = `translate(${x}px, ${y}px)`;
+});
+
+/* clock */
+function clock() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  document.getElementById('clock').textContent =
+    `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+clock();
+setInterval(clock, 1000);
+
+/* reveal */
+const io = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
   });
-}, { threshold: 0.12 });
+}, { threshold: .12 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 
