@@ -4,5 +4,11 @@
     "desc": "一个极简的本地 AI 聊天界面预览。",
     "path": "labs/ai-demo/index.html",
     "icon": "AI"
+  },
+  {
+    "name": "K3",
+    "desc": "一个高端概念产品页，展示新一代智能模型 K3。",
+    "path": "labs/k3/index.html",
+    "icon": "K3"
   }
 ]
