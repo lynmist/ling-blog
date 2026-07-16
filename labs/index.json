@@ -10,5 +10,11 @@
     "desc": "一封从月球背面发来的电文：月之暗面旗舰模型 K3。",
     "path": "labs/k3/index.html",
     "icon": "K3"
+  },
+  {
+    "name": "K3 · 瑞士海报",
+    "desc": "同一份事实，换一种视觉语言：国际主义排版练习。",
+    "path": "labs/k3-2/index.html",
+    "icon": "三"
   }
 ]
