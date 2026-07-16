@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K3 · 交互场 — Interactive Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06070d;
+  --panel: rgba(255,255,255,.04);
+  --ink: #eef1ff;
+  --ink2: #9aa3c0;
+  --ink3: #4d5570;
+  --line: rgba(255,255,255,.09);
+  --cyan: #22d3ee;
+  --violet: #8b5cf6;
+  --pink: #ec4899;
+  --mono: 'JetBrains Mono', monospace;
+  --grot: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--grot);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: rgba(34,211,238,.3); }
+@media (hover:hover) and (pointer:fine) {
+  body { cursor: none; }
+  a, button, input { cursor: none; }
+}
+
+/* custom cursor */
+.cursor-dot, .cursor-ring {
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.cursor-dot { width: 6px; height: 6px; background: var(--cyan); }
+.cursor-ring {
+  width: 34px; height: 34px;
+  border: 1px solid rgba(34,211,238,.5);
+  transition: width .25s, height .25s, border-color .25s, background .25s;
+}
+.cursor-ring.grow { width: 58px; height: 58px; border-color: rgba(139,92,246,.7); background: rgba(139,92,246,.08); }
+@media (hover:none), (pointer:coarse) { .cursor-dot, .cursor-ring { display: none; } }
+
+/* scroll progress */
+.progress {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; z-index: 200;
+  background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+/* ambient blobs */
+.blob {
+  position: fixed; border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none; z-index: 0;
+  opacity: .5;
+}
+.blob.b1 { width: 44vw; height: 44vw; background: radial-gradient(circle, rgba(34,211,238,.16), transparent 70%); top: -12vw; left: -10vw; animation: drift 22s ease-in-out infinite alternate; }
+.blob.b2 { width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(139,92,246,.15), transparent 70%); bottom: -14vw; right: -8vw; animation: drift 26s ease-in-out infinite alternate-reverse; }
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to { transform: translate(6vw, 4vh) scale(1.15); }
+}
+
+/* nav */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.1rem 2rem;
+  background: rgba(6,7,13,.55);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-brand { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; }
+.nav-brand b { color: var(--cyan); font-weight: 400; }
+.nav-back {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink2);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: .5rem 1rem;
+  transition: border-color .25s, color .25s;
+}
+.nav-back:hover { border-color: var(--cyan); color: var(--ink); }
+
+main { position: relative; z-index: 2; }
+
+/* ---------- hero ---------- */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 6rem 1.5rem 4rem;
+}
+#particles { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero-content { position: relative; z-index: 2; text-align: center; pointer-events: none; }
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .45em; text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 1.4rem;
+}
+.hero-sub {
+  max-width: 520px; margin: 55vmin auto 0;
+  font-size: 14px; line-height: 2.1;
+  color: var(--ink2);
+}
+.hero-hint {
+  position: absolute; bottom: 2.2rem; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--ink3);
+  z-index: 2;
+  animation: bob 2.4s ease-in-out infinite;
+}
+@keyframes bob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,8px); } }
+
+/* ---------- sections ---------- */
+.section { max-width: 1100px; margin: 0 auto; padding: 7rem 2rem; }
+.sec-head { text-align: center; margin-bottom: 4rem; }
+.sec-kicker {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .4em; text-transform: uppercase;
+  color: var(--violet);
+  margin-bottom: 1rem;
+}
+.sec-title {
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 500; letter-spacing: -.02em;
+}
+.sec-title .grad {
+  background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 2.4rem 1.6rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.stat::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(300px circle at var(--mx,50%) var(--my,50%), rgba(34,211,238,.09), transparent 45%);
+  opacity: 0; transition: opacity .3s;
+  pointer-events: none;
+}
+.stat:hover::after { opacity: 1; }
+.stat-value {
+  font-size: clamp(34px, 4.6vw, 54px);
+  font-weight: 700; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(180deg, #fff, #7c86ab);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stat-value .unit { font-size: .45em; color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+.stat-label {
+  margin-top: .9rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* tilt cards */
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.4rem; perspective: 1200px; }
+.tcard {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 2.6rem 2.2rem;
+  transform-style: preserve-3d;
+  transition: transform .18s ease-out, border-color .3s;
+  overflow: hidden;
+}
+.tcard::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(340px circle at var(--mx,50%) var(--my,50%), rgba(139,92,246,.14), transparent 45%);
+  opacity: 0; transition: opacity .3s;
+  pointer-events: none;
+}
+.tcard:hover::before { opacity: 1; }
+.tcard:hover { border-color: rgba(139,92,246,.4); }
+.tcard-ico {
+  width: 46px; height: 46px;
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  background: linear-gradient(135deg, rgba(34,211,238,.18), rgba(139,92,246,.18));
+  border: 1px solid var(--line);
+  margin-bottom: 1.5rem;
+  transform: translateZ(40px);
+}
+.tcard h3 { font-size: 19px; font-weight: 500; margin-bottom: .7rem; transform: translateZ(30px); }
+.tcard p { font-size: 13px; line-height: 1.95; color: var(--ink2); transform: translateZ(20px); }
+.tcard .tag {
+  position: absolute; top: 1.4rem; right: 1.5rem;
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* slider lab */
+.lab {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: clamp(1.8rem, 4vw, 3.5rem);
+}
+.lab-row { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .8rem; margin-bottom: 2rem; }
+.lab-row .lab-title { font-size: 17px; font-weight: 500; }
+.lab-tokens {
+  font-family: var(--mono);
+  font-size: clamp(22px, 3.4vw, 34px);
+  color: var(--cyan);
+  font-variant-numeric: tabular-nums;
+}
+input[type=range] {
+  width: 100%;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--cyan) var(--fill,50%), rgba(255,255,255,.12) var(--fill,50%));
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--cyan);
+  box-shadow: 0 0 18px rgba(34,211,238,.6);
+  transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--cyan);
+  box-shadow: 0 0 18px rgba(34,211,238,.6);
+}
+.lab-readout {
+  margin-top: 2.2rem;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+}
+.readout-cell {
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 1.3rem 1.2rem;
+  text-align: center;
+}
+.readout-num {
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.readout-key {
+  margin-top: .5rem;
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.lab-note { margin-top: 1.6rem; font-size: 11px; color: var(--ink3); line-height: 1.8; }
+
+/* timeline */
+.tl { position: relative; max-width: 640px; margin: 0 auto; padding-left: 2.4rem; }
+.tl-track {
+  position: absolute; left: 8px; top: 6px; bottom: 6px;
+  width: 2px; background: var(--line); border-radius: 2px;
+  overflow: hidden;
+}
+.tl-fill {
+  width: 100%; height: 0;
+  background: linear-gradient(180deg, var(--cyan), var(--violet), var(--pink));
+}
+.tl-item { position: relative; padding: 0 0 3.2rem; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item::before {
+  content: '';
+  position: absolute; left: -2.4rem; top: 6px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--ink3);
+  transform: translateX(2.5px);
+  transition: border-color .3s, box-shadow .3s;
+}
+.tl-item.lit::before { border-color: var(--cyan); box-shadow: 0 0 12px rgba(34,211,238,.7); }
+.tl-date { font-family: var(--mono); font-size: 11px; letter-spacing: .25em; color: var(--cyan); }
+.tl-name { font-size: 22px; font-weight: 500; margin: .6rem 0 .5rem; }
+.tl-desc { font-size: 13px; line-height: 1.9; color: var(--ink2); max-width: 480px; }
+
+/* cta */
+.cta { text-align: center; padding: 8rem 2rem 9rem; }
+.cta-title { font-size: clamp(28px, 4.4vw, 48px); font-weight: 500; letter-spacing: -.02em; margin-bottom: 1.2rem; }
+.cta-sub { color: var(--ink2); font-size: 14px; line-height: 2; margin-bottom: 2.8rem; }
+.btn {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+  padding: 1.05rem 2.4rem;
+  border-radius: 999px;
+  position: relative;
+  transition: box-shadow .3s;
+}
+.btn-glow {
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  color: #06070d; font-weight: 500;
+  box-shadow: 0 0 26px rgba(34,211,238,.35);
+}
+.btn-glow:hover { box-shadow: 0 0 44px rgba(139,92,246,.55); }
+.btn-ghost { border: 1px solid var(--line); color: var(--ink2); margin-left: 1rem; }
+.btn-ghost:hover { border-color: var(--cyan); color: var(--ink); }
+
+footer {
+  border-top: 1px solid var(--line);
+  max-width: 1100px; margin: 0 auto;
+  padding: 2.6rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2,.6,.2,1), transform .8s cubic-bezier(.2,.6,.2,1); }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .cards { grid-template-columns: 1fr; }
+  .lab-readout { grid-template-columns: 1fr; }
+  .hero-sub { margin-top: 62vmin; }
+  footer { flex-direction: column; gap: .8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="cursor-dot" id="cdot"></div>
+<div class="cursor-ring" id="cring"></div>
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+
+<nav class="nav">
+  <div class="nav-brand">K3 <b>//</b> PLAYGROUND</div>
+  <a class="nav-back" href="../../labs.html">返回实验页</a>
+</nav>
+
+<main>
+  <header class="hero">
+    <canvas id="particles"></canvas>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Move your cursor · Click to pulse</p>
+      <p class="hero-sub">月之暗面迄今最强旗舰模型 Kimi K3——这一版不说概念，只让你动手玩。粒子是它的参数，光是它的回答。</p>
+    </div>
+    <div class="hero-hint">Scroll ↓</div>
+  </header>
+
+  <section class="section">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Numbers in Motion</p>
+      <h2 class="sec-title scramble" data-text="数字自己会说话">数字自己会说话</h2>
+    </div>
+    <div class="stats reveal">
+      <div class="stat">
+        <div class="stat-value"><span class="count" data-to="2.8" data-dec="1">0</span><span class="unit">T*</span></div>
+        <div class="stat-label">参数规模 · 传闻</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value"><span class="count" data-to="32" data-dec="0">0</span><span class="unit">B*</span></div>
+        <div class="stat-label">激活参数 · 传闻</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value"><span class="count" data-to="1000000" data-dec="0" data-comma="1">0</span></div>
+        <div class="stat-label">上下文 Tokens</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value"><span class="count" data-to="3" data-dec="0">0</span></div>
+        <div class="stat-label">K 系列世代</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Hover to Tilt</p>
+      <h2 class="sec-title scramble" data-text="四种超能力">四种超能力</h2>
+    </div>
+    <div class="cards reveal">
+      <div class="tcard">
+        <span class="tag">CH-01</span>
+        <div class="tcard-ico">⌘</div>
+        <h3>编程</h3>
+        <p>跨仓库工程理解与长链路开发任务，Kimi Code 的核心引擎。写代码，也懂工程。</p>
+      </div>
+      <div class="tcard">
+        <span class="tag">CH-02</span>
+        <div class="tcard-ico">◈</div>
+        <h3>游戏与 3D</h3>
+        <p>三维场景与游戏逻辑的空间推理，一句话生成可运行的游戏原型与 3D 内容。</p>
+      </div>
+      <div class="tcard">
+        <span class="tag">CH-03</span>
+        <div class="tcard-ico">❖</div>
+        <h3>知识任务</h3>
+        <p>百万字上下文配合深度思考，长文档分析、跨资料推理一次到位。</p>
+      </div>
+      <div class="tcard">
+        <span class="tag">CH-04</span>
+        <div class="tcard-ico">✦</div>
+        <h3>Agent 集群</h3>
+        <p>长程任务执行与多智能体协作，把宏大目标拆成能落地的每一步。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Drag the Slider</p>
+      <h2 class="sec-title scramble" data-text="一百万有多长">一百万有多长</h2>
+    </div>
+    <div class="lab reveal">
+      <div class="lab-row">
+        <span class="lab-title">上下文窗口模拟器</span>
+        <span class="lab-tokens" id="tok">500,000 tokens</span>
+      </div>
+      <input type="range" id="ctx" min="0" max="1000000" step="10000" value="500000">
+      <div class="lab-readout">
+        <div class="readout-cell">
+          <div class="readout-num" id="r-chars">50 万字</div>
+          <div class="readout-key">≈ 汉字容量</div>
+        </div>
+        <div class="readout-cell">
+          <div class="readout-num" id="r-books">5 本</div>
+          <div class="readout-key">十万字小说</div>
+        </div>
+        <div class="readout-cell">
+          <div class="readout-num" id="r-hlm">0.7 部</div>
+          <div class="readout-key">《红楼梦》换算</div>
+        </div>
+      </div>
+      <p class="lab-note">* 按宣传口径 1 token ≈ 1 汉字换算，《红楼梦》按 73 万字计。拖到最右，就是 K3 Allegretto+ 的完整容量。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">Scroll to Fill</p>
+      <h2 class="sec-title scramble" data-text="三代进化">三代进化</h2>
+    </div>
+    <div class="tl" id="tl">
+      <div class="tl-track"><div class="tl-fill" id="tlfill"></div></div>
+      <div class="tl-item">
+        <div class="tl-date">2025.07</div>
+        <div class="tl-name">Kimi K2</div>
+        <div class="tl-desc">万亿 MoE 架构，总参 1T / 激活 32B，发布即开源，刷新开源 SOTA。</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.04</div>
+        <div class="tl-name">Kimi K2.6</div>
+        <div class="tl-desc">开源原生多模态 Agent 模型，文本、图片、视频输入全支持。</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026.07</div>
+        <div class="tl-name">Kimi K3</div>
+        <div class="tl-desc">迄今最强旗舰。约 2.8T 参数*、最高 1M 上下文、开放权重。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta reveal">
+    <h2 class="cta-title">亲手试试 <span class="grad">K3</span></h2>
+    <p class="cta-sub">已上线 Kimi 官网、App 与开放平台 API，开放权重版本可供下载部署。</p>
+    <a class="btn btn-glow magnetic" href="https://www.kimi.com" target="_blank" rel="noopener">访问 kimi.com</a>
+    <a class="btn btn-ghost magnetic" href="../../labs.html">返回实验列表</a>
+  </section>
+</main>
+
+<footer>
+  <span>K3 Playground · Interactive</span>
+  <span>* 传闻规格 · ling's lab</span>
+</footer>
+
+<script>
+/* ============ custom cursor ============ */
+const dot = document.getElementById('cdot'), ring = document.getElementById('cring');
+let mx = -100, my = -100, rx = -100, ry = -100;
+addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function cursorLoop() {
+  rx += (mx - rx) * .16; ry += (my - ry) * .16;
+  dot.style.transform = `translate(${mx - 3}px, ${my - 3}px)`;
+  ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`;
+  requestAnimationFrame(cursorLoop);
+})();
+document.querySelectorAll('a, button, input, .tcard, .stat').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('grow'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('grow'));
+});
+
+/* ============ scroll progress ============ */
+const prog = document.getElementById('progress');
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  prog.style.transform = `scaleX(${h.scrollTop / (h.scrollHeight - h.clientHeight)})`;
+}, { passive: true });
+
+/* ============ particle K3 ============ */
+const cv = document.getElementById('particles'), cx2 = cv.getContext('2d');
+let pts = [], pmx = -9999, pmy = -9999, dpr = Math.min(devicePixelRatio || 1, 2);
+
+function buildParticles() {
+  const w = cv.clientWidth, h = cv.clientHeight;
+  cv.width = w * dpr; cv.height = h * dpr;
+  cx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const off = document.createElement('canvas');
+  off.width = w; off.height = h;
+  const oc = off.getContext('2d');
+  const fs = Math.min(w * .42, h * .5, 380);
+  oc.font = `700 ${fs}px 'Space Grotesk', sans-serif`;
+  oc.textAlign = 'center'; oc.textBaseline = 'middle';
+  oc.fillStyle = '#fff';
+  oc.fillText('K3', w / 2, h * .38);
+  const data = oc.getImageData(0, 0, w, h).data;
+  const step = Math.max(4, Math.round(w / 220));
+  pts = [];
+  for (let y = 0; y < h; y += step) {
+    for (let x = 0; x < w; x += step) {
+      if (data[(y * w + x) * 4 + 3] > 128) {
+        const t = x / w;
+        pts.push({
+          x: Math.random() * w, y: Math.random() * h,
+          tx: x, ty: y, vx: 0, vy: 0,
+          c: t < .5 ? `rgba(${34 + t * 2 * 105 | 0},${211 - t * 2 * 119 | 0},238,.9)` : `rgba(139,${92 + (t - .5) * 2 * 144 | 0},${246 - (t - .5) * 2 * 57 | 0},.9)`
+        });
+      }
+    }
+  }
+}
+buildParticles();
+addEventListener('resize', buildParticles);
+
+cv.addEventListener('mousemove', e => {
+  const r = cv.getBoundingClientRect();
+  pmx = e.clientX - r.left; pmy = e.clientY - r.top;
+});
+cv.addEventListener('mouseleave', () => { pmx = pmy = -9999; });
+cv.addEventListener('touchmove', e => {
+  const r = cv.getBoundingClientRect();
+  pmx = e.touches[0].clientX - r.left; pmy = e.touches[0].clientY - r.top;
+}, { passive: true });
+cv.addEventListener('click', e => {
+  const r = cv.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
+  for (const p of pts) {
+    const dx = p.x - px, dy = p.y - py;
+    const d = Math.hypot(dx, dy) || 1;
+    const f = 1200 / (d + 40);
+    p.vx += dx / d * f; p.vy += dy / d * f;
+  }
+});
+
+(function pLoop() {
+  const w = cv.clientWidth, h = cv.clientHeight;
+  cx2.clearRect(0, 0, w, h);
+  for (const p of pts) {
+    p.vx += (p.tx - p.x) * .018;
+    p.vy += (p.ty - p.y) * .018;
+    const dx = p.x - pmx, dy = p.y - pmy;
+    const d2 = dx * dx + dy * dy;
+    if (d2 < 8100) {
+      const d = Math.sqrt(d2) || 1;
+      const f = (90 - d) / 90 * 3.2;
+      p.vx += dx / d * f; p.vy += dy / d * f;
+    }
+    p.vx *= .88; p.vy *= .88;
+    p.x += p.vx; p.y += p.vy;
+    cx2.fillStyle = p.c;
+    cx2.fillRect(p.x, p.y, 1.6, 1.6);
+  }
+  requestAnimationFrame(pLoop);
+})();
+
+/* ============ scramble headings ============ */
+const CHARS = '!<>-_\\/[]{}—=+*^?#01';
+function scramble(el) {
+  const target = el.dataset.text;
+  let frame = 0;
+  const total = target.length * 6 + 20;
+  const timer = setInterval(() => {
+    frame++;
+    el.textContent = target.split('').map((ch, i) => {
+      if (frame > i * 6 + 14) return ch;
+      return CHARS[Math.random() * CHARS.length | 0];
+    }).join('');
+    if (frame > total) { el.textContent = target; clearInterval(timer); }
+  }, 34);
+}
+
+/* ============ counters ============ */
+function countUp(el) {
+  const to = parseFloat(el.dataset.to), dec = +el.dataset.dec, comma = el.dataset.comma;
+  const t0 = performance.now(), dur = 1700;
+  (function step(t) {
+    const k = Math.min((t - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - k, 3);
+    let v = (to * e).toFixed(dec);
+    if (comma) v = (+v).toLocaleString('en-US');
+    el.textContent = v;
+    if (k < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ============ intersection triggers ============ */
+const io = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    e.target.querySelectorAll('.count').forEach(countUp);
+    e.target.querySelectorAll('.scramble').forEach(scramble);
+    if (e.target.classList.contains('scramble')) scramble(e.target);
+    io.unobserve(e.target);
+  });
+}, { threshold: .2 });
+document.querySelectorAll('.reveal, .sec-head').forEach(el => io.observe(el));
+
+/* ============ tilt + spotlight ============ */
+document.querySelectorAll('.tcard, .stat').forEach(card => {
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    card.style.setProperty('--mx', x + 'px');
+    card.style.setProperty('--my', y + 'px');
+    if (card.classList.contains('tcard') && matchMedia('(hover:hover)').matches) {
+      const rx2 = (y / r.height - .5) * -10;
+      const ry2 = (x / r.width - .5) * 12;
+      card.style.transform = `rotateX(${rx2}deg) rotateY(${ry2}deg)`;
+    }
+  });
+  card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+});
+
+/* ============ magnetic buttons ============ */
+document.querySelectorAll('.magnetic').forEach(btn => {
+  btn.addEventListener('pointermove', e => {
+    const r = btn.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    btn.style.transform = `translate(${x * .25}px, ${y * .35}px)`;
+  });
+  btn.addEventListener('pointerleave', () => { btn.style.transform = ''; });
+});
+
+/* ============ context slider ============ */
+const slider = document.getElementById('ctx');
+function fmtWan(n) {
+  if (n >= 10000) return (n / 10000).toFixed(n % 10000 ? 1 : 0) + ' 万字';
+  return n + ' 字';
+}
+function lab() {
+  const t = +slider.value;
+  slider.style.setProperty('--fill', t / 10000 + '%');
+  document.getElementById('tok').textContent = t.toLocaleString('en-US') + ' tokens';
+  document.getElementById('r-chars').textContent = fmtWan(t);
+  document.getElementById('r-books').textContent = (t / 100000).toFixed(1).replace(/\.0$/, '') + ' 本';
+  document.getElementById('r-hlm').textContent = (t / 730000).toFixed(1) + ' 部';
+}
+slider.addEventListener('input', lab);
+lab();
+
+/* ============ timeline fill ============ */
+const tl = document.getElementById('tl'), tlfill = document.getElementById('tlfill');
+const tlItems = tl.querySelectorAll('.tl-item');
+addEventListener('scroll', () => {
+  const r = tl.getBoundingClientRect();
+  const vh = innerHeight;
+  const k = Math.min(Math.max((vh * .75 - r.top) / r.height, 0), 1);
+  tlfill.style.height = k * 100 + '%';
+  tlItems.forEach((it, i) => {
+    if (k > (i + .5) / tlItems.length) it.classList.add('lit');
+  });
+}, { passive: true });
+</script>
+
+</body>
+</html>
