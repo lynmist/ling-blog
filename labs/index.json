@@ -22,5 +22,11 @@
     "desc": "日式侘寂：圆相一笔，大巧若拙的 K3 静物写生。",
     "path": "labs/k3-3/index.html",
     "icon": "◯"
+  },
+  {
+    "name": "K3 · 蓝图",
+    "desc": "一张 K3 的工程图纸：架构、尺寸、象限与修订记录。",
+    "path": "labs/k3-4/index.html",
+    "icon": "图"
   }
 ]

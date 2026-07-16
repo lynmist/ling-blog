@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K3 · 蓝图 — Engineering Drawing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500&family=Noto+Sans+SC:wght@300;400&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bp: #1a4066;
+  --bp-deep: #15334f;
+  --wt: rgba(255,255,255,.88);
+  --wt-dim: rgba(255,255,255,.45);
+  --wt-faint: rgba(255,255,255,.18);
+  --amber: #ffcf5c;
+  --mono: 'JetBrains Mono', monospace;
+  --grot: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  --hand: 'Zhi Mang Xing', cursive;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bp-deep);
+  color: var(--wt);
+  font-family: var(--mono);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  padding: clamp(.6rem, 2.5vw, 2.5rem);
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: rgba(255,207,92,.35); }
+
+/* the sheet */
+.sheet {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  background:
+    /* fine grid */
+    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px),
+    /* major grid */
+    linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px),
+    var(--bp);
+  background-size:
+    22px 22px, 22px 22px,
+    110px 110px, 110px 110px;
+  border: 1px solid var(--wt-dim);
+  outline: 3px solid var(--wt);
+  outline-offset: 6px;
+  padding: clamp(1.4rem, 4vw, 3.5rem);
+}
+
+/* corner registration marks */
+.corner { position: absolute; width: 18px; height: 18px; border: 1.5px solid var(--wt); }
+.corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+.corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+.corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+.corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+/* ---------- sheet head ---------- */
+.sheet-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 1.5rem; flex-wrap: wrap;
+  border-bottom: 2px solid var(--wt);
+  padding-bottom: 1.4rem;
+  margin-bottom: 3rem;
+}
+.sheet-head h1 {
+  font-family: var(--grot);
+  font-size: clamp(26px, 4.5vw, 52px);
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.sheet-head h1 span { color: var(--amber); }
+.sheet-head .sub {
+  margin-top: .7rem;
+  font-size: 10px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--wt-dim);
+}
+.sheet-meta {
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  text-align: right; line-height: 2.1;
+  color: var(--wt-dim);
+}
+.sheet-meta b { color: var(--wt); font-weight: 400; }
+.sheet-meta a { border-bottom: 1px dashed var(--wt-dim); }
+.sheet-meta a:hover { color: var(--amber); border-color: var(--amber); }
+
+/* ---------- figure blocks ---------- */
+.fig { margin-bottom: 4.5rem; position: relative; }
+.fig-cap {
+  display: flex; align-items: baseline; gap: 1.2rem;
+  margin-bottom: 1.6rem;
+}
+.fig-no {
+  font-size: 11px; letter-spacing: .25em;
+  color: var(--amber);
+  white-space: nowrap;
+}
+.fig-title {
+  font-family: var(--grot);
+  font-size: clamp(15px, 2vw, 20px);
+  letter-spacing: .2em; text-transform: uppercase;
+  font-weight: 400;
+}
+.fig-line { flex: 1; height: 1px; background: var(--wt-faint); }
+.fig-frame {
+  border: 1px solid var(--wt-dim);
+  padding: clamp(1.2rem, 3vw, 2.5rem);
+  position: relative;
+  background: rgba(255,255,255,.02);
+}
+.fig-frame::before {
+  content: '';
+  position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border: 1px dashed var(--wt-faint);
+  pointer-events: none;
+}
+
+/* FIG.1 schematic */
+.schematic { width: 100%; height: auto; display: block; }
+.schematic text { font-family: var(--mono); fill: var(--wt); }
+.schematic .box { fill: rgba(255,255,255,.03); stroke: var(--wt); stroke-width: 1.2; }
+.schematic .flow { stroke: var(--wt); stroke-width: 1.2; fill: none; marker-end: url(#arr); }
+.schematic .dashed { stroke: var(--wt-dim); stroke-width: 1; stroke-dasharray: 5 5; fill: none; animation: ants 1.2s linear infinite; }
+.schematic .amber { stroke: var(--amber); }
+@keyframes ants { to { stroke-dashoffset: -10; } }
+
+/* FIG.2 dimension bars */
+.dim { margin-bottom: 2.2rem; }
+.dim:last-child { margin-bottom: 0; }
+.dim-label {
+  display: flex; justify-content: space-between;
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--wt-dim);
+  margin-bottom: .7rem;
+}
+.dim-label b { color: var(--wt); font-weight: 400; }
+.dim-track {
+  position: relative;
+  height: 30px;
+  border-left: 1px solid var(--wt);
+  border-right: 1px solid var(--wt-dim);
+}
+.dim-bar {
+  position: absolute; left: 0; top: 50%;
+  transform: translateY(-50%);
+  height: 10px;
+  background: repeating-linear-gradient(-45deg, var(--wt) 0 4px, transparent 4px 8px);
+  width: 0;
+  transition: width 1.4s cubic-bezier(.2,.6,.2,1);
+}
+.dim-bar.full { background: var(--amber); }
+.dim-ticks {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, var(--wt-faint) 0 1px, transparent 1px 10%);
+  pointer-events: none;
+}
+.dim-note {
+  margin-top: .6rem;
+  font-family: var(--hand);
+  font-size: 17px;
+  color: var(--amber);
+  letter-spacing: .08em;
+}
+
+/* FIG.3 quadrant */
+.quad { display: grid; grid-template-columns: 1fr 1fr; position: relative; }
+.quad::before {
+  content: '';
+  position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 1px; background: var(--wt-faint);
+}
+.quad::after {
+  content: '';
+  position: absolute; top: 50%; left: 0; right: 0;
+  height: 1px; background: var(--wt-faint);
+}
+.quad-cell { padding: 2rem 2.2rem; position: relative; }
+.quad-cell .cross {
+  font-size: 12px; color: var(--amber);
+}
+.quad-cell h3 {
+  font-family: var(--grot);
+  font-size: 16px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase;
+  margin: .8rem 0 .9rem;
+}
+.quad-cell p {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 12px; line-height: 2;
+  color: var(--wt-dim);
+}
+
+/* notes */
+.notes { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.notes ol { list-style: none; counter-reset: n; }
+.notes li {
+  counter-increment: n;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 12.5px; line-height: 2;
+  color: var(--wt);
+  padding: .9rem 0;
+  border-bottom: 1px dashed var(--wt-faint);
+}
+.notes li::before {
+  content: counter(n, decimal-leading-zero) ' / ';
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.notes li:last-child { border-bottom: none; }
+
+/* revision table */
+.rev { width: 100%; border-collapse: collapse; font-size: 10.5px; letter-spacing: .12em; }
+.rev th, .rev td {
+  border: 1px solid var(--wt-dim);
+  padding: .7rem .9rem;
+  text-align: left;
+  text-transform: uppercase;
+}
+.rev th { background: rgba(255,255,255,.06); font-weight: 400; color: var(--amber); }
+.rev td { color: var(--wt); }
+.rev td:first-child { color: var(--amber); }
+
+/* stamp */
+.stamp {
+  position: absolute;
+  top: clamp(4.5rem, 9vw, 7rem);
+  right: clamp(1.2rem, 4vw, 3rem);
+  transform: rotate(9deg);
+  border: 3px double var(--amber);
+  color: var(--amber);
+  padding: .9rem 1.6rem;
+  font-size: clamp(12px, 1.6vw, 17px);
+  letter-spacing: .35em; text-transform: uppercase;
+  text-align: center;
+  opacity: .85;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 5;
+}
+.stamp small { display: block; font-size: .6em; letter-spacing: .5em; margin-top: .35rem; }
+
+/* title block */
+.titleblock {
+  display: grid;
+  grid-template-columns: repeat(6, auto);
+  border: 1.5px solid var(--wt);
+  font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+  margin-top: 1rem;
+}
+.tb-cell {
+  border-right: 1px solid var(--wt-dim);
+  padding: .8rem 1.1rem;
+  display: flex; flex-direction: column; gap: .4rem;
+  min-width: 0;
+}
+.tb-cell:last-child { border-right: none; }
+.tb-k { color: var(--wt-dim); }
+.tb-v { color: var(--wt); font-weight: 400; white-space: nowrap; }
+.tb-v.amber { color: var(--amber); }
+
+/* handwritten margin note */
+.margin-note {
+  font-family: var(--hand);
+  font-size: clamp(18px, 2.4vw, 24px);
+  color: var(--amber);
+  letter-spacing: .06em;
+  margin-top: 1.4rem;
+}
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal.visible .dim-bar { width: var(--w); }
+
+@media (max-width: 860px) {
+  .notes { grid-template-columns: 1fr; }
+  .quad::before, .quad::after { display: none; }
+  .quad { grid-template-columns: 1fr; }
+  .quad-cell { border-bottom: 1px solid var(--wt-faint); }
+  .quad-cell:last-child { border-bottom: none; }
+  .titleblock { grid-template-columns: repeat(2, 1fr); }
+  .tb-cell { border-bottom: 1px solid var(--wt-dim); }
+  .sheet-head .sheet-meta { text-align: left; }
+  .stamp { position: static; transform: rotate(3deg); display: inline-block; margin-bottom: 2rem; pointer-events: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+
+  <div class="stamp">Open Weight<small>开放权重</small></div>
+
+  <header class="sheet-head">
+    <div>
+      <h1>Kimi <span>K3</span> 工程蓝图</h1>
+      <p class="sub">Engineering Drawing · MoE Flagship Model · Moonshot AI</p>
+    </div>
+    <div class="sheet-meta">
+      Dwg No. <b>K3-BP-04</b><br>
+      Scale <b>1 : 1</b> · Units <b>tokens</b><br>
+      <a href="../../labs.html">← 返回图纸目录</a>
+    </div>
+  </header>
+
+  <!-- FIG.1 -->
+  <section class="fig reveal">
+    <div class="fig-cap">
+      <span class="fig-no">FIG. 1</span>
+      <h2 class="fig-title">总体架构 / General Architecture</h2>
+      <span class="fig-line"></span>
+    </div>
+    <div class="fig-frame">
+      <svg class="schematic" viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="rgba(255,255,255,.88)"/>
+          </marker>
+        </defs>
+
+        <!-- input -->
+        <rect class="box" x="30" y="130" width="130" height="80"/>
+        <text x="95" y="165" text-anchor="middle" font-size="13" letter-spacing="2">INPUT</text>
+        <text x="95" y="188" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.45)">提示词</text>
+
+        <!-- router -->
+        <rect class="box" x="240" y="130" width="130" height="80"/>
+        <text x="305" y="165" text-anchor="middle" font-size="13" letter-spacing="2">ROUTER</text>
+        <text x="305" y="188" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.45)">路由</text>
+
+        <!-- experts -->
+        <rect class="box" x="450" y="30" width="150" height="52"/>
+        <text x="525" y="60" text-anchor="middle" font-size="11" letter-spacing="1">EXPERT ×N</text>
+        <rect class="box" x="450" y="106" width="150" height="52"/>
+        <text x="525" y="136" text-anchor="middle" font-size="11" letter-spacing="1">EXPERT ×N</text>
+        <rect class="box amber" x="450" y="182" width="150" height="52" fill="none" stroke="#ffcf5c" stroke-width="1.2"/>
+        <text x="525" y="212" text-anchor="middle" font-size="11" letter-spacing="1" fill="#ffcf5c">ACTIVE 32B*</text>
+        <rect class="box" x="450" y="258" width="150" height="52"/>
+        <text x="525" y="288" text-anchor="middle" font-size="11" letter-spacing="1">EXPERT ×N</text>
+
+        <!-- aggregate -->
+        <rect class="box" x="680" y="130" width="150" height="80"/>
+        <text x="755" y="165" text-anchor="middle" font-size="13" letter-spacing="2">OUTPUT</text>
+        <text x="755" y="188" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.45)">回答</text>
+
+        <!-- flows -->
+        <path class="flow" d="M160,170 H240"/>
+        <path class="flow" d="M370,150 C410,150 410,60 450,56"/>
+        <path class="flow" d="M370,160 C410,160 410,132 450,132"/>
+        <path class="flow" d="M370,180 C410,180 410,208 450,208"/>
+        <path class="flow" d="M370,190 C410,190 410,284 450,284"/>
+        <path class="flow" d="M600,56 C640,56 640,150 680,158"/>
+        <path class="flow" d="M600,132 C640,132 640,162 680,166"/>
+        <path class="flow" d="M600,208 C640,208 640,178 680,174"/>
+        <path class="flow" d="M600,284 C640,284 640,190 680,182"/>
+
+        <!-- dimension annotation -->
+        <path class="dashed" d="M525,310 V336 H305"/>
+        <text x="420" y="330" text-anchor="middle" font-size="10" fill="#ffcf5c" letter-spacing="1">TOTAL ≈ 2.8T*</text>
+      </svg>
+      <p class="margin-note">混合专家架构：总量 2.8 万亿*，每次只激活 320 亿*——大，而且省。（*传闻规格）</p>
+    </div>
+  </section>
+
+  <!-- FIG.2 -->
+  <section class="fig reveal">
+    <div class="fig-cap">
+      <span class="fig-no">FIG. 2</span>
+      <h2 class="fig-title">上下文尺寸 / Context Dimensions</h2>
+      <span class="fig-line"></span>
+    </div>
+    <div class="fig-frame">
+      <div class="dim">
+        <div class="dim-label"><span>K2 · 2025</span><b>128K</b></div>
+        <div class="dim-track"><div class="dim-ticks"></div><div class="dim-bar" style="--w:12.8%"></div></div>
+      </div>
+      <div class="dim">
+        <div class="dim-label"><span>K3 Moderato</span><b>256K</b></div>
+        <div class="dim-track"><div class="dim-ticks"></div><div class="dim-bar" style="--w:25.6%"></div></div>
+      </div>
+      <div class="dim">
+        <div class="dim-label"><span>K3 Allegretto+</span><b>1,000,000</b></div>
+        <div class="dim-track"><div class="dim-ticks"></div><div class="dim-bar full" style="--w:100%"></div></div>
+        <p class="dim-note">↑ 一百万 token，整本书一次读完。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIG.3 -->
+  <section class="fig reveal">
+    <div class="fig-cap">
+      <span class="fig-no">FIG. 3</span>
+      <h2 class="fig-title">能力象限 / Capability Quadrants</h2>
+      <span class="fig-line"></span>
+    </div>
+    <div class="fig-frame">
+      <div class="quad">
+        <div class="quad-cell">
+          <span class="cross">+ Q1</span>
+          <h3>编程 Code</h3>
+          <p>跨仓库工程理解与长链路开发，Kimi Code 的核心引擎。</p>
+        </div>
+        <div class="quad-cell">
+          <span class="cross">+ Q2</span>
+          <h3>游戏 / 3D</h3>
+          <p>三维场景与游戏逻辑的空间推理，可运行的原型代码。</p>
+        </div>
+        <div class="quad-cell">
+          <span class="cross">+ Q3</span>
+          <h3>知识 Knowledge</h3>
+          <p>百万字长文分析与跨资料推理，复杂问答一次到位。</p>
+        </div>
+        <div class="quad-cell">
+          <span class="cross">+ Q4</span>
+          <h3>Agent 集群</h3>
+          <p>长程任务执行与多智能体协作，目标拆解逐步落地。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIG.4 -->
+  <section class="fig reveal">
+    <div class="fig-cap">
+      <span class="fig-no">FIG. 4</span>
+      <h2 class="fig-title">通用注释与修订 / Notes &amp; Revisions</h2>
+      <span class="fig-line"></span>
+    </div>
+    <div class="fig-frame">
+      <div class="notes">
+        <ol>
+          <li>本图依据公开报道绘制，2.8T 与 32B 为传闻规格，非官方确认。</li>
+          <li>K3 于 2026 年 7 月发布，为月之暗面迄今最强旗舰。</li>
+          <li>开放权重，可免费下载、修改与部署。</li>
+          <li>型号档位以速度记号命名：Moderato 256K / Allegretto+ 最高 1M。</li>
+          <li>性能对标乃至超越同期国际顶级闭源模型。</li>
+        </ol>
+        <table class="rev">
+          <tr><th>Rev</th><th>Model</th><th>Date</th><th>Description</th></tr>
+          <tr><td>A</td><td>Kimi K2</td><td>2025.07</td><td>1T MoE · 发布即开源</td></tr>
+          <tr><td>B</td><td>K2.6</td><td>2026.04</td><td>原生多模态 Agent</td></tr>
+          <tr><td>C</td><td>K3</td><td>2026.07</td><td>2.8T* · 1M 上下文</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- title block -->
+  <div class="titleblock reveal">
+    <div class="tb-cell"><span class="tb-k">Project</span><span class="tb-v">KIMI K3</span></div>
+    <div class="tb-cell"><span class="tb-k">Design</span><span class="tb-v">MOONSHOT AI</span></div>
+    <div class="tb-cell"><span class="tb-k">Drawn</span><span class="tb-v">LING'S LAB</span></div>
+    <div class="tb-cell"><span class="tb-k">Date</span><span class="tb-v">2026.07</span></div>
+    <div class="tb-cell"><span class="tb-k">Sheet</span><span class="tb-v amber">04 / 04</span></div>
+    <div class="tb-cell"><span class="tb-k">Link</span><span class="tb-v"><a href="https://www.kimi.com" target="_blank" rel="noopener" style="border-bottom:1px dashed var(--wt-dim)">KIMI.COM ↗</a></span></div>
+  </div>
+</div>
+
+<script>
+const io = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
