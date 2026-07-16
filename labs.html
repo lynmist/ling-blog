@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <script src="js/theme.js"></script>
-<title>更多 — ling</title>
+<title>实验 — ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="css/base.css" rel="stylesheet">
 <style>
-.more-intro { padding-top: 3rem; font-size: 14px; color: var(--ink2); line-height: 2; max-width: 520px; }
-.more-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding-top: 3rem; }
-.more-card {
+.labs-intro { padding-top: 3rem; font-size: 14px; color: var(--ink2); line-height: 2; max-width: 520px; }
+.labs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding-top: 3rem; }
+.lab-card {
   display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem;
   padding: 1.6rem 1.4rem;
   background: var(--surface);
@@ -23,8 +23,8 @@
   box-shadow: var(--shadow-sm);
   transition: transform .2s, box-shadow .2s, border-color .2s, background .25s;
 }
-.more-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--blue-l); }
-.more-icon {
+.lab-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--blue-l); }
+.lab-icon {
   width: 40px; height: 40px; border-radius: 12px;
   background: var(--blue-ll);
   border: 1px solid var(--line);
@@ -32,13 +32,13 @@
   color: var(--blue);
   font-size: 18px;
 }
-.more-name { font-size: 15px; font-weight: 500; color: var(--ink); }
-.more-desc { font-size: 12px; color: var(--ink2); line-height: 1.6; }
+.lab-name { font-size: 15px; font-weight: 500; color: var(--ink); }
+.lab-desc { font-size: 12px; color: var(--ink2); line-height: 1.6; }
 footer { margin-top: 6rem; }
 @media (max-width: 600px) {
-  .more-grid { grid-template-columns: 1fr; }
-  .more-card { flex-direction: row; align-items: center; gap: 1rem; padding: 1.2rem; }
-  .more-text { flex: 1; min-width: 0; }
+  .labs-grid { grid-template-columns: 1fr; }
+  .lab-card { flex-direction: row; align-items: center; gap: 1rem; padding: 1.2rem; }
+  .lab-text { flex: 1; min-width: 0; }
 }
 </style>
 </head>
@@ -67,56 +67,44 @@ footer { margin-top: 6rem; }
 
 <div class="page">
   <header class="page-header">
-    <p class="page-eyebrow">Explore</p>
-    <h1 class="page-title">更多</h1>
-    <p class="page-sub">一些不太常去、但值得被找到的地方。</p>
+    <p class="page-eyebrow">Labs</p>
+    <h1 class="page-title">实验</h1>
+    <p class="page-sub">一些小工具、预览站点和其他想单独放出来的东西。</p>
   </header>
 
-  <p class="more-intro">这里收集了站点里分散在各处的角落，方便一次跳转。</p>
+  <p class="labs-intro">每个卡片都是一个独立的小页面，放在 labs/ 下的单独文件夹里，随时可以增加或替换。</p>
 
-  <div class="more-grid">
-    <a href="link.html" class="more-card">
-      <div class="more-icon">友</div>
-      <div class="more-text">
-        <div class="more-name">友链</div>
-        <div class="more-desc">喜欢的站点与朋友</div>
-      </div>
-    </a>
-    <a href="about.html" class="more-card">
-      <div class="more-icon">关</div>
-      <div class="more-text">
-        <div class="more-name">关于</div>
-        <div class="more-desc">关于 ling 和这里</div>
-      </div>
-    </a>
-    <a href="bookshelf.html" class="more-card">
-      <div class="more-icon">架</div>
-      <div class="more-text">
-        <div class="more-name">书架</div>
-        <div class="more-desc">小说、散文和其他</div>
-      </div>
-    </a>
-    <a href="gallery.html" class="more-card">
-      <div class="more-icon">影</div>
-      <div class="more-text">
-        <div class="more-name">摄影</div>
-        <div class="more-desc">镜头里的瞬间</div>
-      </div>
-    </a>
-    <a href="labs.html" class="more-card">
-      <div class="more-icon">试</div>
-      <div class="more-text">
-        <div class="more-name">实验</div>
-        <div class="more-desc">小工具与预览站点</div>
-      </div>
-    </a>
-  </div>
+  <div class="labs-grid" id="labs-grid"></div>
 
   <footer>
     <p>© 2026 ling</p>
-    <p>More · Archive</p>
+    <p>Labs · Archive</p>
   </footer>
 </div>
+
+<script>
+fetch('labs/index.json')
+  .then(r => r.json())
+  .then(labs => {
+    const grid = document.getElementById('labs-grid');
+    if (!labs || labs.length === 0) {
+      grid.innerHTML = '<div class="empty"><p>还没有实验项目</p></div>';
+      return;
+    }
+    grid.innerHTML = labs.map(l => `
+      <a href="${l.path || '#'}" class="lab-card">
+        <div class="lab-icon">${l.icon || '◆'}</div>
+        <div class="lab-text">
+          <div class="lab-name">${l.name || '未命名'}</div>
+          <div class="lab-desc">${l.desc || ''}</div>
+        </div>
+      </a>
+    `).join('');
+  })
+  .catch(() => {
+    document.getElementById('labs-grid').innerHTML = '<div class="empty"><p>暂时无法加载实验列表</p></div>';
+  });
+</script>
 
 </body>
 </html>
