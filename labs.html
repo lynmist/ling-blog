@@ -42,10 +42,12 @@ button.lab-card { font: inherit; text-align: left; cursor: pointer; width: 100%;
   position: fixed; inset: 0; z-index: 500;
   background: rgba(28,43,56,0.45);
   backdrop-filter: blur(4px);
-  display: none; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 1.5rem;
+  visibility: hidden; opacity: 0;
+  transition: opacity .25s ease, visibility .25s;
 }
-.lab-modal-bg.open { display: flex; }
+.lab-modal-bg.open { visibility: visible; opacity: 1; }
 .lab-modal {
   width: 440px; max-width: 100%;
   max-height: 80vh; overflow-y: auto;
@@ -54,7 +56,10 @@ button.lab-card { font: inherit; text-align: left; cursor: pointer; width: 100%;
   border-radius: 14px;
   box-shadow: var(--shadow-md);
   padding: 1.4rem;
+  transform: translateY(14px) scale(0.97); opacity: 0;
+  transition: transform .28s cubic-bezier(.2,.8,.2,1), opacity .22s ease;
 }
+.lab-modal-bg.open .lab-modal { transform: none; opacity: 1; }
 .lab-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
 .lab-modal-title { font-size: 13px; font-weight: 500; letter-spacing: 0.1em; color: var(--ink); }
 .lab-modal-close { background: none; border: none; font-size: 14px; color: var(--ink3); cursor: pointer; padding: 4px; line-height: 1; }
@@ -72,6 +77,23 @@ button.lab-card { font: inherit; text-align: left; cursor: pointer; width: 100%;
 .lab-modal-item .lab-icon { width: 34px; height: 34px; border-radius: 9px; font-size: 14px; flex-shrink: 0; }
 .lab-modal-item .lab-name { font-size: 14px; }
 .lab-modal-item .lab-desc { font-size: 11px; }
+
+/* stagger items in when the modal opens */
+.lab-modal-bg.open .lab-modal-item { animation: lab-item-in .3s cubic-bezier(.2,.8,.2,1) both; }
+.lab-modal-bg.open .lab-modal-item:nth-child(2) { animation-delay: .05s; }
+.lab-modal-bg.open .lab-modal-item:nth-child(3) { animation-delay: .1s; }
+.lab-modal-bg.open .lab-modal-item:nth-child(4) { animation-delay: .15s; }
+.lab-modal-bg.open .lab-modal-item:nth-child(5) { animation-delay: .2s; }
+.lab-modal-bg.open .lab-modal-item:nth-child(n+6) { animation-delay: .25s; }
+@keyframes lab-item-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-modal-bg, .lab-modal { transition: none; }
+  .lab-modal-bg.open .lab-modal-item { animation: none; }
+}
 footer { margin-top: 6rem; }
 @media (max-width: 600px) {
   .labs-grid { grid-template-columns: 1fr; }
