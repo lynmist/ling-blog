@@ -107,12 +107,7 @@ footer { margin-top: 6rem; }
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="nav-logo"><span class="nav-dot"></span><span class="nav-name">ling</span></a>
-    <ul class="nav-links">
-      <li><a href="index.html#about">About</a></li>
-      <li><a href="index.html#writing">Writing</a></li>
-      <li><a href="index.html#gallery">Gallery</a></li>
-      <li><a href="more.html">More</a></li>
-    </ul>
+    <a href="index.html" class="nav-back">← Back</a>
     <button class="theme-switch" type="button" onclick="toggleTheme()" aria-label="切换主题">
       <span class="switch-track">
         <span class="switch-thumb">
@@ -219,5 +214,6 @@ fetch('labs/index.json')
   });
 </script>
 
+<script src="js/nav-back.js"></script>
 </body>
 </html>
