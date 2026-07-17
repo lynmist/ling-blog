@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K3 · 视界 — 黑洞吸积盘 GR 实时渲染</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Noto+Sans+SC:wght@300;400;500&family=Space+Grotesk:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #030304;
+  --ink: #ece9e2;
+  --ink2: #a3a099;
+  --ink3: #57554f;
+  --line: rgba(236,233,226,.08);
+  --amber: #ffb35c;
+  --cyan: #8fd0ff;
+  --mono: 'JetBrains Mono', monospace;
+  --grot: 'Space Grotesk', sans-serif;
+  --serif: 'Noto Serif SC', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--grot);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: rgba(255,179,92,.3); color: #fff; }
+
+/* ---------- nav ---------- */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 2rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(3,3,4,.55);
+  backdrop-filter: blur(16px);
+}
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .35em; text-transform: uppercase;
+}
+.nav-brand b { color: var(--amber); font-weight: 400; }
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink2);
+  transition: color .25s;
+}
+.nav-links a::before { content: '· '; color: var(--amber); }
+.nav-links a:hover { color: var(--ink); }
+.nav-back {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink3);
+  border: 1px solid var(--line);
+  padding: .5rem 1rem; border-radius: 999px;
+  transition: border-color .25s, color .25s;
+}
+.nav-back:hover { border-color: rgba(255,179,92,.4); color: var(--ink); }
+
+main { position: relative; z-index: 2; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+#bh {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  background: #000;
+}
+#nogl {
+  position: absolute; inset: 0; z-index: 5;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 2rem; text-align: center;
+  font-family: var(--mono);
+  font-size: 12px; letter-spacing: .15em; line-height: 2;
+  color: var(--ink2);
+  background: var(--bg);
+}
+.hero-vignette {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(0,0,0,.5) 100%);
+}
+.hero-content {
+  position: absolute; z-index: 3;
+  left: max(2rem, calc(50% - 600px));
+  bottom: 7rem;
+  pointer-events: none;
+}
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 1.6rem;
+  text-shadow: 0 0 12px rgba(0,0,0,.8);
+}
+.hero-tag::before { content: '◉ '; animation: blink 2.4s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+.hero-title {
+  font-family: var(--grot);
+  font-size: clamp(80px, 13vw, 180px);
+  font-weight: 300;
+  line-height: .85;
+  letter-spacing: -.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236,233,226,.8);
+  user-select: none;
+  text-shadow: 0 0 30px rgba(0,0,0,.6);
+}
+.hero-title em {
+  font-style: normal;
+  color: var(--amber);
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 46px rgba(255,179,92,.4);
+}
+.hero-name {
+  margin-top: 1.6rem;
+  font-family: var(--serif);
+  font-size: clamp(24px, 3.2vw, 40px);
+  font-weight: 300;
+  letter-spacing: .28em;
+  text-shadow: 0 0 14px rgba(0,0,0,.9);
+}
+.hero-name span {
+  color: var(--ink2);
+  font-size: .5em; letter-spacing: .4em; margin-left: 1rem;
+  font-family: var(--mono);
+}
+.hero-sub {
+  margin-top: 1.6rem;
+  max-width: 440px;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px; line-height: 2.1;
+  color: var(--ink2);
+  text-shadow: 0 0 10px rgba(0,0,0,.9);
+}
+.hero-vertical {
+  position: absolute; z-index: 3;
+  right: 2.2rem; top: 42%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--serif);
+  font-size: 15px; letter-spacing: 1.2em;
+  color: var(--ink3);
+  user-select: none;
+  pointer-events: none;
+}
+.hero-vertical::before {
+  content: '';
+  display: block;
+  width: 1px; height: 60px;
+  background: var(--line);
+  margin: 0 auto 1.6rem;
+}
+
+/* controls */
+.controls {
+  position: absolute; z-index: 4;
+  right: max(2rem, calc(50% - 600px));
+  bottom: 6rem;
+  width: 250px;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid var(--line);
+  background: rgba(3,3,4,.55);
+  backdrop-filter: blur(14px);
+}
+.ctl-row { display: flex; align-items: center; gap: .8rem; }
+.ctl-row + .ctl-row { margin-top: 1rem; }
+.ctl-row label {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink2);
+}
+.ctl-row label span { display: block; color: var(--ink3); font-size: 9px; margin-top: .25rem; }
+.ctl-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--amber);
+  height: 2px;
+}
+.ctl-row b {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 400;
+  color: var(--amber);
+  min-width: 34px; text-align: right;
+}
+.seg { display: flex; flex: 1; border: 1px solid var(--line); }
+.seg button {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .1em;
+  padding: .45rem 0;
+  background: transparent;
+  color: var(--ink3);
+  border: none;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.seg button:last-child { border-right: none; }
+.seg button:hover { color: var(--ink); }
+.seg button.on { background: var(--amber); color: #0a0805; }
+.ctl-note {
+  margin-top: 1rem;
+  padding-top: .9rem;
+  border-top: 1px dashed var(--line);
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink3);
+  line-height: 1.9;
+}
+
+/* telemetry strip */
+.telemetry {
+  position: absolute; z-index: 4;
+  left: 0; right: 0; bottom: 0;
+  border-top: 1px solid var(--line);
+  background: rgba(3,3,4,.55);
+  backdrop-filter: blur(14px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.telemetry > div {
+  padding: 1rem 1.4rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink3);
+  border-right: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem;
+}
+.telemetry > div:last-child { border-right: none; }
+.telemetry b { color: var(--ink); font-weight: 400; white-space: nowrap; }
+.telemetry .live b { color: var(--amber); }
+
+/* ---------- marquee ---------- */
+.marquee {
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 1rem 0;
+}
+.marquee-track {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--ink3);
+  animation: mq 36s linear infinite;
+}
+.marquee-track i { color: var(--amber); font-style: normal; margin: 0 1.2rem; }
+@keyframes mq { to { transform: translateX(-50%); } }
+
+/* ---------- sections ---------- */
+.section { max-width: 1200px; margin: 0 auto; padding: 7.5rem 2rem; position: relative; }
+.sec-head {
+  display: flex; align-items: baseline; gap: 2rem;
+  margin-bottom: 4rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2rem;
+}
+.sec-no {
+  font-family: var(--serif);
+  font-size: clamp(48px, 7vw, 84px);
+  font-weight: 300;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236,233,226,.4);
+  line-height: 1;
+}
+.sec-title-wrap { flex: 1; }
+.sec-kicker {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .4em; text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: .8rem;
+}
+.sec-title {
+  font-family: var(--serif);
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: 400;
+  letter-spacing: .1em;
+}
+.sec-note {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--ink3);
+  text-align: right;
+  align-self: flex-end;
+}
+
+/* editorial body */
+.edit { display: grid; grid-template-columns: 1.1fr .9fr; gap: 5rem; align-items: start; }
+.edit-lede {
+  font-family: var(--serif);
+  font-size: clamp(19px, 2.3vw, 26px);
+  line-height: 2.1;
+  font-weight: 300;
+}
+.edit-lede::first-letter {
+  font-size: 2.6em;
+  float: left;
+  line-height: 1;
+  padding: .35rem .8rem .1rem 0;
+  color: var(--amber);
+}
+.edit-body {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13.5px; line-height: 2.2;
+  color: var(--ink2);
+}
+.edit-body p + p { margin-top: 1.4rem; }
+.edit-body .mono-note {
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  border-top: 1px dashed var(--line);
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .12em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+
+/* physics cards */
+.phys-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line);
+}
+.phys-card {
+  padding: 2.4rem 2rem 2.2rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background .3s;
+  position: relative;
+}
+.phys-card:nth-child(3n) { border-right: none; }
+.phys-card:nth-child(n+4) { border-bottom: none; }
+.phys-card:hover { background: rgba(236,233,226,.02); }
+.phys-card::before {
+  content: '+';
+  position: absolute; top: .9rem; right: 1.1rem;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--amber);
+  opacity: .6;
+}
+.phys-name {
+  font-family: var(--serif);
+  font-size: 20px; font-weight: 400; letter-spacing: .08em;
+}
+.phys-name small {
+  display: block;
+  margin-top: .5rem;
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: .3em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.phys-formula {
+  margin-top: 1.6rem;
+  font-family: var(--mono);
+  font-size: clamp(15px, 1.6vw, 19px);
+  color: var(--amber);
+  letter-spacing: .04em;
+}
+.phys-desc {
+  margin-top: 1.2rem;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 12px; line-height: 2;
+  color: var(--ink2);
+}
+
+/* readouts */
+.readouts {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+}
+.readout {
+  padding: 2.6rem 1.8rem 2.2rem;
+  border-right: 1px solid var(--line);
+  position: relative;
+  transition: background .3s;
+}
+.readout:last-child { border-right: none; }
+.readout:hover { background: rgba(236,233,226,.02); }
+.readout .ticks {
+  height: 10px;
+  background:
+    repeating-linear-gradient(90deg, var(--ink3) 0 1px, transparent 1px 9px);
+  opacity: .5;
+  margin-bottom: 2rem;
+}
+.readout .ticks::after {
+  content: '';
+  display: block;
+  width: 1px; height: 16px;
+  background: var(--amber);
+  margin-top: -6px;
+  margin-left: var(--pos, 50%);
+  box-shadow: 0 0 8px rgba(255,179,92,.6);
+}
+.readout-value {
+  font-family: var(--grot);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 300;
+  letter-spacing: -.02em;
+}
+.readout-value small { font-size: .42em; color: var(--ink3); }
+.readout-label {
+  margin-top: .9rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.readout-sub { margin-top: .5rem; font-family: 'Noto Sans SC', sans-serif; font-size: 11px; color: var(--ink3); }
+
+/* decode list */
+.decode { border-top: 1px solid var(--line); }
+.dec {
+  display: grid;
+  grid-template-columns: 100px 1fr 1.1fr;
+  gap: 2rem; align-items: baseline;
+  padding: 2.8rem 0;
+  border-bottom: 1px solid var(--line);
+  transition: background .3s, padding-left .35s;
+}
+.dec:hover { padding-left: 1.2rem; background: rgba(236,233,226,.015); }
+.dec-code {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .2em;
+  color: var(--amber);
+}
+.dec-name {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.8vw, 32px);
+  font-weight: 400;
+}
+.dec-name small {
+  display: block;
+  margin-top: .5rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.dec-desc {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 13px; line-height: 2;
+  color: var(--ink2);
+}
+
+/* mission log */
+.log { font-family: var(--mono); border: 1px solid var(--line); padding: 2.4rem 2.2rem; }
+.log-line {
+  display: grid;
+  grid-template-columns: 130px 150px 1fr;
+  gap: 1.6rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 12px; letter-spacing: .06em;
+  align-items: baseline;
+}
+.log-line:last-child { border-bottom: none; }
+.log-date { color: var(--ink3); }
+.log-name { color: var(--ink); font-family: var(--serif); font-size: 16px; letter-spacing: .1em; }
+.log-desc { color: var(--ink2); font-family: 'Noto Sans SC', sans-serif; font-size: 12.5px; line-height: 1.9; }
+.log-line.current .log-name { color: var(--amber); }
+.log-line.current .log-date { color: var(--amber); }
+.log-line.current .log-date::before { content: '▸ '; }
+
+/* quote */
+.quote { max-width: 900px; margin: 0 auto; text-align: center; padding: 8rem 2rem; }
+.quote-mark {
+  font-family: var(--serif);
+  font-size: 60px; color: var(--amber);
+  line-height: .5; display: block; margin-bottom: 2.4rem;
+}
+.quote-text {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.2vw, 34px);
+  line-height: 2; font-weight: 300;
+  letter-spacing: .04em;
+}
+.quote-cite {
+  margin-top: 2.6rem;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* cta */
+.cta {
+  border-top: 1px solid var(--line);
+  text-align: center;
+  padding: 8rem 2rem 9rem;
+}
+.cta-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 300; letter-spacing: .12em;
+}
+.cta-sub {
+  max-width: 480px; margin: 1.6rem auto 3rem;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 14px; line-height: 2; color: var(--ink2);
+}
+.btn {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+  padding: 1.1rem 2.6rem;
+  transition: all .25s;
+}
+.btn-solid { background: var(--ink); color: #050505; }
+.btn-solid:hover { background: var(--amber); }
+.btn-ghost { border: 1px solid var(--line); color: var(--ink2); margin-left: 1rem; }
+.btn-ghost:hover { border-color: rgba(255,179,92,.4); color: var(--ink); }
+
+footer {
+  border-top: 1px solid var(--line);
+  max-width: 1200px; margin: 0 auto;
+  padding: 2.6rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--ink3);
+}
+footer .dot { color: var(--amber); }
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1); }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .hero-vertical { display: none; }
+  .hero-content { left: 1.5rem; right: 1.5rem; top: 6.5rem; bottom: auto; }
+  .hero-sub { max-width: 100%; }
+  .controls { left: 1.5rem; right: 1.5rem; width: auto; bottom: 5.2rem; }
+  .telemetry { grid-template-columns: 1fr 1fr; }
+  .telemetry > div:nth-child(2n) { border-right: none; }
+  .edit { grid-template-columns: 1fr; gap: 2.5rem; }
+  .phys-grid { grid-template-columns: 1fr; }
+  .phys-card { border-right: none; }
+  .phys-card:nth-child(n+4) { border-bottom: 1px solid var(--line); }
+  .phys-card:last-child { border-bottom: none; }
+  .readouts { grid-template-columns: 1fr 1fr; }
+  .readout:nth-child(2n) { border-right: none; }
+  .readout { border-bottom: 1px solid var(--line); }
+  .dec { grid-template-columns: 1fr; gap: .8rem; }
+  .log-line { grid-template-columns: 1fr; gap: .4rem; }
+  .sec-note { display: none; }
+  footer { flex-direction: column; gap: .8rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">MOONSHOT <b>//</b> K3 · GR</div>
+  <div class="nav-links">
+    <a href="#one">概览</a>
+    <a href="#two">物理</a>
+    <a href="#three">读数</a>
+    <a href="#four">航程</a>
+  </div>
+  <a class="nav-back" href="../../labs.html">返回实验页</a>
+</nav>
+
+<main>
+  <header class="hero">
+    <canvas id="bh"></canvas>
+    <div id="nogl">此页面需要 WebGL 支持才能渲染黑洞。<br>WEBGL CONTEXT UNAVAILABLE</div>
+    <div class="hero-vignette"></div>
+
+    <div class="hero-content">
+      <p class="hero-tag">General Relativity · Realtime Raytracing</p>
+      <h1 class="hero-title">K<em>3</em></h1>
+      <p class="hero-name">视界<span>EVENT HORIZON</span></p>
+      <p class="hero-sub">把 K3 的规模交给引力来解释：上方不是贴图，而是每像素 260 步的测地线积分——光线在 Schwarzschild 时空中真实弯曲，盘内缘物质以 0.5c 绕转，引力红移与多普勒集束一并计入。</p>
+    </div>
+
+    <div class="hero-vertical">史瓦西度规 · 1916</div>
+
+    <div class="controls">
+      <div class="ctl-row">
+        <label>轨道倾角<span>Inclination</span></label>
+        <input type="range" id="incl" min="30" max="88" step="1" value="78">
+        <b id="inclVal">78°</b>
+      </div>
+      <div class="ctl-row">
+        <label>渲染精度<span>Precision</span></label>
+        <div class="seg">
+          <button data-q="0.45">流畅</button>
+          <button data-q="0.7" class="on">标准</button>
+          <button data-q="1">精细</button>
+        </div>
+      </div>
+      <p class="ctl-note">260 steps / pixel · Schwarzschild metric, M = 1 · drag nothing, it's already moving</p>
+    </div>
+
+    <div class="telemetry">
+      <div class="live"><span>Integrator</span><b>● LIVE</b></div>
+      <div><span>ISCO</span><b>6M · 0.5c</b></div>
+      <div><span>Inclination</span><b id="inclRead">78°</b></div>
+      <div><span>Render</span><b id="fps">— FPS</b></div>
+    </div>
+  </header>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      KIMI K3<i>✦</i>EVENT HORIZON<i>✦</i>d²u/dφ² = 3u² − u<i>✦</i>ISCO 6M<i>✦</i>DOPPLER BEAMING<i>✦</i>OPEN WEIGHT<i>✦</i>1M CONTEXT<i>✦</i>
+      KIMI K3<i>✦</i>EVENT HORIZON<i>✦</i>d²u/dφ² = 3u² − u<i>✦</i>ISCO 6M<i>✦</i>DOPPLER BEAMING<i>✦</i>OPEN WEIGHT<i>✦</i>1M CONTEXT<i>✦</i>
+    </div>
+  </div>
+
+  <section class="section" id="one">
+    <div class="sec-head reveal">
+      <div class="sec-no">壹</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Spacetime 01 / Overview</p>
+        <h2 class="sec-title">不用比喻，直接上引力</h2>
+      </div>
+      <p class="sec-note">Ref: MS-K3-2026<br>Frame: ZAMO</p>
+    </div>
+    <div class="edit reveal">
+      <p class="edit-lede">黑洞是宇宙里唯一把「规模」直接写成几何的存在：质量大到光也逃不出去，时空本身开始发光。所以我们用真实的广义相对论，给月之暗面迄今最强的旗舰模型 Kimi K3 画一张像。</p>
+      <div class="edit-body">
+        <p>2026 年 7 月，月之暗面发布 Kimi K3：万亿级参数、最高 100 万 token 上下文，编程、游戏与 3D、知识任务全面登顶，并以开放权重抵达每一个人——规模大得像一颗引力源。</p>
+        <p>本页首屏的黑洞由 WebGL 实时积分渲染：每个像素逆向追踪一条光线，沿 Schwarzschild 度规的测地线方程步进 260 次；吸积盘辐射按开普勒速度做引力红移与多普勒集束修正。你看到的每一处弯曲、每一侧明暗不对称，都是算出来的，不是画的。</p>
+        <p class="mono-note">// Rendered live on your GPU · unofficial concept tribute · ling's lab</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="two">
+    <div class="sec-head reveal">
+      <div class="sec-no">贰</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Spacetime 02 / The Physics</p>
+        <h2 class="sec-title">渲染所用的物理</h2>
+      </div>
+      <p class="sec-note">6 Equations<br>Units: G = c = M = 1</p>
+    </div>
+    <div class="phys-grid reveal">
+      <div class="phys-card">
+        <p class="phys-name">光线测地线<small>Null Geodesic</small></p>
+        <p class="phys-formula">d²u/dφ² = 3u² − u</p>
+        <p class="phys-desc">其中 u = 1/r。每个像素沿此方程数值积分，光线的每一次弯折都出自 Schwarzschild 度规本身。</p>
+      </div>
+      <div class="phys-card">
+        <p class="phys-name">事件视界<small>Event Horizon</small></p>
+        <p class="phys-formula">r = 2M</p>
+        <p class="phys-desc">边界之内，光也无法返回。画面中央的黑色圆形即黑洞阴影，视觉半径约 5.2M。</p>
+      </div>
+      <div class="phys-card">
+        <p class="phys-name">光子球<small>Photon Sphere</small></p>
+        <p class="phys-formula">r = 3M</p>
+        <p class="phys-desc">光在这里可以绕黑洞做圆轨道。盘面上方那圈细亮环，是绕了半圈甚至一整圈才到达的光。</p>
+      </div>
+      <div class="phys-card">
+        <p class="phys-name">最小稳定轨道<small>ISCO</small></p>
+        <p class="phys-formula">r = 6M</p>
+        <p class="phys-desc">吸积盘的内缘。此处开普勒轨道速度 β = 1/√(r−2) 达到 0.5c，再向内物质只能坠落。</p>
+      </div>
+      <div class="phys-card">
+        <p class="phys-name">频移因子<small>Redshift Factor</small></p>
+        <p class="phys-formula">g = √(1−3/r) / (1−β·cosψ)</p>
+        <p class="phys-desc">引力红移与狭义相对论多普勒的合项：朝向我们运动的盘侧更蓝更亮，远离侧更红更暗。</p>
+      </div>
+      <div class="phys-card">
+        <p class="phys-name">相对论集束<small>Relativistic Beaming</small></p>
+        <p class="phys-formula">I<sub>obs</sub> = g³ · I<sub>emit</sub></p>
+        <p class="phys-desc">比强度按频率比的三次方变换——吸积盘左右悬殊的亮度差，纯粹是相对论效应。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="three">
+    <div class="sec-head reveal">
+      <div class="sec-no">叁</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Spacetime 03 / Readouts</p>
+        <h2 class="sec-title">引力读数</h2>
+      </div>
+      <p class="sec-note">Instrument Panel<br>Calibrated 2026.07</p>
+    </div>
+    <div class="readouts reveal">
+      <div class="readout">
+        <div class="ticks" style="--pos: 88%"></div>
+        <div class="readout-value">2.8<small>T</small></div>
+        <div class="readout-label">Parameters</div>
+        <div class="readout-sub">传闻量级 · 中国最大</div>
+      </div>
+      <div class="readout">
+        <div class="ticks" style="--pos: 96%"></div>
+        <div class="readout-value">1<small>M</small></div>
+        <div class="readout-label">Context Window</div>
+        <div class="readout-sub">百万字超长记忆</div>
+      </div>
+      <div class="readout">
+        <div class="ticks" style="--pos: 100%"></div>
+        <div class="readout-value">OPEN</div>
+        <div class="readout-label">Weight</div>
+        <div class="readout-sub">开放权重 · 免费商用</div>
+      </div>
+      <div class="readout">
+        <div class="ticks" style="--pos: 92%"></div>
+        <div class="readout-value">SOTA</div>
+        <div class="readout-label">Benchmarks</div>
+        <div class="readout-sub">对标国际顶级模型</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head reveal">
+      <div class="sec-no">肆</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Spacetime 04 / Capabilities</p>
+        <h2 class="sec-title">逃逸出的信号</h2>
+      </div>
+      <p class="sec-note">4 Channels<br>Full Duplex</p>
+    </div>
+    <div class="decode reveal">
+      <div class="dec">
+        <div class="dec-code">CH-01</div>
+        <div class="dec-name">编程<small>Coding</small></div>
+        <div class="dec-desc">从单文件脚本到跨仓库工程，理解项目结构、自动调用工具、完成长链路开发任务——Kimi Code 的核心引擎。</div>
+      </div>
+      <div class="dec">
+        <div class="dec-code">CH-02</div>
+        <div class="dec-name">游戏与 3D<small>Gaming / 3D</small></div>
+        <div class="dec-desc">对 3D 场景、游戏逻辑与空间推理专门强化，能生成可运行的游戏原型与三维内容代码——本页即一例。</div>
+      </div>
+      <div class="dec">
+        <div class="dec-code">CH-03</div>
+        <div class="dec-name">知识任务<small>Knowledge</small></div>
+        <div class="dec-desc">百万字上下文配合深度思考，长文档分析、跨资料推理、复杂问答一次到位。</div>
+      </div>
+      <div class="dec">
+        <div class="dec-code">CH-04</div>
+        <div class="dec-name">Agent 集群<small>Agent Swarm</small></div>
+        <div class="dec-desc">延续 K2 系列的 Agent 基因，支持长程任务执行与多智能体协作，把目标拆成步骤逐一落地。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="four">
+    <div class="sec-head reveal">
+      <div class="sec-no">伍</div>
+      <div class="sec-title-wrap">
+        <p class="sec-kicker">Spacetime 05 / Mission Log</p>
+        <h2 class="sec-title">航程记录</h2>
+      </div>
+      <p class="sec-note">3 Entries<br>Status: Ongoing</p>
+    </div>
+    <div class="log reveal">
+      <div class="log-line">
+        <span class="log-date">2025.07</span>
+        <span class="log-name">Kimi K2</span>
+        <span class="log-desc">万亿 MoE，总参 1T / 激活 32B，发布即开源，代码与 Agent 刷新开源 SOTA。</span>
+      </div>
+      <div class="log-line">
+        <span class="log-date">2026.04</span>
+        <span class="log-name">Kimi K2.6</span>
+        <span class="log-desc">开源原生多模态 Agent 模型，支持文本、图片与视频输入。</span>
+      </div>
+      <div class="log-line current">
+        <span class="log-date">2026.07</span>
+        <span class="log-name">Kimi K3</span>
+        <span class="log-desc">迄今最强旗舰。万亿级参数，最高 1M 上下文，开放权重。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote reveal">
+    <span class="quote-mark">“</span>
+    <p class="quote-text">让最强大的智能，<br>成为每个人都能触及的基础设施。</p>
+    <p class="quote-cite">— Moonshot AI</p>
+  </section>
+
+  <section class="cta reveal">
+    <h2 class="cta-title">越过视界，看见规模</h2>
+    <p class="cta-sub">Kimi K3 已上线 Kimi 官网、App 与开放平台 API，开放权重版本可供下载与部署。</p>
+    <a class="btn btn-solid" href="https://www.kimi.com" target="_blank" rel="noopener">访问 Kimi 官网</a>
+    <a class="btn btn-ghost" href="../../labs.html">返回实验列表</a>
+  </section>
+</main>
+
+<footer>
+  <span><span class="dot">◉</span> 视界 · Kimi K3 Concept</span>
+  <span>Unofficial GR tribute · ling's lab</span>
+</footer>
+
+<script>
+/* ============================================================
+   GR black hole accretion disk — realtime raytracer
+   Schwarzschild metric (M = 1), per-pixel null geodesic
+   integration:  d²u/dφ² = 3u² − u,  u = 1/r
+   ============================================================ */
+(function () {
+  const canvas = document.getElementById('bh');
+  const fallback = document.getElementById('nogl');
+  const gl = canvas.getContext('webgl', {
+    antialias: false,
+    alpha: false,
+    powerPreference: 'high-performance'
+  });
+  if (!gl) { fallback.style.display = 'flex'; return; }
+
+  const VERT = `
+attribute vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+`;
+
+  const FRAG = `
+precision highp float;
+
+uniform vec2 uRes;
+uniform float uTime;
+uniform float uIncl;
+
+#define STEPS 260
+#define DANG 0.02
+#define ROUT 13.0
+#define ESC 60.0
+#define DIST 26.0
+
+float hash13(vec3 p) {
+  p = fract(p * 0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
+
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash13(vec3(i, 7.0));
+  float b = hash13(vec3(i + vec2(1.0, 0.0), 7.0));
+  float c = hash13(vec3(i + vec2(0.0, 1.0), 7.0));
+  float d = hash13(vec3(i + vec2(1.0, 1.0), 7.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 4; i++) {
+    v += a * vnoise(p);
+    p = p * 2.13 + vec2(17.7, 9.2);
+    a *= 0.5;
+  }
+  return v;
+}
+
+/* blackbody-ish temperature ramp */
+vec3 ramp(float t) {
+  vec3 col = mix(vec3(0.42, 0.07, 0.02), vec3(1.0, 0.40, 0.08), smoothstep(0.10, 0.55, t));
+  col = mix(col, vec3(1.0, 0.82, 0.52), smoothstep(0.55, 0.95, t));
+  col = mix(col, vec3(0.78, 0.87, 1.0), smoothstep(0.95, 1.40, t));
+  return col;
+}
+
+/* lensed background: faint galactic band + two layers of hash stars */
+vec3 background(vec3 d) {
+  vec3 col = vec3(0.006, 0.007, 0.012);
+  float band = exp(-pow(abs(d.y + 0.18) * 2.2, 2.0));
+  col += band * vec3(0.020, 0.024, 0.040);
+  for (int L = 0; L < 2; L++) {
+    float sc = L == 0 ? 60.0 : 140.0;
+    vec3 sp = d * sc;
+    vec3 id = floor(sp);
+    vec3 f = fract(sp) - 0.5;
+    float h = hash13(id + float(L) * 13.7);
+    float star = smoothstep(0.30, 0.05, length(f)) * step(0.994, h);
+    float bright = 0.35 + 0.65 * hash13(id + 3.1);
+    col += star * bright * mix(vec3(1.0), vec3(0.72, 0.84, 1.25), hash13(id + 9.4));
+  }
+  return col;
+}
+
+/* disk emission at hit point, incl. gravitational redshift + doppler beaming */
+vec3 diskShade(vec3 hp, vec3 d3, float rho) {
+  float temp = pow(6.0 / rho, 0.75);
+  /* Keplerian differential rotation of the turbulence texture */
+  float om = 6.0 * pow(rho, -1.5);
+  float rot = om * uTime;
+  float c = cos(rot);
+  float s = sin(rot);
+  mat2 rotM = mat2(c, s, -s, c);
+  vec2 rc = rotM * hp.xz * 0.55;
+  float turb = fbm(rc + vec2(log(rho) * 2.2, 0.0));
+  temp *= 0.72 + 0.56 * turb;
+  float em = temp * (0.50 + 0.95 * turb);
+  em *= smoothstep(6.0, 7.0, rho);
+  em *= 1.0 - smoothstep(ROUT * 0.55, ROUT, rho);
+  em *= 1.0 + 1.2 * exp(-(rho - 6.0) * 1.1);
+
+  /* Keplerian velocity measured by a local static observer */
+  float beta = inversesqrt(rho - 2.0);
+  vec3 vdir = normalize(vec3(-hp.z, 0.0, hp.x));
+  float cosp = -dot(d3, vdir);
+  float g = sqrt(max(1.0 - 3.0 / rho, 0.0)) / max(1.0 - beta * cosp, 0.05);
+  float boost = pow(clamp(g, 0.0, 2.0), 3.0);
+
+  vec3 col = ramp(temp) * em * boost * 1.35;
+  float lum = dot(col, vec3(0.3333));
+  col = mix(col, lum * vec3(0.72, 0.86, 1.30), clamp((g - 1.0) * 1.1, 0.0, 0.6));
+  col = mix(col, lum * vec3(1.30, 0.72, 0.42), clamp((1.0 - g) * 1.1, 0.0, 0.6));
+  return col;
+}
+
+vec3 trace(vec3 cam, vec3 dir) {
+  /* orbital plane of this light ray (Schwarzschild is spherically symmetric) */
+  vec3 e1 = normalize(cam);
+  vec3 nrm = cross(cam, dir);
+  float nl = length(nrm);
+  nrm = nl > 1e-5 ? nrm / nl : vec3(0.0, 1.0, 0.0);
+  vec3 e2 = cross(nrm, e1);
+  float d1 = dot(dir, e1);
+  float d2 = dot(dir, e2);
+  if (d2 < 0.0) { e2 = -e2; nrm = -nrm; d2 = -d2; }
+
+  float u = 1.0 / length(cam);
+  float up = -u * d1 / max(d2, 1e-5);
+  float alpha = 0.0;
+
+  vec3 col = vec3(0.0);
+  vec3 ppos = cam;
+  vec3 d3 = dir;
+  int hits = 0;
+  bool done = false;
+
+  for (int i = 0; i < STEPS; i++) {
+    up += (3.0 * u * u - u) * DANG;
+    u += up * DANG;
+    alpha += DANG;
+
+    if (u > 0.5) { done = true; break; }                       /* crossed the horizon */
+    if (u < 1.0 / ESC && up < 0.0) { col += background(d3); done = true; break; } /* escaped */
+
+    float r = 1.0 / max(u, 1e-5);
+    float ca = cos(alpha);
+    float sa = sin(alpha);
+    vec3 rad = ca * e1 + sa * e2;
+    vec3 pos = rad * r;
+    float rr = -up / (u * u);
+    d3 = normalize(rad * rr + (-sa * e1 + ca * e2) * r);
+
+    /* crossing of the equatorial (disk) plane? */
+    if (ppos.y * pos.y < 0.0) {
+      float t = ppos.y / (ppos.y - pos.y);
+      vec3 hp = mix(ppos, pos, t);
+      float rho = length(hp.xz);
+      if (rho > 6.0 && rho < ROUT) {
+        col += diskShade(hp, d3, rho) * (hits == 0 ? 1.0 : 0.5);
+        hits++;
+        if (hits >= 2) { done = true; break; }
+      }
+    }
+    ppos = pos;
+  }
+  if (!done) col += background(d3) * 0.3;  /* lingering near the photon sphere */
+  return col;
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uRes) / uRes.y;
+  float inc = radians(uIncl);
+  vec3 cam = vec3(0.0, DIST * cos(inc), -DIST * sin(inc));
+  vec3 fwd = normalize(-cam);
+  vec3 rgt = normalize(cross(vec3(0.0, 1.0, 0.0), fwd));
+  vec3 upv = cross(rgt, fwd);
+  vec3 dir = normalize(uv.x * rgt + uv.y * upv + 2.4 * fwd);
+  vec3 col = trace(cam, dir);
+  col = 1.0 - exp(-col * 1.2);
+  col = pow(col, vec3(0.4545));
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(s);
+      console.error(log);
+      fallback.textContent = 'Shader 编译失败 / SHADER ERROR: ' + log;
+      fallback.style.display = 'flex';
+      return null;
+    }
+    return s;
+  }
+
+  const vs = compile(gl.VERTEX_SHADER, VERT);
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    fallback.textContent = 'Program 链接失败 / LINK ERROR: ' + gl.getProgramInfoLog(prog);
+    fallback.style.display = 'flex';
+    return;
+  }
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, 'uRes');
+  const uTime = gl.getUniformLocation(prog, 'uTime');
+  const uIncl = gl.getUniformLocation(prog, 'uIncl');
+
+  let scale = 0.7;
+  let incl = 78;
+  let visible = true;
+
+  function resize() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (!w || !h) return;
+    canvas.width = Math.max(2, Math.round(w * scale));
+    canvas.height = Math.max(2, Math.round(h * scale));
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(canvas);
+
+  const fpsEl = document.getElementById('fps');
+  let frames = 0;
+  let lastFps = performance.now();
+  const t0 = performance.now();
+
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!visible) return;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uTime, (now - t0) / 1000);
+    gl.uniform1f(uIncl, incl);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    frames++;
+    if (now - lastFps >= 1000) {
+      fpsEl.textContent = frames + ' FPS';
+      frames = 0;
+      lastFps = now;
+    }
+  }
+  requestAnimationFrame(loop);
+
+  /* controls */
+  const inclSlider = document.getElementById('incl');
+  const inclVal = document.getElementById('inclVal');
+  const inclRead = document.getElementById('inclRead');
+  inclSlider.addEventListener('input', () => {
+    incl = parseFloat(inclSlider.value);
+    inclVal.textContent = incl + '°';
+    inclRead.textContent = incl + '°';
+  });
+  document.querySelectorAll('.seg button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.seg button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      scale = parseFloat(b.dataset.q);
+      resize();
+    });
+  });
+})();
+
+/* reveal */
+const io = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
