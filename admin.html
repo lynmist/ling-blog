@@ -505,7 +505,7 @@ function buildPostHTML(d) {
   </footer>
 </div>
 <script id="md-src" type="text/plain">${d.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}<\/script>
-<script src="../css/post.js"><\/script>
+<script src="../js/post.js"><\/script>
 </body>
 </html>`;
 }
@@ -571,7 +571,7 @@ function bindEvents() {
     let html = buildPostHTML(d);
     // blob:// pages can't resolve relative ../css/*.css — swap to the live site's absolute URL for preview only
     html = html.replace(`../css/${d.theme}.css`, `${SITE_ORIGIN}/css/${d.theme}.css`)
-                .replace('../css/post.js', `${SITE_ORIGIN}/css/post.js`)
+                .replace('../js/post.js', `${SITE_ORIGIN}/js/post.js`)
                 .replace('../js/theme.js', `${SITE_ORIGIN}/js/theme.js`)
                 .replace('href="../favicon.ico"', `href="${SITE_ORIGIN}/favicon.ico"`)
                 .replace(/href="\.\.\/index\.html"/g, `href="${SITE_ORIGIN}/index.html"`)
