@@ -258,6 +258,8 @@ body { font-family: 'Noto Sans SC','Inter',sans-serif; background: var(--bg); co
 <script>
 const STORE_KEY = 'ling_v3_articles';
 const STORE_IDX = 'ling_v3_published';
+// live site origin, used only to make blob:// preview pages resolve relative assets
+const SITE_ORIGIN = 'https://yling2719.top';
 
 // ── helpers ──
 function slugify(str) {
@@ -271,6 +273,15 @@ function slugify(str) {
 function today() {
   const d = new Date();
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// escape a value before interpolating it into HTML markup
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 // ── storage ──
@@ -301,11 +312,21 @@ function renderList() {
   el.innerHTML = drafts.map(a => `
     <div class="article-item ${a.id===currentId?'active':''}" data-id="${a.id}">
       <div>
-        <div class="ai-title">${a.title || '无标题'}</div>
-        <div class="ai-meta"><span class="ai-tag">${a.tag||'随笔'}</span>${a.date||''}</div>
+        <div class="ai-title">${escapeHtml(a.title) || '无标题'}</div>
+        <div class="ai-meta"><span class="ai-tag">${escapeHtml(a.tag)||'随笔'}</span><span class="ai-date">${escapeHtml(a.date)}</span></div>
       </div>
       <button class="ai-del" data-del="${a.id}">×</button>
     </div>`).join('');
+}
+
+// update only the active item's visible meta, without rebuilding the whole list
+function syncListItem() {
+  const item = document.querySelector(`.article-item[data-id="${currentId}"]`);
+  const a = drafts.find(x => x.id===currentId);
+  if (!item || !a) { renderList(); return; }
+  item.querySelector('.ai-title').textContent = a.title || '无标题';
+  item.querySelector('.ai-tag').textContent = a.tag || '随笔';
+  item.querySelector('.ai-date').textContent = a.date || '';
 }
 
 function loadDraft(id) {
@@ -359,7 +380,7 @@ function autoSave() {
     body:     document.getElementById('md-editor').value,
   };
   saveDrafts(drafts);
-  renderList();
+  syncListItem();
 }
 
 // ── slug ──
@@ -429,17 +450,25 @@ function getData() {
 }
 
 function buildPostHTML(d) {
+  // escape every field interpolated into the markup; body is escaped separately at the md-src tag below
+  const title = escapeHtml(d.title);
+  const tag = escapeHtml(d.tag);
+  const date = escapeHtml(d.date);
+  const lead = escapeHtml(d.lead);
+  const cover = escapeHtml(d.cover);
+  const coverCap = escapeHtml(d.coverCap);
+  const theme = escapeHtml(d.theme);
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="../favicon.ico" type="image/x-icon">
 <script src="../js/theme.js"></script>
-<title>${d.title} — ling</title>
+<title>${title} — ling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link href="../css/${d.theme}.css" rel="stylesheet">
+<link href="../css/${theme}.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"><\/script>
 </head>
 <body>
@@ -449,7 +478,7 @@ function buildPostHTML(d) {
   <button class="theme-switch" type="button" onclick="toggleTheme()" aria-label="切换主题">
     <span class="switch-track">
       <span class="switch-thumb">
-        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         <svg class="auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/></svg>
         <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </span>
@@ -460,13 +489,13 @@ function buildPostHTML(d) {
   <header class="article-header">
     <p class="ah-eyebrow">Writing</p>
     <div class="ah-meta">
-      <span class="ah-tag">${d.tag}</span>
-      <span class="ah-date">${d.date}</span>
+      <span class="ah-tag">${tag}</span>
+      <span class="ah-date">${date}</span>
     </div>
-    <h1 class="ah-title">${d.title}</h1>
-    ${d.lead ? `<p class="ah-lead">${d.lead}</p>` : ''}
+    <h1 class="ah-title">${title}</h1>
+    ${d.lead ? `<p class="ah-lead">${lead}</p>` : ''}
   </header>
-  ${d.cover ? `<div class="cover-wrap"><div class="cover-box"><img src="${d.cover}" alt="cover"></div>${d.coverCap ? `<p class="cover-cap">${d.coverCap}</p>` : ''}</div>` : ''}
+  ${d.cover ? `<div class="cover-wrap"><div class="cover-box"><img src="${cover}" alt="cover"></div>${d.coverCap ? `<p class="cover-cap">${coverCap}</p>` : ''}</div>` : ''}
   <article class="article-body">
     <div class="md-body" id="md-output"></div>
   </article>
@@ -541,12 +570,12 @@ function bindEvents() {
     const d = getData();
     let html = buildPostHTML(d);
     // blob:// pages can't resolve relative ../css/*.css — swap to the live site's absolute URL for preview only
-    html = html.replace(`../css/${d.theme}.css`, `https://yling2719.top/css/${d.theme}.css`)
-                .replace('../css/post.js', 'https://yling2719.top/css/post.js')
-                .replace('../js/theme.js', 'https://yling2719.top/js/theme.js')
-                .replace('href="../favicon.ico"', 'href="https://yling2719.top/favicon.ico"')
-                .replace(/href="\.\.\/index\.html"/g, 'href="https://yling2719.top/index.html"')
-                .replace(/href="\.\.\/writing\.html"/g, 'href="https://yling2719.top/writing.html"');
+    html = html.replace(`../css/${d.theme}.css`, `${SITE_ORIGIN}/css/${d.theme}.css`)
+                .replace('../css/post.js', `${SITE_ORIGIN}/css/post.js`)
+                .replace('../js/theme.js', `${SITE_ORIGIN}/js/theme.js`)
+                .replace('href="../favicon.ico"', `href="${SITE_ORIGIN}/favicon.ico"`)
+                .replace(/href="\.\.\/index\.html"/g, `href="${SITE_ORIGIN}/index.html"`)
+                .replace(/href="\.\.\/writing\.html"/g, `href="${SITE_ORIGIN}/writing.html"`);
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     window.open(URL.createObjectURL(blob), '_blank');
   });
