@@ -80,7 +80,10 @@ main { position: relative; z-index: 2; }
   width: 100%; height: 100%;
   display: block;
   background: #000;
+  cursor: grab;
+  touch-action: pan-y;
 }
+#bh.drag { cursor: grabbing; }
 #nogl {
   position: absolute; inset: 0; z-index: 5;
   display: none;
@@ -586,7 +589,7 @@ footer .dot { color: var(--amber); }
       <p class="hero-tag">General Relativity · Realtime Raytracing</p>
       <h1 class="hero-title">K<em>3</em></h1>
       <p class="hero-name">视界<span>EVENT HORIZON</span></p>
-      <p class="hero-sub">把 K3 的规模交给引力来解释：上方不是贴图，而是每像素 260 步的测地线积分——光线在 Schwarzschild 时空中真实弯曲，盘内缘物质以 0.5c 绕转，引力红移与多普勒集束一并计入。</p>
+      <p class="hero-sub">把 K3 的规模交给引力来解释：上方不是贴图，而是每像素 260 步的测地线积分——光线在 Schwarzschild 时空中真实弯曲，盘内缘物质以 0.5c 绕转，引力红移与多普勒集束一并计入。拖动画面，可以绕着它转。</p>
     </div>
 
     <div class="hero-vertical">史瓦西度规 · 1916</div>
@@ -605,7 +608,7 @@ footer .dot { color: var(--amber); }
           <button data-q="1">精细</button>
         </div>
       </div>
-      <p class="ctl-note">260 steps / pixel · Schwarzschild metric, M = 1 · drag nothing, it's already moving</p>
+      <p class="ctl-note">260 steps / pixel · bloom + film grain · drag to orbit</p>
     </div>
 
     <div class="telemetry">
@@ -829,12 +832,13 @@ precision highp float;
 uniform vec2 uRes;
 uniform float uTime;
 uniform float uIncl;
+uniform float uAz;
+uniform float uDist;
 
 #define STEPS 260
 #define DANG 0.02
 #define ROUT 13.0
-#define ESC 60.0
-#define DIST 26.0
+#define ESC 80.0
 
 float hash13(vec3 p) {
   p = fract(p * 0.1031);
@@ -978,14 +982,72 @@ vec3 trace(vec3 cam, vec3 dir) {
 void main() {
   vec2 uv = (gl_FragCoord.xy * 2.0 - uRes) / uRes.y;
   float inc = radians(uIncl);
-  vec3 cam = vec3(0.0, DIST * cos(inc), -DIST * sin(inc));
+  vec3 cam = vec3(uDist * sin(inc) * sin(uAz), uDist * cos(inc), -uDist * sin(inc) * cos(uAz));
   vec3 fwd = normalize(-cam);
   vec3 rgt = normalize(cross(vec3(0.0, 1.0, 0.0), fwd));
   vec3 upv = cross(rgt, fwd);
   vec3 dir = normalize(uv.x * rgt + uv.y * upv + 2.4 * fwd);
   vec3 col = trace(cam, dir);
-  col = 1.0 - exp(-col * 1.2);
-  col = pow(col, vec3(0.4545));
+  gl_FragColor = vec4(col * 0.55, 1.0);
+}
+`;
+
+/* bloom bright-pass */
+const BRIGHT = `
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2 uRes;
+void main() {
+  vec2 uv = gl_FragCoord.xy / uRes;
+  vec3 c = texture2D(uTex, uv).rgb;
+  float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  gl_FragColor = vec4(c * smoothstep(0.30, 0.60, lum), 1.0);
+}
+`;
+
+/* separable gaussian blur */
+const BLUR = `
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2 uRes;
+uniform vec2 uDir;
+void main() {
+  vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 px = uDir / uRes;
+  vec3 c = texture2D(uTex, uv).rgb * 0.2270270270;
+  c += texture2D(uTex, uv + px * 1.3846153846).rgb * 0.3162162162;
+  c += texture2D(uTex, uv - px * 1.3846153846).rgb * 0.3162162162;
+  c += texture2D(uTex, uv + px * 3.2307692308).rgb * 0.0702702703;
+  c += texture2D(uTex, uv - px * 3.2307692308).rgb * 0.0702702703;
+  gl_FragColor = vec4(c, 1.0);
+}
+`;
+
+/* film composite: bloom + tonemap + chromatic aberration + grain */
+const COMP = `
+precision highp float;
+uniform sampler2D uTex;
+uniform sampler2D uBloom;
+uniform vec2 uRes;
+uniform float uTime;
+float hash13(vec3 p) {
+  p = fract(p * 0.1031);
+  p += dot(p, p.zyx + 31.32);
+  return fract((p.x + p.y) * p.z);
+}
+void main() {
+  vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 cuv = uv * 2.0 - 1.0;
+  vec2 off = cuv * (0.0035 * dot(cuv, cuv));
+  vec3 col;
+  col.r = texture2D(uTex, uv + off).r;
+  col.g = texture2D(uTex, uv).g;
+  col.b = texture2D(uTex, uv - off).b;
+  col += texture2D(uBloom, uv).rgb * 1.1;
+  col *= 1.82;
+  col = 1.0 - exp(-col * 1.25);
+  col += (hash13(vec3(gl_FragCoord.xy, mod(uTime, 10.0))) - 0.5) * 0.012;
+  col = pow(max(col, 0.0), vec3(0.4545));
   gl_FragColor = vec4(col, 1.0);
 }
 `;
@@ -1005,77 +1067,115 @@ void main() {
   }
 
   const vs = compile(gl.VERTEX_SHADER, VERT);
-  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return;
+  if (!vs) return;
 
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-    fallback.textContent = 'Program 链接失败 / LINK ERROR: ' + gl.getProgramInfoLog(prog);
-    fallback.style.display = 'flex';
-    return;
+  function program(fragSrc, uniforms) {
+    const fs = compile(gl.FRAGMENT_SHADER, fragSrc);
+    if (!fs) return null;
+    const p = gl.createProgram();
+    gl.attachShader(p, vs);
+    gl.attachShader(p, fs);
+    gl.bindAttribLocation(p, 0, 'aPos');
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      fallback.textContent = 'Program 链接失败 / LINK ERROR: ' + gl.getProgramInfoLog(p);
+      fallback.style.display = 'flex';
+      return null;
+    }
+    const u = {};
+    uniforms.forEach(n => { u[n] = gl.getUniformLocation(p, n); });
+    return { p, u };
   }
-  gl.useProgram(prog);
 
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  const sceneP = program(FRAG, ['uRes', 'uTime', 'uIncl', 'uAz', 'uDist']);
+  const brightP = program(BRIGHT, ['uRes', 'uTex']);
+  const blurP = program(BLUR, ['uRes', 'uTex', 'uDir']);
+  const compP = program(COMP, ['uRes', 'uTex', 'uBloom', 'uTime']);
+  if (!sceneP || !brightP || !blurP || !compP) return;
+
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, 'aPos');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-  const uRes = gl.getUniformLocation(prog, 'uRes');
-  const uTime = gl.getUniformLocation(prog, 'uTime');
-  const uIncl = gl.getUniformLocation(prog, 'uIncl');
+  function target(w, h) {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return { fb, tex, w, h };
+  }
+
+  function freeTarget(t) {
+    if (!t) return;
+    gl.deleteTexture(t.tex);
+    gl.deleteFramebuffer(t.fb);
+  }
 
   let scale = 0.7;
-  let incl = 78;
-  let visible = true;
+  let targets = null;
 
   function resize() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     if (!w || !h) return;
-    canvas.width = Math.max(2, Math.round(w * scale));
-    canvas.height = Math.max(2, Math.round(h * scale));
+    const W = Math.max(2, Math.round(w * scale));
+    const H = Math.max(2, Math.round(h * scale));
+    if (targets && W === canvas.width && H === canvas.height) return;
+    canvas.width = W;
+    canvas.height = H;
+    if (targets) {
+      freeTarget(targets.scene); freeTarget(targets.a); freeTarget(targets.b);
+    }
+    const hw = Math.max(1, W >> 1);
+    const hh = Math.max(1, H >> 1);
+    targets = { scene: target(W, H), a: target(hw, hh), b: target(hw, hh) };
   }
   addEventListener('resize', resize);
   resize();
 
+  let visible = true;
   new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(canvas);
 
-  const fpsEl = document.getElementById('fps');
-  let frames = 0;
-  let lastFps = performance.now();
-  const t0 = performance.now();
-
-  function loop(now) {
-    requestAnimationFrame(loop);
-    if (!visible) return;
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniform2f(uRes, canvas.width, canvas.height);
-    gl.uniform1f(uTime, (now - t0) / 1000);
-    gl.uniform1f(uIncl, incl);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    frames++;
-    if (now - lastFps >= 1000) {
-      fpsEl.textContent = frames + ' FPS';
-      frames = 0;
-      lastFps = now;
-    }
+  function bindTex(unit, tex, loc) {
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.uniform1i(loc, unit);
   }
-  requestAnimationFrame(loop);
 
-  /* controls */
+  function drawQuad(tgt) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, tgt ? tgt.fb : null);
+    gl.viewport(0, 0, tgt ? tgt.w : canvas.width, tgt ? tgt.h : canvas.height);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /* camera + controls */
   const inclSlider = document.getElementById('incl');
   const inclVal = document.getElementById('inclVal');
   const inclRead = document.getElementById('inclRead');
+  const fpsEl = document.getElementById('fps');
+
+  let incl = 78;
+  let azUser = 0;
+  let lastTouch = -1e9;
+
+  function syncIncl() {
+    inclVal.textContent = Math.round(incl) + '°';
+    inclRead.textContent = Math.round(incl) + '°';
+    inclSlider.value = incl;
+  }
   inclSlider.addEventListener('input', () => {
     incl = parseFloat(inclSlider.value);
-    inclVal.textContent = incl + '°';
-    inclRead.textContent = incl + '°';
+    lastTouch = performance.now();
+    syncIncl();
   });
   document.querySelectorAll('.seg button').forEach(b => {
     b.addEventListener('click', () => {
@@ -1085,6 +1185,88 @@ void main() {
       resize();
     });
   });
+
+  /* drag to orbit (desktop) */
+  if (matchMedia('(pointer:fine)').matches) {
+    let drag = false, px = 0, py = 0;
+    canvas.addEventListener('pointerdown', e => {
+      drag = true; px = e.clientX; py = e.clientY;
+      canvas.classList.add('drag');
+      canvas.setPointerCapture(e.pointerId);
+      lastTouch = performance.now();
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      azUser += (e.clientX - px) * 0.005;
+      incl = Math.min(88, Math.max(22, incl + (e.clientY - py) * 0.15));
+      px = e.clientX; py = e.clientY;
+      lastTouch = performance.now();
+      syncIncl();
+    });
+    const end = () => { drag = false; canvas.classList.remove('drag'); };
+    canvas.addEventListener('pointerup', end);
+    canvas.addEventListener('pointercancel', end);
+  }
+
+  let frames = 0;
+  let lastFps = performance.now();
+  let prev = performance.now();
+  const t0 = prev;
+
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (!visible || !targets) { prev = now; return; }
+    const dt = Math.min((now - prev) / 1000, 0.1);
+    prev = now;
+    const t = (now - t0) / 1000;
+
+    /* cinematic intro: dive from 70M to 26M */
+    const k = Math.min(t / 4.5, 1);
+    const e = 1 - Math.pow(1 - k, 3);
+    const distNow = 70 + (26 - 70) * e;
+    if (k >= 1 && now - lastTouch > 4000) azUser += dt * 0.02;
+    const azNow = -0.9 * (1 - e) + azUser;
+    const inclNow = 84 + (incl - 84) * e;
+
+    gl.useProgram(sceneP.p);
+    gl.uniform2f(sceneP.u.uRes, canvas.width, canvas.height);
+    gl.uniform1f(sceneP.u.uTime, t);
+    gl.uniform1f(sceneP.u.uIncl, inclNow);
+    gl.uniform1f(sceneP.u.uAz, azNow);
+    gl.uniform1f(sceneP.u.uDist, distNow);
+    drawQuad(targets.scene);
+
+    gl.useProgram(brightP.p);
+    gl.uniform2f(brightP.u.uRes, targets.a.w, targets.a.h);
+    bindTex(0, targets.scene.tex, brightP.u.uTex);
+    drawQuad(targets.a);
+
+    gl.useProgram(blurP.p);
+    gl.uniform2f(blurP.u.uRes, targets.a.w, targets.a.h);
+    for (let i = 0; i < 2; i++) {
+      gl.uniform2f(blurP.u.uDir, 1, 0);
+      bindTex(0, targets.a.tex, blurP.u.uTex);
+      drawQuad(targets.b);
+      gl.uniform2f(blurP.u.uDir, 0, 1);
+      bindTex(0, targets.b.tex, blurP.u.uTex);
+      drawQuad(targets.a);
+    }
+
+    gl.useProgram(compP.p);
+    gl.uniform2f(compP.u.uRes, canvas.width, canvas.height);
+    gl.uniform1f(compP.u.uTime, t);
+    bindTex(0, targets.scene.tex, compP.u.uTex);
+    bindTex(1, targets.a.tex, compP.u.uBloom);
+    drawQuad(null);
+
+    frames++;
+    if (now - lastFps >= 1000) {
+      fpsEl.textContent = frames + ' FPS';
+      frames = 0;
+      lastFps = now;
+    }
+  }
+  requestAnimationFrame(loop);
 })();
 
 /* reveal */
