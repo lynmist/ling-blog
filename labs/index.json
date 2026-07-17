@@ -6,33 +6,40 @@
     "icon": "AI"
   },
   {
-    "name": "Kimi K3 · 暗面来信",
-    "desc": "一封从月球背面发来的电文：月之暗面旗舰模型 K3。",
-    "path": "labs/k3/index.html",
-    "icon": "K3"
-  },
-  {
-    "name": "K3 · 瑞士海报",
-    "desc": "同一份事实，换一种视觉语言：国际主义排版练习。",
-    "path": "labs/k3-2/index.html",
-    "icon": "三"
-  },
-  {
-    "name": "K3 · 間",
-    "desc": "日式侘寂：圆相一笔，大巧若拙的 K3 静物写生。",
-    "path": "labs/k3-3/index.html",
-    "icon": "◯"
-  },
-  {
-    "name": "K3 · 蓝图",
-    "desc": "一张 K3 的工程图纸：架构、尺寸、象限与修订记录。",
-    "path": "labs/k3-4/index.html",
-    "icon": "图"
-  },
-  {
-    "name": "K3 · 交互场",
-    "desc": "可玩的一版：粒子拼字、磁吸按钮、追光卡片与上下文滑杆。",
-    "path": "labs/k3-5/index.html",
-    "icon": "✦"
+    "name": "Kimi K3",
+    "desc": "同一模型的五种视觉表达，点开选一个看。",
+    "icon": "K3",
+    "children": [
+      {
+        "name": "K3 · 暗面来信",
+        "desc": "一封从月球背面发来的电文：月之暗面旗舰模型 K3。",
+        "path": "labs/k3/index.html",
+        "icon": "K3"
+      },
+      {
+        "name": "K3 · 瑞士海报",
+        "desc": "同一份事实，换一种视觉语言：国际主义排版练习。",
+        "path": "labs/k3-2/index.html",
+        "icon": "三"
+      },
+      {
+        "name": "K3 · 間",
+        "desc": "日式侘寂：圆相一笔，大巧若拙的 K3 静物写生。",
+        "path": "labs/k3-3/index.html",
+        "icon": "◯"
+      },
+      {
+        "name": "K3 · 蓝图",
+        "desc": "一张 K3 的工程图纸：架构、尺寸、象限与修订记录。",
+        "path": "labs/k3-4/index.html",
+        "icon": "图"
+      },
+      {
+        "name": "K3 · 交互场",
+        "desc": "可玩的一版：粒子拼字、磁吸按钮、追光卡片与上下文滑杆。",
+        "path": "labs/k3-5/index.html",
+        "icon": "✦"
+      }
+    ]
   }
 ]

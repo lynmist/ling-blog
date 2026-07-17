@@ -34,6 +34,44 @@
 }
 .lab-name { font-size: 15px; font-weight: 500; color: var(--ink); }
 .lab-desc { font-size: 12px; color: var(--ink2); line-height: 1.6; }
+.lab-count { font-size: 10px; letter-spacing: 0.14em; color: var(--ink4); margin-top: 2px; }
+button.lab-card { font: inherit; text-align: left; cursor: pointer; width: 100%; }
+
+/* ── group modal ── */
+.lab-modal-bg {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(28,43,56,0.45);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.lab-modal-bg.open { display: flex; }
+.lab-modal {
+  width: 440px; max-width: 100%;
+  max-height: 80vh; overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  padding: 1.4rem;
+}
+.lab-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.lab-modal-title { font-size: 13px; font-weight: 500; letter-spacing: 0.1em; color: var(--ink); }
+.lab-modal-close { background: none; border: none; font-size: 14px; color: var(--ink3); cursor: pointer; padding: 4px; line-height: 1; }
+.lab-modal-close:hover { color: var(--ink); }
+.lab-modal-item {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.9rem 1rem; margin-bottom: 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none; color: inherit;
+  transition: background .15s, border-color .15s;
+}
+.lab-modal-item:last-child { margin-bottom: 0; }
+.lab-modal-item:hover { background: var(--blue-ll); border-color: var(--blue-l); }
+.lab-modal-item .lab-icon { width: 34px; height: 34px; border-radius: 9px; font-size: 14px; flex-shrink: 0; }
+.lab-modal-item .lab-name { font-size: 14px; }
+.lab-modal-item .lab-desc { font-size: 11px; }
 footer { margin-top: 6rem; }
 @media (max-width: 600px) {
   .labs-grid { grid-template-columns: 1fr; }
@@ -82,6 +120,17 @@ footer { margin-top: 6rem; }
   </footer>
 </div>
 
+<!-- Group picker modal -->
+<div class="lab-modal-bg" id="lab-modal">
+  <div class="lab-modal" role="dialog" aria-modal="true">
+    <div class="lab-modal-head">
+      <span class="lab-modal-title" id="lab-modal-title"></span>
+      <button class="lab-modal-close" id="lab-modal-close" aria-label="关闭">✕</button>
+    </div>
+    <div id="lab-modal-list"></div>
+  </div>
+</div>
+
 <script>
 fetch('labs/index.json')
   .then(r => r.json())
@@ -91,15 +140,57 @@ fetch('labs/index.json')
       grid.innerHTML = '<div class="empty"><p>还没有实验项目</p></div>';
       return;
     }
-    grid.innerHTML = labs.map(l => `
+
+    // an entry with a `children` array renders as a group button; everything else is a plain link card
+    grid.innerHTML = labs.map((l, i) => {
+      if (l.children && l.children.length) {
+        return `
+      <button type="button" class="lab-card" data-group="${i}">
+        <div class="lab-icon">${l.icon || '◆'}</div>
+        <div class="lab-text">
+          <div class="lab-name">${l.name || '未命名'}</div>
+          <div class="lab-desc">${l.desc || ''}</div>
+          <div class="lab-count">${l.children.length} 个页面 →</div>
+        </div>
+      </button>`;
+      }
+      return `
       <a href="${l.path || '#'}" class="lab-card">
         <div class="lab-icon">${l.icon || '◆'}</div>
         <div class="lab-text">
           <div class="lab-name">${l.name || '未命名'}</div>
           <div class="lab-desc">${l.desc || ''}</div>
         </div>
-      </a>
-    `).join('');
+      </a>`;
+    }).join('');
+
+    // group card click -> open picker modal
+    const modal = document.getElementById('lab-modal');
+    grid.addEventListener('click', e => {
+      const btn = e.target.closest('[data-group]');
+      if (!btn) return;
+      const group = labs[+btn.dataset.group];
+      document.getElementById('lab-modal-title').textContent = group.name || '';
+      document.getElementById('lab-modal-list').innerHTML = group.children.map(c => `
+        <a href="${c.path || '#'}" class="lab-modal-item">
+          <div class="lab-icon">${c.icon || '◆'}</div>
+          <div class="lab-text">
+            <div class="lab-name">${c.name || '未命名'}</div>
+            <div class="lab-desc">${c.desc || ''}</div>
+          </div>
+        </a>
+      `).join('');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('lab-modal-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
   })
   .catch(() => {
     document.getElementById('labs-grid').innerHTML = '<div class="empty"><p>暂时无法加载实验列表</p></div>';
