@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0709;
+  --bg: #070408;
   --ink: #efe6ea;
   --dim: #8d7f88;
   --faint: #554a52;
@@ -27,79 +27,17 @@ body {
 }
 ::selection { background: rgba(200,60,90,.35); }
 
-/* 颗粒 */
-body::after {
-  content: '';
-  position: fixed; inset: 0; z-index: 30; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: .05; mix-blend-mode: overlay;
+#gl {
+  position: fixed; inset: 0; z-index: 1;
+  width: 100vw; height: 100vh; display: block;
+  cursor: grab;
 }
-
-/* 舞台光晕 */
-#halo {
-  position: fixed; z-index: 0; pointer-events: none;
-  width: 120vmax; height: 120vmax;
-  left: 50%; top: 46%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle,
-    rgba(122,28,52,.34) 0%,
-    rgba(70,16,34,.18) 26%,
-    rgba(24,8,16,.08) 46%,
-    transparent 62%);
-  transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+#gl.dragging { cursor: grabbing; }
+#gl-fallback {
+  position: fixed; inset: 0; z-index: 2; display: none;
+  align-items: center; justify-content: center;
+  color: var(--dim); font-size: 14px; letter-spacing: .2em;
 }
-#vignette {
-  position: fixed; inset: 0; z-index: 20; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 46%, transparent 52%, rgba(0,0,0,.62) 100%);
-}
-
-#scene {
-  position: fixed; inset: 0; z-index: 2;
-  display: flex; align-items: center; justify-content: center;
-  perspective: 1100px;
-}
-#rose {
-  width: min(88vh, 92vw); height: auto;
-  overflow: visible;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-#sway {
-  transform-origin: 0px 190px;
-  animation: sway 11s ease-in-out infinite;
-}
-@keyframes sway {
-  0%, 100% { transform: rotate(-1.1deg); }
-  50% { transform: rotate(1.3deg); }
-}
-#breathe {
-  transform-origin: 0px -40px;
-  animation: breathe 7s ease-in-out infinite;
-}
-@keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.012); }
-}
-
-/* 花瓣绽放 */
-.petal-g {
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: 50% 96%;
-  transform: scale(.2) rotate(var(--tw, 0deg));
-  transition: opacity 1.4s ease, transform 2.2s cubic-bezier(.16,.7,.18,1);
-}
-.in .petal-g { opacity: 1; transform: none; }
-.leaf-g {
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: 0% 60%;
-  transform: scale(.15, .1);
-  transition: opacity 1.2s ease, transform 1.8s cubic-bezier(.16,.7,.18,1);
-}
-.in .leaf-g { opacity: 1; transform: none; }
-.dew { opacity: 0; transition: opacity 1.6s ease; }
-.in .dew { opacity: 1; }
 
 /* 文案层 */
 .caption {
@@ -122,7 +60,7 @@ body::after {
   font-size: 15px; letter-spacing: .16em; color: #b0627a;
 }
 .caption p {
-  margin-top: 20px; max-width: 300px;
+  margin-top: 20px; max-width: 320px;
   font-size: 12px; line-height: 2.2; letter-spacing: .14em; color: var(--dim);
 }
 .spec {
@@ -149,277 +87,319 @@ body::after {
 </head>
 <body>
 
-<div id="halo"></div>
-<div id="scene">
-  <svg id="rose" viewBox="-260 -300 520 560" role="img" aria-label="一朵写实风格的玫瑰花">
-    <g id="sway"><g id="breathe"><g id="tilt">
-      <g id="plant"></g>
-    </g></g></g>
-  </svg>
-</div>
-<div id="vignette"></div>
+<canvas id="gl"></canvas>
+<div id="gl-fallback">此设备不支持 WebGL,无法实时渲染这朵花。</div>
 
 <div class="caption">
   <div class="no">SPECIMEN 08 — ROSA</div>
   <h1>一&thinsp;蕊</h1>
-  <div class="sci">Rosa rugosa, in full bloom</div>
-  <p>六十四枚花瓣沿黄金角旋生,自外向内次第收拢;每一片都有杯状卷边、脉络与背光。全页无一张图片,皆为矢量手写。</p>
+  <div class="sci">Rosa rugosa, raymarched in real time</div>
+  <p>这朵花不存在于任何图片里:它是一组数学曲面,由你显卡里的每个像素,以光线行进的方式,一帧一帧求交、投影、透光而成。</p>
 </div>
 
 <div class="spec">
-  <div><b>花瓣</b> 六十四枚 · 七重旋生</div>
-  <div><b>叶</b> 羽状复叶 · 锯齿缘</div>
-  <div><b>光</b> 左上 · 单光源</div>
-  <div><b>绘制</b> SVG · 零位图</div>
+  <div><b>渲染</b> 逐像素光线行进 · SDF</div>
+  <div><b>花瓣</b> 六重旋生 · 杯状曲面</div>
+  <div><b>光照</b> 软阴影 · 次表面透光</div>
+  <div><b>素材</b> 零 SVG · 零位图</div>
 </div>
 
-<div class="hint">移动鼠标 · 转动这朵花</div>
+<div class="hint">拖拽 · 绕这朵花转一圈</div>
 
 <script>
-const SVGNS = 'http://www.w3.org/2000/svg';
-const rand = (a, b) => a + Math.random() * (b - a);
-let uid = 0;
-const plant = document.getElementById('plant');
-
-function el(tag, attrs, parent) {
-  const n = document.createElementNS(SVGNS, tag);
-  for (const k in attrs) n.setAttribute(k, attrs[k]);
-  if (parent) parent.appendChild(n);
-  return n;
-}
-const defs = el('defs', {}, plant);
-
-function rgrad(stops) {
-  const g = el('radialGradient', { id: 'rg' + (++uid), cx: .5, cy: .92, r: 1.05 }, defs);
-  stops.forEach(([o, c, op]) => {
-    const s = { offset: o, 'stop-color': c };
-    if (op !== undefined) s['stop-opacity'] = op;
-    el('stop', s, g);
-  });
-  return 'url(#rg' + uid + ')';
-}
-function lgrad(stops, x1 = 0, y1 = 1, x2 = 0, y2 = 0) {
-  const g = el('linearGradient', { id: 'lg' + (++uid), x1, y1, x2, y2 }, defs);
-  stops.forEach(([o, c, op]) => {
-    const s = { offset: o, 'stop-color': c };
-    if (op !== undefined) s['stop-opacity'] = op;
-    el('stop', s, g);
-  });
-  return 'url(#lg' + uid + ')';
+/* ═══════════ 一蕊:WebGL 光线行进单朵玫瑰 ═══════════ */
+const canvas = document.getElementById('gl');
+const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+if (!gl) {
+  document.getElementById('gl-fallback').style.display = 'flex';
+  throw new Error('WebGL unavailable');
 }
 
-/* ── 有机边缘:用湍流轻微置换花瓣轮廓 ── */
-const warp = el('filter', { id: 'warp', x: '-8%', y: '-8%', width: '116%', height: '116%' }, defs);
-el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.028 0.05', numOctaves: 2, seed: 7, result: 'n' }, warp);
-el('feDisplacementMap', { in: 'SourceGraphic', in2: 'n', scale: 7, xChannelSelector: 'R', yChannelSelector: 'G' }, warp);
+const VERT = `
+attribute vec2 aPos;
+void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }
+`;
 
-/* 花瓣丝绒质感 */
-const velvet = el('filter', { id: 'velvet', x: '-5%', y: '-5%', width: '110%', height: '110%' }, defs);
-el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.55', numOctaves: 2, seed: 3, result: 't' }, velvet);
-const vcm = el('feColorMatrix', { in: 't', type: 'matrix', values: '0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.5 0 0 0 0', result: 'a' }, velvet);
-el('feComposite', { in: 'a', in2: 'SourceAlpha', operator: 'in', result: 'grain' }, velvet);
-el('feBlend', { in: 'SourceGraphic', in2: 'grain', mode: 'multiply' }, velvet);
+const FRAG = `
+precision highp float;
 
-/* ── 杯状花瓣路径:基部在原点,向上张开,顶缘外翻 ── */
-function cupPetal(w, h, curl) {
-  const lip = h * curl;               // 卷边深度
-  return {
-    body: `M0,0
-      C ${-w * .98},${-h * .12} ${-w * 1.06},${-h * .68} ${-w * .58},${-h * .93}
-      C ${-w * .3},${-h * 1.05} ${w * .3},${-h * 1.05} ${w * .58},${-h * .93}
-      C ${w * 1.06},${-h * .68} ${w * .98},${-h * .12} 0,0 Z`,
-    lip: `M ${-w * .58},${-h * .93}
-      C ${-w * .3},${-h * 1.05} ${w * .3},${-h * 1.05} ${w * .58},${-h * .93}
-      C ${w * .34},${-h * .93 + lip} ${-w * .34},${-h * .93 + lip} ${-w * .58},${-h * .93} Z`
-  };
-}
+uniform vec2  uRes;
+uniform float uTime;
+uniform float uBloom;   // 0 → 1 绽放
+uniform vec2  uRot;     // yaw, pitch
 
-/* 花瓣上的放射细脉 */
-function veins(g, w, h, color, n) {
-  for (let i = 0; i < n; i++) {
-    const f = (i / (n - 1) - .5) * 2;         // -1..1
-    el('path', {
-      d: `M0,${-h * .04} Q ${f * w * .5},${-h * .48} ${f * w * .46},${-h * .9}`,
-      fill: 'none', stroke: color, 'stroke-width': .55, opacity: .3
-    }, g);
+#define FAR 6.0
+#define STEPS 120
+
+mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+/* 命中材质:花瓣局部坐标 (u 沿瓣长, v 沿瓣宽), ring 序号 */
+float gU, gV, gRing, gEdge;
+
+/* ── 花朵 SDF:六重花瓣环 + 花心 ── */
+float map(vec3 p){
+  float d = 1e9;
+  float bs = 0.35 + 0.65 * uBloom;               // 整体随绽放展开
+  float r  = length(p.xz);
+  float ay = atan(p.z, p.x);
+
+  /* 花心:带螺旋纹的小球 */
+  {
+    vec3 bp = p - vec3(0.0, 0.16 * bs, 0.0);
+    float bud = length(bp * vec3(1.0, 0.85, 1.0)) - 0.115 * bs;
+    bud += 0.012 * bs * sin(ay * 14.0 + p.y * 42.0) * uBloom;
+    if (bud < d){ d = bud; gU = 0.0; gV = ay; gRing = 9.0; gEdge = 0.0; }
   }
-}
 
-/* ── 玫瑰调色:深酒红 → 丝绒红 → 粉光 ── */
-const SKIN = [
-  ['#3d0a18', '#6e1226', '#a02040', '#d4546f'],   // 外瓣:最深
-  ['#4a0c1c', '#821630', '#b02850', '#e0607c'],
-  ['#580f22', '#961b3c', '#c2345e', '#ec7090'],
-  ['#661228', '#ac2247', '#d44568', '#f583a0'],
-  ['#74162e', '#c02952', '#e05276', '#ff96ae'],
-  ['#821a34', '#d4305c', '#ec6184', '#ffa9bc'],
-  ['#901e3a', '#e03864', '#f87092', '#ffbfca']    // 内瓣:最亮
-];
-const petalFill = {};
-function skinFill(tone) {
-  if (!petalFill[tone]) {
-    const [deep, base, mid, edge] = SKIN[tone];
-    petalFill[tone] = rgrad([[0, deep], [.38, base], [.72, mid], [1, edge]]);
-  }
-  return petalFill[tone];
-}
-function lipFill(tone) {
-  const key = 'lip' + tone;
-  if (!petalFill[key]) {
-    const edge = SKIN[tone][3];
-    petalFill[key] = lgrad([[0, edge], [1, '#ffe4ea']], 0, 1, 0, 0);
-  }
-  return petalFill[key];
-}
+  /* 花瓣环:外 → 内 */
+  for (int k = 0; k < 6; k++){
+    float fk = float(k);
+    float t  = fk / 5.0;                          // 0 外 → 1 内
+    float count = 9.0 - fk;                       // 9..4 瓣
+    float sector = 6.2831853 / count;
+    float phase = fk * 2.4 + 0.6;
 
-/* ═════ 花头:黄金角旋生,外大内小、外开内合 ═════ */
-const HEAD = { x: 0, y: -104 };
-const GOLDEN = 137.508;
-const petals = [];
-const LAYERS = 7;
-const COUNTS = [11, 10, 10, 9, 8, 8, 8];         // 共 64 瓣
-let pIndex = 0;
+    float ringR = mix(0.60, 0.10, t) * bs;
+    float len   = mix(0.78, 0.46, t) * bs;
+    float wid   = mix(0.34, 0.20, t) * bs;
+    float curl  = mix(1.9, 3.1, t);               // 内瓣更向上合抱
+    float open  = mix(1.05, 0.04, t) * uBloom;    // 外瓣向外翻
+    float baseY = -0.075 * (1.0 - t) * bs;
 
-for (let L = 0; L < LAYERS; L++) {
-  const t = L / (LAYERS - 1);                     // 0 外 → 1 内
-  const n = COUNTS[L];
-  const baseR = 96 * (1 - t * 0.82);              // 距花心半径
-  const w = 62 * (1 - t * 0.52);                  // 瓣宽
-  const h = 74 * (1 - t * 0.42);                  // 瓣长
-  const curl = 0.16 + t * 0.1;                    // 越靠内卷得越紧
-  for (let i = 0; i < n; i++) {
-    const a = (pIndex * GOLDEN + rand(-3, 3)) % 360;
-    pIndex++;
-    petals.push({ L, t, a, r: baseR * rand(.96, 1.04), w: w * rand(.94, 1.06), h: h * rand(.94, 1.06), curl });
-  }
-}
+    /* 折叠进本环的扇区 */
+    float a = mod(ay + phase, sector) - sector * 0.5;
+    float u = r - ringR;
+    float v = a * r;
+    float w = p.y - baseY;
 
-/* 外瓣先画(在底层),内瓣后画(压在上面) */
-const headG = el('g', { transform: `translate(${HEAD.x},${HEAD.y}) scale(1,.9)` }, plant);
-petals.forEach((p, i) => {
-  const g = el('g', {
-    class: 'petal-g',
-    transform: `rotate(${p.a}) translate(0,${-p.r}) scale(1,${0.72 + p.t * 0.5})`,
-    style: `--tw:${rand(-7, 7)}deg; transition-delay:${150 + p.L * 190 + i % 7 * 40}ms; filter:drop-shadow(0 ${3 - p.t * 2}px ${5 - p.t * 2.5}px rgba(20,2,8,${.5 - p.t * .18}))`
-  }, headG);
-  const { body, lip } = cupPetal(p.w, p.h, p.curl);
-  const tone = Math.min(6, Math.round(p.t * 6.4));
-  const bp = el('path', { d: body, fill: skinFill(tone), filter: 'url(#velvet)' }, g);
-  bp.setAttribute('stroke', 'rgba(30,4,12,.4)');
-  bp.setAttribute('stroke-width', .5);
-  /* 背光薄边:外瓣边缘一圈粉光 */
-  if (p.t < .5) {
-    el('path', {
-      d: body, fill: 'none',
-      stroke: `rgba(255,190,205,${.34 - p.t * .3})`,
-      'stroke-width': 1.4, filter: 'url(#warp)'
-    }, g);
-  }
-  veins(g, p.w, p.h, '#2c0610', 5);
-  veins(g, p.w * .8, p.h * .92, '#ffccd6', 3);
-  /* 外翻的瓣尖 */
-  el('path', { d: lip, fill: lipFill(tone), opacity: .95 }, g);
-});
+    float un = clamp(u / len, 0.0, 1.0);
+    /* 中线剖面:先升后外翻;叠加细微波纹 */
+    float prof = curl * u * u - open * pow(un, 2.6) * len * 0.9;
+    prof += 0.014 * sin(v * 34.0 + u * 9.0 + fk) * bs;
+    /* 杯状横截面:瓣缘上卷 */
+    float cupK = (1.3 - t * 0.5) / max(len, 0.05);
+    prof += cupK * v * v * 0.55;
+    /* 半宽:基部窄、瓣端宽,边缘波皱 */
+    float hw = wid * pow(un, 0.5) * (1.0 + 0.09 * sin(u * 26.0 + fk * 3.0));
+    hw = min(hw, sector * r * 0.49);
 
-/* 花心螺旋:玫瑰标志性的涡 */
-const heart = el('g', { class: 'petal-g', style: 'transition-delay:1500ms', transform: 'translate(0,-6)' }, headG);
-el('path', {
-  d: `M0,-2
-      C 8,-10 20,-8 22,2 C 24,14 12,24 -2,22 C -18,20 -26,6 -22,-8
-      C -17,-24 2,-30 16,-22 C 30,-14 32,6 22,18`,
-  fill: 'none', stroke: '#2e0712', 'stroke-width': 3.2, 'stroke-linecap': 'round'
-}, heart);
-el('path', {
-  d: `M0,-2
-      C 8,-10 20,-8 22,2 C 24,14 12,24 -2,22 C -18,20 -26,6 -22,-8
-      C -17,-24 2,-30 16,-22 C 30,-14 32,6 22,18`,
-  fill: 'none', stroke: '#8e1836', 'stroke-width': 1.4, 'stroke-linecap': 'round',
-  transform: 'translate(1.5,1.5)'
-}, heart);
-el('ellipse', { cx: 0, cy: 0, rx: 7, ry: 5.4, fill: '#3d0a18' }, heart);
-el('ellipse', { cx: -1.4, cy: -1.4, rx: 3.2, ry: 2.4, fill: '#6e1226' }, heart);
+    float surf = w - prof;
+    float pd = abs(surf) - 0.011 * bs;
+    pd = max(pd, -u);
+    pd = max(pd, u - len);
+    pd = max(pd, abs(v) - hw);
 
-/* ═════ 茎、刺、羽状复叶 ═════ */
-const stemG = el('g', {}, plant);
-const stemFill = lgrad([[0, '#223a1e'], [.5, '#33512a'], [1, '#1a2c16']], 0, 0, 1, 0);
-/* 主茎:花头下方弯入画面底部 */
-el('path', {
-  d: 'M-2,-58 C -14,20 16,110 4,236 L -8,236 C 2,110 -26,22 -13,-60 Z',
-  fill: stemFill
-}, stemG);
-el('path', { d: 'M-8,-56 C -18,18 8,110 -2,232', fill: 'none', stroke: '#4a7038', 'stroke-width': 1.6, opacity: .8 }, stemG);
-/* 皮刺 */
-for (const [sx, sy, dir] of [[-14, 30, -1], [6, 92, 1], [-10, 168, -1]]) {
-  el('path', {
-    d: `M${sx},${sy} q ${dir * 12},-3 ${dir * 16},-12 q ${dir * -2},10 ${dir * -13},14 Z`,
-    fill: '#5a3a2a', stroke: '#2e1c12', 'stroke-width': .5
-  }, stemG);
-}
-
-/* 一片复叶:叶轴 + 5 枚锯齿小叶 */
-function compoundLeaf(attrs, mirror) {
-  const g = el('g', { class: 'leaf-g', ...attrs }, stemG);
-  const m = mirror ? -1 : 1;
-  const axis = el('path', { d: `M0,0 Q ${m * 46},-8 ${m * 96},6`, fill: 'none', stroke: '#33512a', 'stroke-width': 2.4 }, g);
-  const leaflet = (x, y, s, rot) => {
-    const lg = el('g', { transform: `translate(${m * x},${y}) rotate(${m * rot}) scale(${m * s},${s})` }, g);
-    /* 锯齿轮廓:上下缘各一串小弧 */
-    let d = 'M0,0 ';
-    const L = 34, W = 13, teeth = 7;
-    for (let i = 1; i <= teeth; i++) d += `Q ${L * (i - .5) / teeth},${-W * 1.25} ${L * i / teeth},${-W * .55} `;
-    for (let i = teeth; i >= 1; i--) d += `Q ${L * (i - .5) / teeth},${W * .5} ${L * (i - 1) / teeth},${W * .12} `;
-    d += 'Z';
-    el('path', {
-      d, fill: lgrad([[0, '#2c4a22'], [.55, '#3f6330'], [1, '#243d1c']], 0, 0, 1, 1),
-      stroke: '#182a12', 'stroke-width': .6, filter: 'url(#warp)'
-    }, lg);
-    el('path', { d: `M1,-1 L ${L - 1},${-W * .3}`, stroke: '#5d8a44', 'stroke-width': .9, fill: 'none', opacity: .9 }, lg);
-    for (let v = 1; v <= 4; v++) {
-      const vx = L * v / 5;
-      el('path', { d: `M${vx},${-W * .16 - v} q 4,-3 8,-4`, stroke: '#527c3c', 'stroke-width': .5, fill: 'none', opacity: .7 }, lg);
+    if (pd < d){
+      d = pd; gU = un; gV = v / max(wid, 1e-3); gRing = fk;
+      gEdge = max(abs(v) / max(hw, 1e-3), un);    // 接近瓣缘程度
     }
-  };
-  leaflet(18, -6, .8, -38);
-  leaflet(20, 2, .75, 26);
-  leaflet(48, -8, .95, -30);
-  leaflet(52, 4, .9, 22);
-  leaflet(88, 2, 1.05, -4);
-  return g;
+  }
+  return d * 0.85;                                 // 曲面欠估计,让步进稳定
 }
-compoundLeaf({ transform: 'translate(-12,96)', style: 'transition-delay:500ms' }, true);
-compoundLeaf({ transform: 'translate(6,150) scale(.85)', style: 'transition-delay:700ms; transform-origin:100% 60%' }, false);
 
-/* ═════ 露珠 ═════ */
-function dew(cx, cy, r, delay) {
-  const g = el('g', { class: 'dew', style: `transition-delay:${delay}ms` }, headG);
-  el('ellipse', { cx, cy: cy + r * .3, rx: r * 1.05, ry: r * .8, fill: 'rgba(16,2,6,.5)' }, g);
-  el('circle', { cx, cy, r, fill: rgrad([[0, 'rgba(255,235,240,.16)'], [.7, 'rgba(210,120,140,.1)'], [1, 'rgba(90,16,34,.34)']]) }, g);
-  el('ellipse', { cx: cx - r * .34, cy: cy - r * .4, rx: r * .3, ry: r * .18, fill: 'rgba(255,250,252,.9)', transform: `rotate(-24 ${cx - r * .34} ${cy - r * .4})` }, g);
-  el('circle', { cx: cx + r * .3, cy: cy + r * .36, r: r * .12, fill: 'rgba(255,220,228,.5)' }, g);
+vec3 calcNormal(vec3 p){
+  vec2 e = vec2(0.0016, -0.0016);
+  return normalize(
+    e.xyy * map(p + e.xyy) + e.yyx * map(p + e.yyx) +
+    e.yxy * map(p + e.yxy) + e.xxx * map(p + e.xxx));
 }
-dew(-72, 6, 6.5, 2100);
-dew(58, 42, 4.6, 2350);
-dew(-26, 74, 3.6, 2600);
 
-/* ═════ 装配:绽放 + 鼠标三维转动 ═════ */
-const svg = document.getElementById('rose');
-requestAnimationFrame(() => requestAnimationFrame(() => svg.classList.add('in')));
+float softShadow(vec3 ro, vec3 rd){
+  float res = 1.0, t = 0.02;
+  for (int i = 0; i < 26; i++){
+    float h = map(ro + rd * t);
+    res = min(res, 9.0 * h / t);
+    t += clamp(h, 0.015, 0.14);
+    if (res < 0.02 || t > 2.6) break;
+  }
+  return clamp(res, 0.0, 1.0);
+}
 
-const tilt = document.getElementById('tilt');
-const halo = document.getElementById('halo');
-let tx = 0, ty = 0, cx = 0, cy = 0;
-addEventListener('mousemove', e => {
-  tx = (e.clientX / innerWidth - .5) * 2;
-  ty = (e.clientY / innerHeight - .5) * 2;
+vec3 palette(float ring, float u){
+  /* 外深内浅的玫瑰色谱 */
+  vec3 deep  = vec3(0.235, 0.020, 0.065);
+  vec3 base  = vec3(0.545, 0.055, 0.175);
+  vec3 light = vec3(0.965, 0.415, 0.520);
+  vec3 c = mix(base, deep,  clamp(ring / 5.0, 0.0, 1.0) * 0.85);
+  c = mix(c, light, u * u * 0.55);
+  return c;
+}
+
+vec3 render(vec3 ro, vec3 rd, vec2 q){
+  /* 背景:暗色径向渐变 + 焦外光斑 */
+  vec3 bg = mix(vec3(0.030, 0.016, 0.028), vec3(0.105, 0.045, 0.075),
+                exp(-dot(q, q) * 1.1));
+  for (int i = 0; i < 9; i++){
+    float fi = float(i);
+    vec2 bp = vec2(hash(vec2(fi, 1.7)), hash(vec2(2.3, fi))) * 2.6 - 1.3;
+    float bd = length(q - bp);
+    float br = 0.10 + 0.22 * hash(vec2(fi, fi));
+    float glow = 1.0 - smoothstep(br * 0.25, br, bd);
+    bg += glow * 0.028 * mix(vec3(0.9, 0.35, 0.5), vec3(0.45, 0.4, 0.8), hash(vec2(fi, 9.1)));
+  }
+
+  /* 光线行进 */
+  float t = 0.0;
+  float hit = -1.0;
+  for (int i = 0; i < STEPS; i++){
+    vec3 p = ro + rd * t;
+    float h = map(p);
+    if (h < 0.0016 * max(t, 1.0)){ hit = t; break; }
+    t += h;
+    if (t > FAR) break;
+  }
+
+  vec3 col = bg;
+  if (hit > 0.0){
+    vec3 p = ro + rd * hit;
+    vec3 n = calcNormal(p);
+    if (n.y < -0.6) n = -n;                       // 薄瓣背面翻正
+
+    vec3 lig = normalize(vec3(0.55, 0.75, 0.45)); // 暖色主光
+    vec3 hal = normalize(lig - rd);
+
+    vec3 albedo;
+    if (gRing > 8.5){
+      albedo = vec3(0.30, 0.03, 0.10);            // 花心
+      albedo *= 0.8 + 0.2 * sin(gV * 14.0);
+    } else {
+      albedo = palette(gRing, gU);
+      /* 细脉:沿瓣长的暗纹 */
+      float vein = smoothstep(0.92, 1.0, abs(sin(gV * 26.0))) * 0.16;
+      albedo *= 1.0 - vein;
+      /* 瓣缘透光薄边 */
+      albedo = mix(albedo, vec3(1.0, 0.62, 0.68), smoothstep(0.86, 1.0, gEdge) * 0.5);
+    }
+
+    float sha = softShadow(p + n * 0.01, lig);
+    float dif = clamp(dot(n, lig), 0.0, 1.0);
+    float amb = 0.5 + 0.5 * n.y;
+    float bac = clamp(dot(n, normalize(vec3(-0.5, 0.15, -0.55))), 0.0, 1.0);
+    float fre = pow(1.0 - clamp(dot(n, -rd), 0.0, 1.0), 4.0);
+    float spe = pow(clamp(dot(n, hal), 0.0, 1.0), 42.0);
+    /* 次表面透光:逆光时花瓣发亮 */
+    float sss = pow(clamp(1.0 + dot(rd, lig), 0.0, 1.0), 3.0);
+
+    col  = albedo * (0.16 + 0.34 * amb) * vec3(0.55, 0.5, 0.72);
+    col += albedo * dif * sha * vec3(1.25, 1.05, 0.95) * 1.35;
+    col += albedo * bac * vec3(0.5, 0.22, 0.3) * 0.5;
+    col += albedo * sss * vec3(1.1, 0.45, 0.45) * 0.85;
+    col += fre * vec3(0.9, 0.5, 0.6) * 0.22;
+    col += spe * sha * vec3(1.0, 0.8, 0.85) * 0.35;
+
+    /* 远处隐入背景 */
+    col = mix(col, bg, smoothstep(3.2, FAR, hit));
+  }
+
+  /* 辉光感 + 暗角 + 颗粒 + 伽马 */
+  col = pow(col, vec3(0.92));
+  col *= 1.0 - 0.42 * dot(q * 0.72, q * 0.72);
+  col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.028;
+  return pow(max(col, 0.0), vec3(0.4545));
+}
+
+void main(){
+  vec2 uv = (gl_FragCoord.xy * 2.0 - uRes) / uRes.y;
+
+  /* 轨道相机 */
+  float yaw = uRot.x + uTime * 0.07;
+  float pitch = clamp(uRot.y, -0.15, 1.1);
+  vec3 ro = vec3(0.0, 0.55, 2.35);
+  ro.yz *= rot(-pitch + 0.42);
+  ro.xz *= rot(yaw);
+  vec3 ta = vec3(0.0, 0.10, 0.0);
+
+  vec3 fw = normalize(ta - ro);
+  vec3 ri = normalize(cross(fw, vec3(0.0, 1.0, 0.0)));
+  vec3 up = cross(ri, fw);
+  vec3 rd = normalize(fw * 1.55 + ri * uv.x + up * uv.y);
+
+  gl_FragColor = vec4(render(ro, rd, uv), 1.0);
+}
+`;
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(s));
+    throw new Error('shader compile failed');
+  }
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+  console.error(gl.getProgramInfoLog(prog));
+  throw new Error('program link failed');
+}
+gl.useProgram(prog);
+
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+const aPos = gl.getAttribLocation(prog, 'aPos');
+gl.enableVertexAttribArray(aPos);
+gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+const uRes = gl.getUniformLocation(prog, 'uRes');
+const uTime = gl.getUniformLocation(prog, 'uTime');
+const uBloom = gl.getUniformLocation(prog, 'uBloom');
+const uRot = gl.getUniformLocation(prog, 'uRot');
+
+/* 高清:按设备像素比渲染,上限 2x 保帧率 */
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  canvas.width = Math.round(innerWidth * dpr);
+  canvas.height = Math.round(innerHeight * dpr);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resize();
+addEventListener('resize', resize);
+
+/* 拖拽环绕 */
+let yaw = 0, pitch = 0.35, dragging = false, px = 0, py = 0, idle = 0;
+canvas.addEventListener('pointerdown', e => {
+  dragging = true; px = e.clientX; py = e.clientY;
+  canvas.classList.add('dragging');
+  canvas.setPointerCapture(e.pointerId);
 });
-(function loop() {
-  cx += (tx - cx) * .045;
-  cy += (ty - cy) * .045;
-  tilt.setAttribute('transform',
-    `translate(${cx * 14},${cy * 8}) rotate(${cx * 4}) scale(${1 + cy * .015})`);
-  halo.style.transform = `translate(calc(-50% + ${cx * 4}vmax), calc(-50% + ${cy * 3}vmax))`;
-  requestAnimationFrame(loop);
-})();
+canvas.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  yaw -= (e.clientX - px) * 0.005;
+  pitch = Math.min(1.1, Math.max(-0.15, pitch + (e.clientY - py) * 0.004));
+  px = e.clientX; py = e.clientY; idle = 0;
+});
+addEventListener('pointerup', () => {
+  dragging = false;
+  canvas.classList.remove('dragging');
+});
+
+/* 绽放动画:加载后 5 秒 ease-out 开到满 */
+const start = performance.now();
+const easeOut = t => 1 - Math.pow(1 - t, 4);
+
+let last = start;
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.1);
+  last = now;
+  idle += dt;
+  /* 静置时缓慢自转(叠加在 shader 的慢转之上) */
+  if (!dragging && idle > 2.5) yaw += dt * 0.05;
+
+  const bloomT = Math.min((now - start) / 5000, 1);
+  gl.uniform2f(uRes, canvas.width, canvas.height);
+  gl.uniform1f(uTime, now / 1000);
+  gl.uniform1f(uBloom, easeOut(bloomT));
+  gl.uniform2f(uRot, yaw, pitch);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>
