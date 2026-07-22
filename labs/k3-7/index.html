@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>花谱 · Flora — 夜间植物园</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #0c0a12;
+  --night-2: #141020;
+  --ink: #e9e4f2;
+  --dim: #8f88a3;
+  --faint: #57506b;
+  --line: rgba(233,228,242,.1);
+  --serif: 'Noto Serif SC', serif;
+  --latin: 'Cormorant Garamond', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(214,140,180,.3); }
+
+/* 胶片颗粒 */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: .05;
+  mix-blend-mode: overlay;
+}
+
+#drift {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+}
+
+/* ── 导航 ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 5vw;
+  background: linear-gradient(to bottom, rgba(12,10,18,.85), transparent);
+  font-size: 13px; letter-spacing: .18em;
+}
+nav .brand { font-family: var(--latin); font-size: 15px; letter-spacing: .32em; }
+nav .links a {
+  color: var(--dim); text-decoration: none; margin-left: 28px;
+  transition: color .3s;
+}
+nav .links a:hover { color: var(--ink); }
+
+/* ── 卷首 ── */
+header {
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 0 6vw;
+}
+header .kicker {
+  font-size: 12px; letter-spacing: .6em; color: var(--dim);
+  text-indent: .6em; margin-bottom: 26px;
+}
+header h1 {
+  font-size: clamp(56px, 11vw, 132px);
+  font-weight: 200; letter-spacing: .18em; text-indent: .18em;
+  line-height: 1.1;
+  background: linear-gradient(120deg, #f3d9e5 0%, #d68cb4 30%, #8f7bd8 62%, #6fb7c9 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+header .latin {
+  font-family: var(--latin); font-style: italic;
+  font-size: clamp(15px, 2vw, 20px); color: var(--dim);
+  letter-spacing: .3em; margin-top: 22px;
+}
+header p.intro {
+  max-width: 560px; margin-top: 34px;
+  font-size: 14px; line-height: 2.3; color: var(--dim);
+  letter-spacing: .12em;
+}
+.scroll-hint {
+  position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  color: var(--faint); font-size: 11px; letter-spacing: .4em; text-indent: .4em;
+}
+.scroll-hint .stem {
+  width: 1px; height: 54px; overflow: hidden; position: relative;
+  background: rgba(233,228,242,.12);
+}
+.scroll-hint .stem::after {
+  content: ''; position: absolute; left: 0; top: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(to bottom, transparent, #d68cb4);
+  animation: drip 2.2s ease-in-out infinite;
+}
+@keyframes drip { 0% { top: -100%; } 60%, 100% { top: 100%; } }
+
+/* ── 花之卷 ── */
+main { position: relative; z-index: 2; }
+.bloom-row {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 4vw;
+  padding: 12vh 7vw;
+  border-top: 1px solid var(--line);
+}
+.bloom-row:nth-child(even) { direction: rtl; }
+.bloom-row:nth-child(even) > * { direction: ltr; }
+
+.stage {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 52vh;
+}
+.stage svg {
+  width: min(46vw, 560px); height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 42px var(--glow, rgba(214,140,180,.22)));
+  animation: sway 9s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.4deg); }
+  50% { transform: rotate(1.6deg); }
+}
+
+/* 花瓣绽放 */
+.petal, .floret, .seed, .stamen, .leaf-g, .bud-g {
+  opacity: 0;
+  transform-box: fill-box;
+  transition: opacity 1.1s ease, transform 1.5s cubic-bezier(.2,.7,.2,1);
+}
+.petal { transform-origin: 0% 100%; transform: scale(.15) rotate(var(--twist, 0deg)); }
+.floret, .seed, .stamen { transform-origin: center; transform: scale(0); }
+.leaf-g { transform-origin: 0% 50%; transform: scale(.2, .05); }
+.bud-g { transform-origin: 50% 100%; transform: scale(.3); }
+.in .petal, .in .floret, .in .seed, .in .stamen, .in .leaf-g, .in .bud-g {
+  opacity: 1; transform: none;
+}
+
+/* 说明牌 */
+.plate { max-width: 420px; }
+.plate .no {
+  font-family: var(--latin); font-style: italic;
+  font-size: 14px; color: var(--faint); letter-spacing: .3em;
+}
+.plate h2 {
+  font-size: clamp(30px, 3.6vw, 44px); font-weight: 200;
+  letter-spacing: .3em; margin: 18px 0 6px;
+}
+.plate .sci {
+  font-family: var(--latin); font-style: italic;
+  font-size: 16px; color: var(--accent, #d68cb4); letter-spacing: .12em;
+}
+.plate .rule {
+  width: 56px; height: 1px; margin: 26px 0;
+  background: linear-gradient(to right, var(--accent, #d68cb4), transparent);
+}
+.plate p {
+  font-size: 14px; line-height: 2.4; color: var(--dim); letter-spacing: .1em;
+}
+.plate .meta {
+  display: flex; gap: 34px; margin-top: 30px;
+  font-size: 11px; letter-spacing: .22em; color: var(--faint);
+}
+.plate .meta b {
+  display: block; font-weight: 400; color: var(--dim);
+  margin-bottom: 6px; font-size: 12px;
+}
+
+/* 末页 */
+footer {
+  position: relative; z-index: 2;
+  border-top: 1px solid var(--line);
+  padding: 14vh 7vw 10vh;
+  text-align: center;
+}
+footer .fin {
+  font-family: var(--latin); font-style: italic;
+  font-size: clamp(22px, 3vw, 32px); color: var(--dim); letter-spacing: .2em;
+}
+footer .small {
+  margin-top: 26px; font-size: 11px; letter-spacing: .35em;
+  color: var(--faint); text-indent: .35em;
+}
+
+@media (max-width: 860px) {
+  .bloom-row { grid-template-columns: 1fr; gap: 6vh; padding: 14vh 8vw; }
+  .stage svg { width: min(80vw, 420px); }
+  .plate { max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="drift"></canvas>
+
+<nav>
+  <div class="brand">FLORA</div>
+  <div class="links">
+    <a href="#camellia">山茶</a>
+    <a href="#lotus">莲</a>
+    <a href="#poppy">虞美人</a>
+    <a href="#hydrangea">紫阳花</a>
+    <a href="#dandelion">蒲公英</a>
+  </div>
+</nav>
+
+<header>
+  <div class="kicker">夜间植物园 · NOCTURNAL CONSERVATORY</div>
+  <h1>花&thinsp;谱</h1>
+  <div class="latin">Flora Nocturna — five studies in bloom</div>
+  <p class="intro">
+    五株花,在夜里依次开放。<br>
+    每一片花瓣都由代码手绘:脉络、渐变与光,皆为矢量之笔。<br>
+    请慢慢向下走,看它们一一苏醒。
+  </p>
+  <div class="scroll-hint"><span>向下</span><span class="stem"></span></div>
+</header>
+
+<main>
+
+  <!-- 一 · 山茶 -->
+  <section class="bloom-row" id="camellia" style="--accent:#e0607e; --glow:rgba(224,96,126,.22)">
+    <div class="stage"><svg viewBox="-160 -160 320 320" data-flower="camellia" role="img" aria-label="山茶花"></svg></div>
+    <div class="plate">
+      <div class="no">PLATE I.</div>
+      <h2>山 茶</h2>
+      <div class="sci">Camellia japonica</div>
+      <div class="rule"></div>
+      <p>瓣瓣相叠,如缎如瓷。山茶不开则已,一开便是满盏的郑重——五重花瓣自外向内收拢,中心一点金黄,是冬天写给春天的信。</p>
+      <div class="meta">
+        <div><b>花期</b>十月至翌年四月</div>
+        <div><b>花瓣</b>五重 · 四十一瓣</div>
+        <div><b>花语</b>理想的爱</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 二 · 莲 -->
+  <section class="bloom-row" id="lotus" style="--accent:#f0a8c0; --glow:rgba(240,168,192,.2)">
+    <div class="stage"><svg viewBox="-160 -160 320 320" data-flower="lotus" role="img" aria-label="莲花"></svg></div>
+    <div class="plate">
+      <div class="no">PLATE II.</div>
+      <h2>莲</h2>
+      <div class="sci">Nelumbo nucifera</div>
+      <div class="rule"></div>
+      <p>出水的第一寸,粉意便淡了一分。莲瓣尖上一点胭脂,向下渐渐褪成月白,层层叠叠托着莲蓬——开到最后,把自己开成了一盏灯。</p>
+      <div class="meta">
+        <div><b>花期</b>六月至九月</div>
+        <div><b>花瓣</b>三重 · 尖瓣十二枚</div>
+        <div><b>花语</b>清净</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 三 · 虞美人 -->
+  <section class="bloom-row" id="poppy" style="--accent:#e8543f; --glow:rgba(232,84,63,.22)">
+    <div class="stage"><svg viewBox="-160 -160 320 320" data-flower="poppy" role="img" aria-label="虞美人"></svg></div>
+    <div class="plate">
+      <div class="no">PLATE III.</div>
+      <h2>虞美人</h2>
+      <div class="sci">Papaver rhoeas</div>
+      <div class="rule"></div>
+      <p>花瓣薄得像揉皱的绢,风一过就轻轻发抖。四片朱红围着一团浓得化不开的墨,雄蕊如细细的金粉——艳而不俗,是田野里最烈的一笔。</p>
+      <div class="meta">
+        <div><b>花期</b>四月至六月</div>
+        <div><b>花瓣</b>四枚 · 绢质皱瓣</div>
+        <div><b>花语</b>慰籍与怀念</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 四 · 紫阳花 -->
+  <section class="bloom-row" id="hydrangea" style="--accent:#8f7bd8; --glow:rgba(143,123,216,.22)">
+    <div class="stage"><svg viewBox="-160 -160 320 320" data-flower="hydrangea" role="img" aria-label="紫阳花"></svg></div>
+    <div class="plate">
+      <div class="no">PLATE IV.</div>
+      <h2>紫阳花</h2>
+      <div class="sci">Hydrangea macrophylla</div>
+      <div class="rule"></div>
+      <p>不是一朵,是一百朵的集合。四瓣小花攒成球,蓝紫粉青在一株上同时成立——雨水的酸碱替它调色,梅雨季替它落款。</p>
+      <div class="meta">
+        <div><b>花期</b>六月至七月</div>
+        <div><b>花序</b>伞房状 · 廿四朵</div>
+        <div><b>花语</b>变幻的心</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 五 · 蒲公英 -->
+  <section class="bloom-row" id="dandelion" style="--accent:#bcd8e8; --glow:rgba(188,216,232,.2)">
+    <div class="stage"><svg viewBox="-160 -160 320 320" data-flower="dandelion" role="img" aria-label="蒲公英"></svg></div>
+    <div class="plate">
+      <div class="no">PLATE V.</div>
+      <h2>蒲公英</h2>
+      <div class="sci">Taraxacum mongolicum</div>
+      <div class="rule"></div>
+      <p>花开过之后,才轮到它最好看。两百枚小伞列成浑圆,每一根绒丝都朝着光——你吹一口气,它就把整个夏天分给了风。</p>
+      <div class="meta">
+        <div><b>果期</b>五月至六月</div>
+        <div><b>冠毛</b>放射 · 二百一十枚</div>
+        <div><b>花语</b>无法停留的爱</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fin">— et nocte, flores —</div>
+  <div class="small">花谱 · 五帧矢量写生 · 全篇无一张图片</div>
+</footer>
+
+<script>
+/* ═══════════ 矢量花房:全部花朵由 JS 生成 SVG ═══════════ */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const rand = (a, b) => a + Math.random() * (b - a);
+let uid = 0;
+
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+
+/* 线性/径向渐变 */
+function gradient(defs, stops, radial) {
+  const g = el(radial ? 'radialGradient' : 'linearGradient', { id: 'g' + (++uid) }, defs);
+  if (!radial) { g.setAttribute('x1', 0); g.setAttribute('y1', 1); g.setAttribute('x2', 0); g.setAttribute('y2', 0); }
+  stops.forEach(([off, color, op]) => {
+    const s = { offset: off, 'stop-color': color };
+    if (op !== undefined) s['stop-opacity'] = op;
+    el('stop', s, g);
+  });
+  return 'url(#g' + uid + ')';
+}
+
+/* 花瓣路径:基部在原点,向 -y 伸展 */
+function petalPath(len, wid, tipRound) {
+  const t = tipRound ? len * 0.98 : len;
+  return `M0,0 C ${wid},${-len * 0.28} ${wid * 1.02},${-len * 0.72} 0,${-t}
+          C ${-wid * 1.02},${-len * 0.72} ${-wid},${-len * 0.28} 0,0 Z`;
+}
+
+/* 花瓣上的细脉络 */
+function petalVeins(group, len, wid, color, count) {
+  for (let i = 0; i < count; i++) {
+    const f = (i / (count - 1) - 0.5) * 1.5;
+    el('path', {
+      d: `M0,${-len * 0.08} Q ${f * wid},${-len * 0.55} ${f * wid * 0.5},${-len * 0.9}`,
+      fill: 'none', stroke: color, 'stroke-width': 0.5, opacity: 0.28
+    }, group);
+  }
+}
+
+/* 一朵分层花:layers = [{n, len, wid, fill, rot, round, veins, delay}] */
+function buildLayered(svg, layers, centerFn) {
+  const defs = el('defs', {}, svg);
+  let d = 0;
+  layers.forEach((L, li) => {
+    const layerG = el('g', {}, svg);
+    for (let i = 0; i < L.n; i++) {
+      const angle = (360 / L.n) * i + (L.rot || 0) + rand(-2.5, 2.5);
+      const g = el('g', { transform: `rotate(${angle})` }, layerG);
+      const p = el('path', {
+        d: petalPath(L.len * rand(0.96, 1.04), L.wid, L.round),
+        fill: L.fill(defs),
+        class: 'petal',
+        style: `transition-delay:${d}ms`
+      }, g);
+      if (L.stroke) { p.setAttribute('stroke', L.stroke); p.setAttribute('stroke-width', 0.6); }
+      if (L.veins) petalVeins(g, L.len, L.wid, L.veins, 3);
+      d += 26;
+    }
+  });
+  if (centerFn) centerFn(svg, defs, d);
+}
+
+/* 花蕊:一圈细丝 + 顶端药粉 */
+function buildStamens(svg, defs, { n, r, len, filColor, anthColor, anthR, delay }) {
+  const g = el('g', {}, svg);
+  for (let i = 0; i < n; i++) {
+    const a = (Math.PI * 2 / n) * i + rand(-0.1, 0.1);
+    const x0 = Math.cos(a) * r, y0 = Math.sin(a) * r;
+    const x1 = Math.cos(a) * (r + len * rand(0.85, 1.1)), y1 = Math.sin(a) * (r + len * rand(0.85, 1.1));
+    const sg = el('g', { class: 'stamen', style: `transition-delay:${delay + i * 14}ms` }, g);
+    el('line', { x1: x0, y1: y0, x2: x1, y2: y1, stroke: filColor, 'stroke-width': 0.8, opacity: 0.9 }, sg);
+    el('circle', { cx: x1, cy: y1, r: anthR * rand(0.85, 1.15), fill: anthColor }, sg);
+  }
+}
+
+/* ═════ 一 · 山茶:五重圆瓣,深红 ═════ */
+function camellia(svg) {
+  const defsCache = {};
+  const fillFor = (dark, light) => (defs) => {
+    const key = dark + light;
+    if (!defsCache[key]) defsCache[key] = gradient(defs, [[0, dark], [0.55, light], [1, dark]], true);
+    return defsCache[key];
+  };
+  buildLayered(svg, [
+    { n: 8, len: 128, wid: 62, round: true, fill: fillFor('#7e1f36', '#c9405f'), veins: '#f0a0b0' },
+    { n: 8, len: 106, wid: 56, round: true, rot: 22, fill: fillFor('#99294a', '#e0607e'), veins: '#ffc0cc' },
+    { n: 7, len: 82, wid: 46, round: true, rot: 10, fill: fillFor('#b8335c', '#f0789a'), veins: '#ffd0da' },
+    { n: 6, len: 58, wid: 36, round: true, rot: 30, fill: fillFor('#d14a72', '#ff9ab5') },
+    { n: 5, len: 36, wid: 24, round: true, rot: 12, fill: fillFor('#e0607e', '#ffb8c8') },
+  ], (svg, defs, d) => {
+    buildStamens(svg, defs, {
+      n: 26, r: 4, len: 16, filColor: '#f5d98a', anthColor: '#ffdf8a', anthR: 2.2, delay: d
+    });
+    el('circle', { cx: 0, cy: 0, r: 5, fill: '#f0c86a', class: 'stamen', style: `transition-delay:${d}ms` }, svg);
+  });
+}
+
+/* ═════ 二 · 莲:尖瓣,粉白渐变 ═════ */
+function lotus(svg) {
+  const fillFor = (tip, mid, base) => (defs) =>
+    gradient(defs, [[0, base], [0.62, mid], [1, tip]]);
+  buildLayered(svg, [
+    { n: 9, len: 130, wid: 40, fill: fillFor('#e86a9a', '#f7c3d4', '#fdeef3'), veins: '#e88aa8' },
+    { n: 8, len: 104, wid: 36, rot: 22, fill: fillFor('#ef7fa8', '#f9cfdd', '#fff4f7'), veins: '#eda0b8' },
+    { n: 7, len: 76, wid: 30, rot: 12, fill: fillFor('#f599b6', '#fcdce6', '#fffafa') },
+  ], (svg, defs, d) => {
+    /* 莲蓬 */
+    const podG = el('g', { class: 'bud-g', style: `transition-delay:${d}ms` }, svg);
+    el('circle', { cx: 0, cy: 0, r: 17, fill: '#d8c26a' }, podG);
+    el('circle', { cx: 0, cy: 0, r: 17, fill: gradient(defs, [[0, '#efe0a0'], [1, '#a8943f']], true) }, podG);
+    for (let i = 0; i < 7; i++) {
+      const a = Math.PI * 2 * i / 7;
+      el('circle', { cx: Math.cos(a) * 9, cy: Math.sin(a) * 9, r: 1.8, fill: '#7a6a2e' }, podG);
+    }
+    el('circle', { cx: 0, cy: 0, r: 1.8, fill: '#7a6a2e' }, podG);
+    buildStamens(svg, defs, {
+      n: 30, r: 18, len: 12, filColor: '#f2d878', anthColor: '#ffe98f', anthR: 1.6, delay: d + 100
+    });
+  });
+}
+
+/* ═════ 三 · 虞美人:四片皱瓣 + 墨心 ═════ */
+function poppy(svg) {
+  const defs = el('defs', {}, svg);
+  /* 四片大瓣,带褶皱明暗 */
+  for (let i = 0; i < 4; i++) {
+    const angle = i * 90 + rand(-8, 8);
+    const g = el('g', { transform: `rotate(${angle})` }, svg);
+    const len = 122 * rand(0.94, 1.05), wid = 74;
+    const p = el('path', {
+      d: petalPath(len, wid, true),
+      fill: gradient(defs, [[0, '#8f1a12'], [0.4, '#d63a28'], [0.8, '#f0603f'], [1, '#ff7a52']]),
+      class: 'petal',
+      style: `transition-delay:${i * 160}ms`
+    }, g);
+    p.setAttribute('stroke', '#7a140e'); p.setAttribute('stroke-width', 0.5);
+    /* 绢质褶皱:一组细放射纹 */
+    const vg = el('g', {}, g);
+    for (let v = 0; v < 7; v++) {
+      const f = (v / 6 - 0.5) * 2.2;
+      el('path', {
+        d: `M0,${-len * 0.06} Q ${f * wid * 0.6},${-len * 0.5} ${f * wid * 0.42},${-len * 0.92}`,
+        fill: 'none', stroke: v % 2 ? '#7a140e' : '#ff9a70',
+        'stroke-width': 0.7, opacity: 0.32
+      }, vg).setAttribute('class', 'petal');
+      vg.lastChild.style.transitionDelay = (i * 160 + 200) + 'ms';
+    }
+  }
+  /* 墨心 + 柱头星芒 */
+  const heartG = el('g', { class: 'bud-g', style: 'transition-delay:820ms' }, svg);
+  el('circle', { cx: 0, cy: 0, r: 22, fill: '#241a2e' }, heartG);
+  el('circle', { cx: 0, cy: 0, r: 22, fill: gradient(defs, [[0, '#4a3560'], [1, '#160f1e']], true) }, heartG);
+  for (let i = 0; i < 9; i++) {
+    const a = Math.PI * 2 * i / 9;
+    el('line', {
+      x1: Math.cos(a) * 5, y1: Math.sin(a) * 5,
+      x2: Math.cos(a) * 15, y2: Math.sin(a) * 15,
+      stroke: '#6a5580', 'stroke-width': 2.4, 'stroke-linecap': 'round'
+    }, heartG);
+  }
+  buildStamens(svg, defs, {
+    n: 34, r: 24, len: 12, filColor: '#3a2a4a', anthColor: '#d8c0f0', anthR: 1.8, delay: 900
+  });
+}
+
+/* ═════ 四 · 紫阳花:伞房花序,小四瓣花球 ═════ */
+function hydrangea(svg) {
+  const defs = el('defs', {}, svg);
+  const palette = [
+    ['#6a58c8', '#a898f0'], ['#7a6ad0', '#bcb0f5'], ['#8a6ec8', '#c8a8e8'],
+    ['#5a78c8', '#98b0ea'], ['#9a6ab8', '#d0a8e0'], ['#6880d0', '#a8c0f0']
+  ];
+  /* 叶 */
+  const leafG = el('g', { class: 'leaf-g', style: 'transition-delay:0ms' }, svg);
+  el('path', {
+    d: 'M-40,80 C -110,50 -128,-20 -70,-44 C -30,-58 -8,-30 -18,20 C -24,55 -30,70 -40,80 Z',
+    fill: gradient(defs, [[0, '#1e3a28'], [1, '#3a6a48']]),
+    opacity: 0.9
+  }, leafG);
+  const leafG2 = el('g', { class: 'leaf-g', style: 'transition-delay:120ms; transform-origin:100% 50%' }, svg);
+  el('path', {
+    d: 'M44,88 C 116,58 132,-12 74,-38 C 34,-52 12,-24 22,26 C 28,60 34,76 44,88 Z',
+    fill: gradient(defs, [[0, '#1e3a28'], [1, '#3a6a48']]),
+    opacity: 0.9
+  }, leafG2);
+  /* 小花按叶序排布成球 */
+  const R = 96, N = 24, golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {
+    const r = R * Math.sqrt((i + 0.5) / N);
+    const a = i * golden;
+    const x = Math.cos(a) * r, y = Math.sin(a) * r * 0.94 - 6;
+    const [c1, c2] = palette[i % palette.length];
+    const fg = el('g', {
+      class: 'floret',
+      transform: `translate(${x},${y}) rotate(${rand(0, 90)}) scale(${rand(0.8, 1.15)})`,
+      style: `transition-delay:${200 + i * 55}ms`
+    }, svg);
+    const size = 13 * (1 - r / R * 0.35);
+    const fill = gradient(defs, [[0, c1], [1, c2]], true);
+    for (let p = 0; p < 4; p++) {
+      const pg = el('g', { transform: `rotate(${p * 90 + 45})` }, fg);
+      el('path', { d: petalPath(size, size * 0.62, true), fill }, pg);
+    }
+    el('circle', { cx: 0, cy: 0, r: 1.6, fill: '#f0ecff' }, fg);
+  }
+}
+
+/* ═════ 五 · 蒲公英:绒球 + 两枚离散的伞 ═════ */
+function dandelion(svg) {
+  const defs = el('defs', {}, svg);
+  /* 茎 */
+  el('path', {
+    d: 'M0,150 C 6,90 -6,40 0,0', fill: 'none',
+    stroke: gradient(defs, [[0, '#2a4a34'], [1, '#4a7a54']]),
+    'stroke-width': 3, 'stroke-linecap': 'round',
+    class: 'petal', style: 'transition-delay:0ms'
+  }, svg);
+  /* 绒球:两百枚小伞 */
+  const N = 210;
+  for (let i = 0; i < N; i++) {
+    /* 斐波那契球面投影,让绒球有立体密度 */
+    const y = 1 - (i / (N - 1)) * 2;
+    const rad = Math.sqrt(1 - y * y);
+    const theta = i * 2.39996;
+    const dx = Math.cos(theta) * rad, dy = Math.sin(theta) * rad * 0.6 - y * 0.5;
+    const len = Math.hypot(dx, dy);
+    if (len < 0.06) continue;
+    const L = 66 * len * rand(0.9, 1.1);
+    const a = Math.atan2(dy, dx);
+    const x1 = Math.cos(a) * L, y1 = Math.sin(a) * L;
+    const depth = 0.35 + len * 0.6;
+    const sg = el('g', {
+      class: 'seed',
+      style: `transition-delay:${300 + (1 - y) * 900 + rand(0, 300)}ms; opacity:0`
+    }, svg);
+    el('line', { x1: 0, y1: 0, x2: x1, y2: y1, stroke: '#cfe0ea', 'stroke-width': 0.5, opacity: depth * 0.55 }, sg);
+    /* 伞尖小绒花 */
+    for (let f = -2; f <= 2; f++) {
+      const fa = a + f * 0.16;
+      el('line', {
+        x1: x1, y1: y1,
+        x2: x1 + Math.cos(fa) * 4.5, y2: y1 + Math.sin(fa) * 4.5,
+        stroke: '#e8f2f8', 'stroke-width': 0.6, opacity: depth * 0.8
+      }, sg);
+    }
+    el('circle', { cx: x1 * 0.06, cy: y1 * 0.06, r: 0.9, fill: '#c8a86a', opacity: depth }, sg);
+  }
+  el('circle', { cx: 0, cy: 0, r: 5, fill: '#b89a5a', class: 'bud-g', style: 'transition-delay:200ms' }, svg);
+  /* 两枚乘风而去的伞 */
+  for (const [fx, fy, rot, del] of [[92, -96, 24, 1800], [-104, -70, -18, 2100]]) {
+    const sg = el('g', { class: 'seed', style: `transition-delay:${del}ms` }, svg);
+    const fly = el('g', { transform: `translate(${fx},${fy}) rotate(${rot})` }, sg);
+    el('line', { x1: 0, y1: 0, x2: 0, y2: -26, stroke: '#cfe0ea', 'stroke-width': 0.6, opacity: 0.8 }, fly);
+    for (let f = -3; f <= 3; f++) {
+      const fa = -Math.PI / 2 + f * 0.2;
+      el('line', {
+        x1: 0, y1: -26, x2: Math.cos(fa) * 7, y2: -26 + Math.sin(fa) * 7,
+        stroke: '#eef6fa', 'stroke-width': 0.7, opacity: 0.9
+      }, fly);
+    }
+    el('circle', { cx: 0, cy: 1, r: 1.4, fill: '#c8a86a' }, fly);
+  }
+}
+
+/* ═════ 装配与绽放 ═════ */
+const builders = { camellia, lotus, poppy, hydrangea, dandelion };
+document.querySelectorAll('svg[data-flower]').forEach(svg => builders[svg.dataset.flower](svg));
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelector('svg').classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.35 });
+document.querySelectorAll('.bloom-row').forEach(r => io.observe(r));
+
+/* ═════ 背景:飘落的发光花瓣 ═════ */
+const cv = document.getElementById('drift');
+const ctx = cv.getContext('2d');
+let W, H, motes = [];
+const COLORS = ['214,140,180', '143,123,216', '111,183,201', '224,96,126', '188,216,232'];
+
+function resize() {
+  W = cv.width = innerWidth * devicePixelRatio;
+  H = cv.height = innerHeight * devicePixelRatio;
+  cv.style.width = innerWidth + 'px';
+  cv.style.height = innerHeight + 'px';
+}
+resize();
+addEventListener('resize', resize);
+
+function newMote(top) {
+  return {
+    x: Math.random() * W,
+    y: top ? -20 : Math.random() * H,
+    r: rand(2, 6.5) * devicePixelRatio,
+    vy: rand(0.15, 0.5) * devicePixelRatio,
+    vx: rand(-0.15, 0.15) * devicePixelRatio,
+    rot: rand(0, Math.PI * 2),
+    vr: rand(-0.008, 0.008),
+    sway: rand(0.4, 1.6),
+    phase: rand(0, Math.PI * 2),
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    alpha: rand(0.12, 0.4)
+  };
+}
+for (let i = 0; i < 42; i++) motes.push(newMote(false));
+
+let t = 0;
+function tick() {
+  t += 0.016;
+  ctx.clearRect(0, 0, W, H);
+  for (const m of motes) {
+    m.y += m.vy;
+    m.x += m.vx + Math.sin(t * m.sway + m.phase) * 0.35 * devicePixelRatio;
+    m.rot += m.vr;
+    if (m.y > H + 24) Object.assign(m, newMote(true));
+    ctx.save();
+    ctx.translate(m.x, m.y);
+    ctx.rotate(m.rot);
+    ctx.beginPath();
+    ctx.moveTo(0, -m.r);
+    ctx.bezierCurveTo(m.r * 0.9, -m.r * 0.4, m.r * 0.7, m.r * 0.7, 0, m.r);
+    ctx.bezierCurveTo(-m.r * 0.7, m.r * 0.7, -m.r * 0.9, -m.r * 0.4, 0, -m.r);
+    ctx.fillStyle = `rgba(${m.color},${m.alpha})`;
+    ctx.fill();
+    ctx.restore();
+  }
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
