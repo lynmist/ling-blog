@@ -1,9 +1,9 @@
 [
   {
-    "name": "AI 对话示例",
-    "desc": "一个极简的本地 AI 聊天界面预览。",
+    "name": "Gemini 对话",
+    "desc": "Gemini 风格的 AI 聊天界面，带流式输出的前端演示。",
     "path": "labs/ai-demo/index.html",
-    "icon": "AI"
+    "icon": "✦"
   },
   {
     "name": "AstrBot 插件",
