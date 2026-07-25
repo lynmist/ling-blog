@@ -1,7 +1,7 @@
 [
   {
-    "name": "Gemini 对话",
-    "desc": "Gemini 风格的 AI 聊天界面，带流式输出的前端演示。",
+    "name": "Hajimi 对话",
+    "desc": "Hajimi 风格的 AI 聊天界面，带流式输出的前端演示。",
     "path": "labs/ai-demo/index.html",
     "icon": "✦"
   },

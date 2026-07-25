@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gemini 风格对话 — AI 对话示例</title>
+<title>Hajimi 风格对话 — AI 对话示例</title>
 <link rel="icon" href="../../favicon.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -235,6 +235,7 @@ button { font-family: inherit; }
   animation: pop .18s cubic-bezier(.2,.8,.2,1) both;
 }
 .menu.bottom { top: auto; bottom: calc(100% + 6px); transform-origin: bottom left; }
+.menu.right { left: auto; right: 0; transform-origin: top right; }
 @keyframes pop { from { opacity: 0; transform: scale(.95) translateY(-4px); } to { opacity: 1; transform: none; } }
 .menu-item {
   display: flex; align-items: center; gap: 0.7rem; width: 100%;
@@ -287,7 +288,7 @@ button { font-family: inherit; }
 
 <aside class="sidebar hidden" id="sidebar">
   <div class="side-top">
-    <span class="brand">Gemini</span>
+    <span class="brand">Hajimi</span>
   </div>
   <button class="new-chat" id="new-chat"><span>＋</span><span>新对话</span></button>
   <div class="side-label">最近</div>
@@ -308,7 +309,7 @@ button { font-family: inherit; }
     <div style="display:flex;align-items:center;gap:0.2rem">
       <button class="icon-btn" id="menu-btn" aria-label="菜单">☰</button>
       <span class="menu-anchor">
-        <button class="model-picker" id="model-btn">Gemini <span class="ver" id="model-ver">2.5 Pro</span> ▾</button>
+        <button class="model-picker" id="model-btn">Hajimi <span class="ver" id="model-ver">2.5 Pro</span> ▾</button>
       </span>
     </div>
     <div class="topbar-right">
@@ -345,7 +346,7 @@ button { font-family: inherit; }
       <span class="menu-anchor">
         <button class="icon-btn" id="plus-btn" aria-label="添加">＋</button>
       </span>
-      <textarea id="msg" rows="1" placeholder="问问 Gemini"></textarea>
+      <textarea id="msg" rows="1" placeholder="问问 Hajimi"></textarea>
       <button class="icon-btn" id="mic-btn" aria-label="语音输入">🎙</button>
       <button class="send-btn" id="send" aria-label="发送" disabled>↑</button>
     </div>
@@ -359,7 +360,7 @@ button { font-family: inherit; }
 const SPARKLE = '<svg viewBox="0 0 24 24"><defs><linearGradient id="ggrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1c71d8"/><stop offset="55%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#d96570"/></linearGradient></defs><path fill="url(#ggrad)" d="M12 2c.6 4.8 2.4 7.4 10 10-7.6 2.6-9.4 5.2-10 10-.6-4.8-2.4-7.4-10-10 7.6-2.6 9.4-5.2 10-10z"/></svg>';
 
 const replies = [
-  '好的，这是一个示例回答。真正的 Gemini 会在这里流式输出内容，而这个页面只是前端预览，回复来自预设列表。',
+  '好的，这是一个示例回答。真正的 Hajimi 会在这里流式输出内容，而这个页面只是前端预览，回复来自预设列表。',
   '你可以把 script 里的 replies 换成真实的 API 调用，比如 fetch 你自己的后端，再逐字把返回内容渲染出来。',
   '流式输出的效果是用 setInterval 逐字追加实现的，配合右下角的光标闪烁，看起来就像在实时生成。',
   '侧边栏的「新对话」可以清空当前对话回到问候页，历史记录那几项只是装饰，点不动也没关系。'
@@ -482,9 +483,9 @@ function closeMenu() {
   document.removeEventListener('click', onDocClick);
 }
 function onDocClick(e) { if (openMenuEl && !openMenuEl.contains(e.target)) closeMenu(); }
-function openMenu(anchor, items, bottom) {
+function openMenu(anchor, items, cls) {
   const m = document.createElement('div');
-  m.className = 'menu' + (bottom ? ' bottom' : '');
+  m.className = 'menu' + (cls ? ' ' + cls : '');
   items.forEach(it => {
     const b = document.createElement('button');
     b.type = 'button';
@@ -504,11 +505,11 @@ function openMenu(anchor, items, bottom) {
   openMenuEl = m;
   setTimeout(() => document.addEventListener('click', onDocClick), 0);
 }
-function bindMenuButton(btn, anchor, itemsFn, bottom) {
+function bindMenuButton(btn, anchor, itemsFn, cls) {
   btn.addEventListener('click', e => {
     e.stopPropagation();
     if (openMenuEl) { closeMenu(); return; }
-    openMenu(anchor, itemsFn(), bottom);
+    openMenu(anchor, itemsFn(), cls);
   });
 }
 
@@ -520,9 +521,9 @@ bindMenuButton(
   document.getElementById('model-btn'),
   document.getElementById('model-btn').parentElement,
   () => models.map(v => ({
-    label: 'Gemini ' + v,
+    label: 'Hajimi ' + v,
     on: v === currentModel,
-    action: () => { currentModel = v; modelVer.textContent = v; toast('已切换到 Gemini ' + v + '（演示）'); }
+    action: () => { currentModel = v; modelVer.textContent = v; toast('已切换到 Hajimi ' + v + '（演示）'); }
   }))
 );
 
@@ -535,7 +536,7 @@ bindMenuButton(
     { icon: '📄', label: '上传文件', action: () => toast('演示页面，暂不支持上传文件') },
     { icon: '☁', label: '从云端硬盘选择', action: () => toast('演示页面，暂不支持云端硬盘') }
   ],
-  true
+  'bottom'
 );
 
 /* mic */
@@ -551,7 +552,8 @@ bindMenuButton(
   () => [
     { icon: '👤', label: 'ling（演示账号）', action: () => toast('这是演示账号') },
     { icon: '↩', label: '退出登录', action: () => toast('演示页面，无需退出') }
-  ]
+  ],
+  'right'
 );
 
 /* settings */
