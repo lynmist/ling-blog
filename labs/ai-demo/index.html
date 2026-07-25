@@ -209,6 +209,60 @@ button { font-family: inherit; }
 .send-btn:not(:disabled):active { transform: scale(0.92); }
 .disclaimer { text-align: center; font-size: 11.5px; color: var(--ink3); padding-top: 0.7rem; }
 
+/* ── motion ── */
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.hero { animation: rise .5s cubic-bezier(.2,.8,.2,1) both; }
+.greeting { animation: rise .55s cubic-bezier(.2,.8,.2,1) both; }
+.greeting .grad { background-size: 220% 100%; animation: rise .55s cubic-bezier(.2,.8,.2,1) both, gradShift 7s ease .6s infinite; }
+@keyframes gradShift { 0%, 100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+.suggest { opacity: 0; animation: rise .45s cubic-bezier(.2,.8,.2,1) forwards; }
+.suggest:nth-child(1) { animation-delay: .18s; }
+.suggest:nth-child(2) { animation-delay: .26s; }
+.suggest:nth-child(3) { animation-delay: .34s; }
+.suggest:nth-child(4) { animation-delay: .42s; }
+.msg-user, .msg-ai { animation: rise .35s cubic-bezier(.2,.8,.2,1) both; }
+.hero.leaving { animation: heroOut .22s ease both; }
+@keyframes heroOut { to { opacity: 0; transform: translateY(-10px); } }
+
+/* ── dropdown menu ── */
+.menu-anchor { position: relative; }
+.menu {
+  position: absolute; z-index: 200; top: calc(100% + 6px); left: 0;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow-md);
+  padding: 0.35rem; min-width: 200px;
+  transform-origin: top left;
+  animation: pop .18s cubic-bezier(.2,.8,.2,1) both;
+}
+.menu.bottom { top: auto; bottom: calc(100% + 6px); transform-origin: bottom left; }
+@keyframes pop { from { opacity: 0; transform: scale(.95) translateY(-4px); } to { opacity: 1; transform: none; } }
+.menu-item {
+  display: flex; align-items: center; gap: 0.7rem; width: 100%;
+  border: none; background: none; cursor: pointer; text-align: left;
+  font-size: 13.5px; color: var(--ink);
+  padding: 0.55rem 0.8rem; border-radius: 8px;
+  transition: background .12s;
+}
+.menu-item:hover { background: var(--hover); }
+.menu-item .check { margin-left: auto; color: var(--accent); visibility: hidden; }
+.menu-item.on .check { visibility: visible; }
+
+/* ── toast ── */
+.toast {
+  position: fixed; left: 50%; bottom: 108px; z-index: 300;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--ink); color: var(--bg);
+  font-size: 13px; padding: 0.55rem 1.1rem; border-radius: 999px;
+  box-shadow: var(--shadow-md);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.toast.show { opacity: 1; transform: translateX(-50%); }
+
+/* mic listening */
+.icon-btn.listening { color: #d96570; animation: pulse 1.1s ease infinite; }
+@keyframes pulse { 0%, 100% { background: var(--hover); } 50% { background: rgba(217,101,112,.22); } }
+
 @media (max-width: 860px) {
   .sidebar { position: fixed; z-index: 100; height: 100%; box-shadow: var(--shadow-md); }
   .suggests { grid-template-columns: repeat(2, 1fr); }
@@ -236,7 +290,7 @@ button { font-family: inherit; }
   </div>
   <div class="side-bottom">
     <a class="history-item" href="../../labs.html" style="text-decoration:none">← 返回实验页</a>
-    <button class="history-item">⚙ 设置</button>
+    <button class="history-item" id="settings-btn">⚙ 设置</button>
   </div>
 </aside>
 
@@ -244,11 +298,15 @@ button { font-family: inherit; }
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:0.2rem">
       <button class="icon-btn" id="menu-btn" aria-label="菜单">☰</button>
-      <button class="model-picker">Gemini <span class="ver">2.5 Pro</span> ▾</button>
+      <span class="menu-anchor">
+        <button class="model-picker" id="model-btn">Gemini <span class="ver" id="model-ver">2.5 Pro</span> ▾</button>
+      </span>
     </div>
     <div class="topbar-right">
       <a class="back-link" href="../../labs.html">← 返回实验页</a>
-      <div class="avatar">L</div>
+      <span class="menu-anchor">
+        <button class="avatar" id="avatar-btn" style="border:none;cursor:pointer">L</button>
+      </span>
     </div>
   </div>
 
@@ -275,14 +333,18 @@ button { font-family: inherit; }
 
   <div class="input-wrap">
     <div class="input-box">
-      <button class="icon-btn" aria-label="添加">＋</button>
+      <span class="menu-anchor">
+        <button class="icon-btn" id="plus-btn" aria-label="添加">＋</button>
+      </span>
       <textarea id="msg" rows="1" placeholder="问问 Gemini"></textarea>
-      <button class="icon-btn" aria-label="语音输入">🎙</button>
+      <button class="icon-btn" id="mic-btn" aria-label="语音输入">🎙</button>
       <button class="send-btn" id="send" aria-label="发送" disabled>↑</button>
     </div>
     <p class="disclaimer">这是前端演示页面，回复为预设内容，不会真正发送请求。</p>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const SPARKLE = '<svg viewBox="0 0 24 24"><defs><linearGradient id="ggrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1c71d8"/><stop offset="55%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#d96570"/></linearGradient></defs><path fill="url(#ggrad)" d="M12 2c.6 4.8 2.4 7.4 10 10-7.6 2.6-9.4 5.2-10 10-.6-4.8-2.4-7.4-10-10 7.6-2.6 9.4-5.2 10-10z"/></svg>';
@@ -314,7 +376,8 @@ function send(text) {
   if (!text) return;
 
   if (hero.style.display !== 'none') {
-    hero.style.display = 'none';
+    hero.classList.add('leaving');
+    setTimeout(() => { hero.style.display = 'none'; hero.classList.remove('leaving'); }, 200);
     chat.classList.add('on');
   }
 
@@ -375,6 +438,7 @@ document.getElementById('new-chat').addEventListener('click', () => {
   input.value = '';
   autoGrow();
   input.focus();
+  document.querySelectorAll('#history .history-item').forEach(x => x.classList.remove('active'));
 });
 
 const sidebar = document.getElementById('sidebar');
@@ -383,6 +447,110 @@ document.getElementById('menu-btn').addEventListener('click', toggleSidebar);
 document.getElementById('menu-btn-2').addEventListener('click', toggleSidebar);
 // desktop: sidebar open by default
 if (window.innerWidth > 860) sidebar.classList.remove('hidden');
+
+/* ── toast ── */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+/* ── dropdown menus ── */
+let openMenuEl = null;
+function closeMenu() {
+  if (openMenuEl) { openMenuEl.remove(); openMenuEl = null; }
+  document.removeEventListener('click', onDocClick);
+}
+function onDocClick(e) { if (openMenuEl && !openMenuEl.contains(e.target)) closeMenu(); }
+function openMenu(anchor, items, bottom) {
+  const m = document.createElement('div');
+  m.className = 'menu' + (bottom ? ' bottom' : '');
+  items.forEach(it => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'menu-item' + (it.on ? ' on' : '');
+    const ico = document.createElement('span');
+    ico.textContent = it.icon || '';
+    const lab = document.createElement('span');
+    lab.textContent = it.label;
+    const chk = document.createElement('span');
+    chk.className = 'check';
+    chk.textContent = '✓';
+    b.append(ico, lab, chk);
+    b.addEventListener('click', e => { e.stopPropagation(); closeMenu(); it.action && it.action(); });
+    m.appendChild(b);
+  });
+  anchor.appendChild(m);
+  openMenuEl = m;
+  setTimeout(() => document.addEventListener('click', onDocClick), 0);
+}
+function bindMenuButton(btn, anchor, itemsFn, bottom) {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (openMenuEl) { closeMenu(); return; }
+    openMenu(anchor, itemsFn(), bottom);
+  });
+}
+
+/* model picker */
+const models = ['2.5 Pro', '2.5 Flash', '2.5 Flash-Lite'];
+let currentModel = '2.5 Pro';
+const modelVer = document.getElementById('model-ver');
+bindMenuButton(
+  document.getElementById('model-btn'),
+  document.getElementById('model-btn').parentElement,
+  () => models.map(v => ({
+    label: 'Gemini ' + v,
+    on: v === currentModel,
+    action: () => { currentModel = v; modelVer.textContent = v; toast('已切换到 Gemini ' + v + '（演示）'); }
+  }))
+);
+
+/* plus menu */
+bindMenuButton(
+  document.getElementById('plus-btn'),
+  document.getElementById('plus-btn').parentElement,
+  () => [
+    { icon: '🖼', label: '上传图片', action: () => toast('演示页面，暂不支持上传图片') },
+    { icon: '📄', label: '上传文件', action: () => toast('演示页面，暂不支持上传文件') },
+    { icon: '☁', label: '从云端硬盘选择', action: () => toast('演示页面，暂不支持云端硬盘') }
+  ],
+  true
+);
+
+/* mic */
+document.getElementById('mic-btn').addEventListener('click', () => {
+  const on = document.getElementById('mic-btn').classList.toggle('listening');
+  toast(on ? '正在聆听…（演示）' : '已停止聆听');
+});
+
+/* avatar */
+bindMenuButton(
+  document.getElementById('avatar-btn'),
+  document.getElementById('avatar-btn').parentElement,
+  () => [
+    { icon: '👤', label: 'ling（演示账号）', action: () => toast('这是演示账号') },
+    { icon: '↩', label: '退出登录', action: () => toast('演示页面，无需退出') }
+  ]
+);
+
+/* settings */
+document.getElementById('settings-btn').addEventListener('click', () => toast('演示页面，设置暂不可用'));
+
+/* history items start a seeded conversation */
+document.querySelectorAll('#history .history-item').forEach(h => {
+  h.addEventListener('click', () => {
+    document.querySelectorAll('#history .history-item').forEach(x => x.classList.remove('active'));
+    h.classList.add('active');
+    chat.innerHTML = '';
+    chat.classList.remove('on');
+    hero.style.display = '';
+    send(h.textContent.trim());
+  });
+});
 
 autoGrow();
 </script>
