@@ -263,6 +263,16 @@ button { font-family: inherit; }
 .icon-btn.listening { color: #d96570; animation: pulse 1.1s ease infinite; }
 @keyframes pulse { 0%, 100% { background: var(--hover); } 50% { background: rgba(217,101,112,.22); } }
 
+/* scrim for mobile sidebar */
+.scrim {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(0,0,0,.35);
+  opacity: 0; visibility: hidden;
+  transition: opacity .25s ease, visibility .25s;
+}
+.scrim.show { opacity: 1; visibility: visible; }
+@media (min-width: 861px) { .scrim { display: none; } }
+
 @media (max-width: 860px) {
   .sidebar { position: fixed; z-index: 100; height: 100%; box-shadow: var(--shadow-md); }
   .suggests { grid-template-columns: repeat(2, 1fr); }
@@ -277,7 +287,6 @@ button { font-family: inherit; }
 
 <aside class="sidebar hidden" id="sidebar">
   <div class="side-top">
-    <button class="icon-btn" id="menu-btn-2" aria-label="收起菜单">☰</button>
     <span class="brand">Gemini</span>
   </div>
   <button class="new-chat" id="new-chat"><span>＋</span><span>新对话</span></button>
@@ -442,11 +451,19 @@ document.getElementById('new-chat').addEventListener('click', () => {
 });
 
 const sidebar = document.getElementById('sidebar');
-function toggleSidebar() { sidebar.classList.toggle('hidden'); }
+const scrim = document.createElement('div');
+scrim.className = 'scrim';
+document.body.appendChild(scrim);
+scrim.addEventListener('click', () => { sidebar.classList.add('hidden'); syncScrim(); });
+function syncScrim() {
+  scrim.classList.toggle('show', window.innerWidth <= 860 && !sidebar.classList.contains('hidden'));
+}
+function toggleSidebar() { sidebar.classList.toggle('hidden'); syncScrim(); }
 document.getElementById('menu-btn').addEventListener('click', toggleSidebar);
-document.getElementById('menu-btn-2').addEventListener('click', toggleSidebar);
+window.addEventListener('resize', syncScrim);
 // desktop: sidebar open by default
 if (window.innerWidth > 860) sidebar.classList.remove('hidden');
+syncScrim();
 
 /* ── toast ── */
 const toastEl = document.getElementById('toast');
@@ -549,6 +566,7 @@ document.querySelectorAll('#history .history-item').forEach(h => {
     chat.classList.remove('on');
     hero.style.display = '';
     send(h.textContent.trim());
+    if (window.innerWidth <= 860) { sidebar.classList.add('hidden'); syncScrim(); }
   });
 });
 
