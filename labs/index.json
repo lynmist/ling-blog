@@ -6,6 +6,31 @@
     "icon": "AI"
   },
   {
+    "name": "AstrBot 插件",
+    "desc": "给 AstrBot 写的几个小插件，点开去 GitHub 看。",
+    "icon": "Py",
+    "children": [
+      {
+        "name": "UApiPro 工具箱",
+        "desc": "集成 UApiPro 提供的开放接口，为 bot 提供可使用的工具。",
+        "path": "https://github.com/lingyun14beta/astrbot_plugin_uapipro_toolbox",
+        "icon": "具"
+      },
+      {
+        "name": "敏感词过滤",
+        "desc": "AstrBot 敏感词过滤插件。",
+        "path": "https://github.com/lingyun14beta/astrbot_plugin_sensitivefilter",
+        "icon": "滤"
+      },
+      {
+        "name": "群欢迎",
+        "desc": "一个普通的群欢迎插件。",
+        "path": "https://github.com/lingyun14beta/astrbot_plugin_group_welcome",
+        "icon": "迎"
+      }
+    ]
+  },
+  {
     "name": "Kimi K3",
     "desc": "同一模型的六种视觉表达，点开选一个看。",
     "icon": "K3",

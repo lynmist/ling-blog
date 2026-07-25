@@ -172,7 +172,7 @@ fetch('labs/index.json')
       </button>`;
       }
       return `
-      <a href="${l.path || '#'}" class="lab-card">
+      <a href="${l.path || '#'}" class="lab-card"${/^https?:\/\//.test(l.path || '') ? ' target="_blank" rel="noopener"' : ''}>
         <div class="lab-icon">${l.icon || '◆'}</div>
         <div class="lab-text">
           <div class="lab-name">${l.name || '未命名'}</div>
@@ -189,7 +189,7 @@ fetch('labs/index.json')
       const group = labs[+btn.dataset.group];
       document.getElementById('lab-modal-title').textContent = group.name || '';
       document.getElementById('lab-modal-list').innerHTML = group.children.map(c => `
-        <a href="${c.path || '#'}" class="lab-modal-item">
+        <a href="${c.path || '#'}" class="lab-modal-item"${/^https?:\/\//.test(c.path || '') ? ' target="_blank" rel="noopener"' : ''}>
           <div class="lab-icon">${c.icon || '◆'}</div>
           <div class="lab-text">
             <div class="lab-name">${c.name || '未命名'}</div>
@@ -206,6 +206,7 @@ fetch('labs/index.json')
       document.body.style.overflow = '';
     }
     document.getElementById('lab-modal-close').addEventListener('click', closeModal);
+    document.getElementById('lab-modal-list').addEventListener('click', e => { if (e.target.closest('a')) closeModal(); });
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
   })

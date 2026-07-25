@@ -5,7 +5,7 @@ let flipEl = null;
 function renderGallery(photos) {
   const masonry = document.getElementById('masonry');
   if (!photos || photos.length === 0) {
-    masonry.innerHTML = '<div class="empty"><p>还没有照片</p></div>';
+    masonry.innerHTML = '<div class="empty"><p>还没有画</p></div>';
     return;
   }
 

@@ -211,6 +211,7 @@
       <div class="about-text">
         <h2 class="about-name">你好，我是 ling</h2>
         <p>一个喜欢慢慢走的人。写一些字，收一些画，留下的都是不想忘掉的东西。</p>
+        <p>偶尔也写写 Python 代码，成果都放在<a href="labs.html">「实验」</a>里。</p>
         <p>欢迎来这里坐坐。</p>
       </div>
       <div class="about-photo">
@@ -275,11 +276,11 @@ fetch('posts/index.json')
 
 <script src="gallery/photos.js"></script>
 <script>
-// Render first 6 photos from gallery/photos.js into the homepage preview grid
+// Render first 6 artworks from gallery/photos.js into the homepage preview grid
 (function () {
   const grid = document.getElementById('index-gallery-grid');
   if (typeof PHOTOS === 'undefined' || !PHOTOS.length) {
-    grid.innerHTML = '<div class="gcell"><span class="gcell-hint">还没有照片</span></div>';
+    grid.innerHTML = '<div class="gcell"><span class="gcell-hint">还没有画</span></div>';
     return;
   }
   const preview = PHOTOS.slice(0, 6);
