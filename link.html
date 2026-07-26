@@ -166,6 +166,29 @@ html[data-theme="dark"] .aurora i { opacity: .22; }
   color: var(--ink); margin-bottom: 0.8rem;
 }
 .apply-text { font-size: 13.5px; color: var(--ink2); line-height: 2; max-width: 520px; margin-bottom: 1.4rem; }
+.apply-sub { font-size: 12px; letter-spacing: 0.12em; color: var(--ink3); margin-bottom: 0.9rem; font-weight: 400; }
+.apply-methods { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
+.method {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  text-decoration: none; color: inherit;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+.method:hover { border-color: var(--blue-l); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.method-k {
+  flex-shrink: 0;
+  font-size: 10.5px; letter-spacing: 0.08em; color: var(--blue);
+  background: var(--blue-ll);
+  padding: 0.25rem 0.65rem; border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+}
+.method-v { flex: 1; font-size: 13px; color: var(--ink2); line-height: 1.6; }
+.method-arrow { color: var(--ink4); transition: color .2s, transform .2s; }
+.method:hover .method-arrow { color: var(--blue); transform: translateX(3px); }
 .site-card {
   position: relative;
   background: color-mix(in srgb, var(--surface) 82%, transparent);
@@ -195,15 +218,6 @@ html[data-theme="dark"] .aurora i { opacity: .22; }
 .copy-btn:hover { color: var(--blue); border-color: var(--blue-l); background: var(--blue-ll); }
 .copy-btn:active { transform: scale(0.96); }
 .copy-btn.done { color: var(--blue); border-color: var(--blue-l); background: var(--blue-ll); }
-
-.count-badge {
-  display: inline-block;
-  font-size: 10px; letter-spacing: 0.12em; color: var(--blue);
-  border: 1px solid var(--blue-l); background: var(--blue-ll);
-  border-radius: 999px; padding: 0.2rem 0.65rem;
-  margin-left: 0.7rem; vertical-align: middle;
-  white-space: nowrap; font-family: 'Inter', sans-serif;
-}
 
 /* film grain */
 .noise {
@@ -264,12 +278,26 @@ footer { margin-top: 7rem; }
 
   <div class="apply">
     <h2 class="apply-title">交换友链</h2>
-    <p class="apply-text">如果你也有自己的小站，欢迎来串门。把下面的信息加到你的友链页，然后通过 About 页的方式联系我。</p>
+    <p class="apply-text">如果你也有自己的小站，欢迎来串门。通过下面任一方式把你的站点信息发给我，我看到后会加到这里。</p>
+    <h3 class="apply-sub">交换方式</h3>
+    <div class="apply-methods">
+      <a class="method" href="mailto:link@yling2719.top?subject=%E5%8F%8B%E9%93%BE%E7%94%B3%E8%AF%B7">
+        <span class="method-k">Mail</span>
+        <span class="method-v">发邮件到 link@yling2719.top，写上你的站点名称、链接、头像和描述</span>
+        <span class="method-arrow">→</span>
+      </a>
+      <a class="method" href="https://github.com/lynmist/ling-blog/issues/new?template=friend-link.md" target="_blank" rel="noopener">
+        <span class="method-k">Issue</span>
+        <span class="method-v">到 GitHub 仓库提交一个友链申请 issue（有现成模板）</span>
+        <span class="method-arrow">→</span>
+      </a>
+    </div>
+    <h3 class="apply-sub">本站信息</h3>
     <div class="site-card">
       <div class="site-row"><span class="k">名称</span><span class="v">ling</span></div>
       <div class="site-row"><span class="k">链接</span><span class="v">https://yling2719.top</span></div>
       <div class="site-row"><span class="k">头像</span><span class="v">https://yling2719.top/images/avatar.jpg</span></div>
-      <div class="site-row"><span class="k">描述</span><span class="v">写一些字，收一些画。</span></div>
+      <div class="site-row"><span class="k">描述</span><span class="v">个人主页：博客文章、画集，以及一些 Python 小项目。</span></div>
       <button class="copy-btn" id="copy-btn" type="button">复制本站信息</button>
     </div>
   </div>
@@ -308,12 +336,6 @@ fetch('links/index.json')
       `;
     }).join('');
 
-    /* count badge */
-    const badge = document.createElement('span');
-    badge.className = 'count-badge';
-    badge.textContent = links.length + ' 个角落';
-    document.querySelector('.link-intro').appendChild(badge);
-
     /* spotlight + tilt */
     const fine = window.matchMedia('(pointer: fine)').matches;
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -343,7 +365,7 @@ const SITE_INFO = [
   '名称：ling',
   '链接：https://yling2719.top',
   '头像：https://yling2719.top/images/avatar.jpg',
-  '描述：写一些字，收一些画。'
+  '描述：个人主页：博客文章、画集，以及一些 Python 小项目。'
 ].join('\n');
 document.getElementById('copy-btn').addEventListener('click', function () {
   const done = () => {
