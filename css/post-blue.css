@@ -61,6 +61,9 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 .ah-meta{display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem}
 .ah-tag{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);padding:3px 12px;border:1px solid var(--blue-l);background:var(--blue-ll);border-radius:99px}
 .ah-date{font-size:11px;color:var(--ink4);font-family:'Inter',sans-serif;letter-spacing:0.06em}
+.ah-author{font-size:11px;color:var(--ink3);font-family:'Inter',sans-serif;letter-spacing:0.06em}
+.ah-author a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--ink4);transition:color .15s,border-color .15s}
+.ah-author a:hover{color:var(--blue);border-color:var(--blue-l)}
 .ah-title{font-family:'Noto Serif SC',serif;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:300;color:var(--ink);line-height:1.35;letter-spacing:-0.015em;margin-bottom:1.4rem}
 .ah-lead{font-size:14px;color:var(--ink3);line-height:1.85;max-width:480px;padding-left:1rem;border-left:1.5px solid var(--blue-l)}
 

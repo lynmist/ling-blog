@@ -4,13 +4,17 @@
     "title": "雨天拍照这件事",
     "tag": "摄影记",
     "date": "2025.04.02",
-    "lead": "相机怕水，但雨天的光是平时遇不到的。"
+    "author": "ling",
+    "lead": "相机怕水，但雨天的光是平时遇不到的。",
+    "authorUrl": "https://yling2719.top/about.html"
   },
   {
     "slug": "my-first-post",
     "title": "傍晚路过一家花店",
     "tag": "随笔",
     "date": "2025.06.14",
-    "lead": "有些事情不值得记录，但如果不记录就真的消失了。"
+    "author": "ling",
+    "lead": "有些事情不值得记录，但如果不记录就真的消失了。",
+    "authorUrl": "https://yling2719.top/about.html"
   }
 ]
