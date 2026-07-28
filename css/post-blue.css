@@ -132,3 +132,22 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 @media (prefers-reduced-motion: reduce) {
   .article-header > *, .cover-wrap, .article-body { animation: none; opacity: 1; }
 }
+
+/* ── title sparkle after content settles ── */
+.ah-title::after {
+  content: '✦';
+  font-size: .48em;
+  color: var(--blue);
+  margin-left: .35em;
+  vertical-align: .35em;
+  display: inline-block;
+  opacity: 0;
+  animation: sparkle-land .9s cubic-bezier(.34,1.56,.64,1) 1.3s forwards;
+}
+@keyframes sparkle-land {
+  from { opacity: 0; transform: scale(.3) rotate(-40deg); }
+  to   { opacity: .95; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ah-title::after { display: none; }
+}
