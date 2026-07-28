@@ -48,6 +48,8 @@ body { font-family: 'Noto Sans SC','Inter',sans-serif; background: var(--bg); co
 .field input:focus { border-color: var(--blue-l); background: var(--panel); }
 .field select { width: 100%; padding: 7px 10px; font-size: 13px; color: var(--ink); font-family: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; outline: none; cursor: pointer; transition: border-color .15s; }
 .field select:focus { border-color: var(--blue-l); background: var(--panel); }
+.check-label { display: flex !important; align-items: center; gap: 0.5rem; font-size: 12px !important; letter-spacing: 0.02em !important; text-transform: none !important; color: var(--ink2) !important; cursor: pointer; margin-bottom: 0 !important; }
+.check-label input { width: auto !important; cursor: pointer; }
 .slug-preview { margin-top: 4px; font-size: 10px; color: var(--ink3); font-family: 'Inter',monospace; letter-spacing: 0.04em; }
 
 .article-list { flex: 1; }
@@ -182,6 +184,9 @@ body { font-family: 'Noto Sans SC','Inter',sans-serif; background: var(--bg); co
           <option value="post-blue">蔚蓝（默认）</option>
           <option value="post-warm">暖调</option>
         </select>
+      </div>
+      <div class="field">
+        <label class="check-label"><input id="f-busuanzi" type="checkbox" checked> 页脚显示阅读计数（不蒜子）</label>
       </div>
     </div>
     <div class="sidebar-section" style="padding-bottom:0.6rem">
@@ -354,6 +359,7 @@ function loadDraft(id) {
   document.getElementById('f-cover').value    = a.cover    || '';
   document.getElementById('f-cover-cap').value= a.coverCap || '';
   document.getElementById('f-theme').value    = a.theme    || 'post-blue';
+  document.getElementById('f-busuanzi').checked = a.busuanzi !== false;
   document.getElementById('md-editor').value  = a.body     || '';
   applyPreviewTheme();
   updateSlugPreview();
@@ -364,7 +370,7 @@ function loadDraft(id) {
 
 function newDraft() {
   const id = 'draft_' + Date.now();
-  drafts.unshift({ id, title:'', slug:'', lead:'', tag:'随笔', date:today(), author:'ling', authorUrl:'https://yling2719.top/about.html', cover:'', coverCap:'', theme:'post-blue', body:'' });
+  drafts.unshift({ id, title:'', slug:'', lead:'', tag:'随笔', date:today(), author:'ling', authorUrl:'https://yling2719.top/about.html', cover:'', coverCap:'', theme:'post-blue', busuanzi:true, body:'' });
   saveDrafts(drafts);
   loadDraft(id);
 }
@@ -392,6 +398,7 @@ function autoSave() {
     cover:    document.getElementById('f-cover').value,
     coverCap: document.getElementById('f-cover-cap').value,
     theme:    document.getElementById('f-theme').value,
+    busuanzi: document.getElementById('f-busuanzi').checked,
     body:     document.getElementById('md-editor').value,
   };
   saveDrafts(drafts);
@@ -463,6 +470,7 @@ function getData() {
     cover:    document.getElementById('f-cover').value,
     coverCap: document.getElementById('f-cover-cap').value,
     theme:    document.getElementById('f-theme').value || 'post-blue',
+    busuanzi: document.getElementById('f-busuanzi').checked,
     body:     document.getElementById('md-editor').value,
   };
 }
@@ -522,11 +530,13 @@ function buildPostHTML(d) {
   </article>
   <footer class="article-footer">
     <p id="wc-out">© 2026 ling</p>
+    ${d.busuanzi ? `<p class="busuanzi-count"><span id="busuanzi_container_page_pv" style="display:none">本文被阅读 <span id="busuanzi_value_page_pv"></span> 次</span></p>` : ''}
     <a href="../writing.html" class="back-link">← 全部文章</a>
   </footer>
 </div>
 <script id="md-src" type="text/plain">${d.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}<\/script>
 <script src="../js/post.js"><\/script>
+${d.busuanzi ? `<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"><\/script>` : ''}
 </body>
 </html>`;
 }
@@ -626,6 +636,7 @@ function bindEvents() {
     document.getElementById(id).addEventListener('input', updatePreview);
   });
   document.getElementById('f-theme').addEventListener('change', applyPreviewTheme);
+  document.getElementById('f-busuanzi').addEventListener('change', autoSave);
   document.getElementById('f-slug').addEventListener('input', () => {
     updateSlugPreview();
     autoSave();
