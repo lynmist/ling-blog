@@ -249,3 +249,21 @@ footer .busuanzi-count { position: absolute; left: 50%; transform: translateX(-5
   [data-theme-mode="dark"] .switch-thumb .moon { opacity: 1; }
   .page { padding: 0 1.4rem 6rem; }
 }
+
+/* ── entrance: staggered rise ── */
+.page > *, .page-header > * {
+  opacity: 0;
+  animation: head-in .55s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.page > *:nth-child(1) { animation-delay: .05s; }
+.page > *:nth-child(2) { animation-delay: .18s; }
+.page > *:nth-child(3) { animation-delay: .28s; }
+.page > *:nth-child(4) { animation-delay: .38s; }
+.page > *:nth-child(n+5) { animation-delay: .46s; }
+.page-header > *:nth-child(1) { animation-delay: .1s; }
+.page-header > *:nth-child(2) { animation-delay: .2s; }
+.page-header > *:nth-child(3) { animation-delay: .3s; }
+@keyframes head-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .page > *, .page-header > * { animation: none; opacity: 1; }
+}
