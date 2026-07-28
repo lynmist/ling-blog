@@ -62,6 +62,7 @@
   gap: 3.5rem;
   align-items: start;
 }
+.about-text { grid-column: 1; grid-row: 1; }
 .about-name {
   font-family: 'Noto Serif SC', serif;
   font-size: 1.5rem; font-weight: 300; color: var(--ink);
@@ -73,6 +74,7 @@
 }
 .about-text p:last-child { margin-bottom: 0; }
 .about-photo {
+  grid-column: 2; grid-row: 1;
   aspect-ratio: 1/1;
   background: var(--blue-ll);
   border: 1px solid var(--line);
@@ -160,9 +162,14 @@
 [data-theme="dark"] .gcell:nth-child(6) { background: #1c2834; }
 
 @media (max-width: 600px) {
-  .about-layout { grid-template-columns: 1fr; gap: 2.5rem; }
-  .about-photo { width: 140px; aspect-ratio: 1/1; margin: 0 auto; border-radius: 50%; }
-  .about-name { text-align: center; }
+  .about-layout { display: flow-root; }
+  .about-photo {
+    float: right;
+    width: 104px; aspect-ratio: 1/1;
+    margin: 0.3rem 0 1rem 1.1rem;
+    border-radius: 50%;
+    shape-outside: circle();
+  }
   .about-text p { text-align: justify; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
   .hero { padding-top: 5rem; }
@@ -209,14 +216,14 @@
   <section class="section" id="about">
     <p class="section-label">About</p>
     <div class="about-layout">
+      <div class="about-photo">
+        <img src="images/avatar.jpg" alt="ling">
+      </div>
       <div class="about-text">
         <h2 class="about-name">你好，我是 ling</h2>
         <p>一个喜欢慢慢走的人。写一些字，收一些画，留下的都是不想忘掉的东西。</p>
         <p>偶尔也写写 Python 代码，成果都放在<a href="labs.html">「实验」</a>里。</p>
         <p>欢迎来这里坐坐。</p>
-      </div>
-      <div class="about-photo">
-        <img src="images/avatar.jpg" alt="ling">
       </div>
     </div>
   </section>
