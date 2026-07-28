@@ -90,8 +90,9 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
 .md-body pre{background:var(--blue-ll);border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.4rem;overflow-x:auto;margin-bottom:1.9rem}
 .md-body pre code{background:none;border:none;padding:0;color:var(--ink2)}
 
-.article-footer{margin-top:6rem;padding-top:2rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.article-footer{margin-top:6rem;padding-top:2rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:relative}
 .article-footer p{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink4)}
+.article-footer .busuanzi-count{position:absolute;left:50%;transform:translateX(-50%)}
 .back-link{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);text-decoration:none;padding:6px 16px;background:var(--blue-ll);border:1px solid var(--blue-l);border-radius:99px;transition:background .15s}
 .back-link:hover{background:var(--hover)}
 

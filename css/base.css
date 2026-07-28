@@ -168,8 +168,10 @@ footer {
   padding-top: 2rem;
   border-top: 1px solid var(--line);
   display: flex; justify-content: space-between; align-items: center;
+  position: relative;
 }
 footer p { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink4); }
+footer .busuanzi-count { position: absolute; left: 50%; transform: translateX(-50%); }
 
 /* ── empty state ── */
 .empty { padding: 4rem 0; text-align: center; }
