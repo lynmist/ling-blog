@@ -234,6 +234,73 @@ html[data-theme="dark"] .aurora i { opacity: .22; }
   100% { transform: translate(2%, -1%); }
 }
 
+/* ── link modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  background: rgba(243, 246, 252, .55);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+html[data-theme="dark"] .modal-overlay { background: rgba(9, 13, 21, .55); }
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.link-modal {
+  position: relative;
+  width: 100%; max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px -18px rgba(60, 80, 140, .35), var(--shadow-md);
+  padding: 2rem 1.7rem 1.7rem;
+  text-align: center;
+  transform: translateY(16px) scale(.95);
+  transition: transform .32s cubic-bezier(.2,.8,.2,1);
+}
+.modal-overlay.open .link-modal { transform: none; }
+.modal-close {
+  position: absolute; top: .85rem; right: .85rem;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--line); background: transparent;
+  color: var(--ink3); font-size: 13px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .2s, border-color .2s, transform .25s;
+}
+.modal-close:hover { color: var(--ink); border-color: var(--ink3); transform: rotate(90deg); }
+.modal-avatar {
+  width: 64px; height: 64px; margin: 0 auto 1rem;
+  border-radius: 18px;
+  background: var(--blue-ll); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Noto Serif SC', serif; font-size: 26px; color: var(--blue);
+  overflow: hidden;
+}
+.modal-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.modal-name {
+  font-size: 16px; font-weight: 500; color: var(--ink);
+  display: flex; align-items: center; justify-content: center; gap: .55rem;
+  margin-bottom: .6rem;
+}
+.modal-desc { font-size: 13px; color: var(--ink2); line-height: 1.8; margin-bottom: .8rem; }
+.modal-url {
+  font-size: 11px; color: var(--ink4);
+  font-family: 'Inter', sans-serif; letter-spacing: .02em;
+  word-break: break-all;
+}
+.modal-go {
+  display: inline-flex; align-items: center; gap: .5rem;
+  margin-top: 1.35rem;
+  padding: .72rem 1.9rem;
+  border-radius: 999px;
+  background: linear-gradient(115deg, var(--blue), #9a7ae8);
+  color: #fff; font-size: 13.5px; text-decoration: none;
+  box-shadow: 0 8px 22px -6px rgba(122,162,255,.55);
+  transition: transform .2s, box-shadow .2s;
+}
+.modal-go:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -6px rgba(122,162,255,.65); }
+.modal-go:active { transform: scale(.96); }
+
 footer { margin-top: 7rem; }
 @media (max-width: 700px) { .link-list { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .link-card { padding: 1.1rem 1.2rem; } }
@@ -309,6 +376,17 @@ footer { margin-top: 7rem; }
   </footer>
 </div>
 
+<div class="modal-overlay" id="link-modal-overlay" aria-hidden="true">
+  <div class="link-modal" role="dialog" aria-modal="true" aria-label="站点详情">
+    <button class="modal-close" id="modal-close" type="button" aria-label="关闭">✕</button>
+    <div class="modal-avatar" id="modal-avatar"></div>
+    <div class="modal-name"><span id="modal-name"></span><span class="link-host" id="modal-host"></span></div>
+    <p class="modal-desc" id="modal-desc"></p>
+    <p class="modal-url" id="modal-url"></p>
+    <a class="modal-go" id="modal-go" href="#" target="_blank" rel="noopener">前往网站 →</a>
+  </div>
+</div>
+
 <script>
 fetch('links/index.json')
   .then(r => r.json())
@@ -356,10 +434,47 @@ fetch('links/index.json')
         });
       });
     }
+    /* click → modal */
+    list.querySelectorAll('.link-card').forEach((card, i) => {
+      card.addEventListener('click', e => {
+        if (!links[i] || !links[i].url) return;
+        e.preventDefault();
+        openLinkModal(links[i]);
+      });
+    });
   })
   .catch(() => {
     document.getElementById('link-list').innerHTML = '<div class="empty"><p>暂时无法加载友链</p></div>';
   });
+
+/* link modal */
+const modalOverlay = document.getElementById('link-modal-overlay');
+function openLinkModal(l) {
+  const initial = (l.name || '友').charAt(0);
+  document.getElementById('modal-avatar').innerHTML = l.avatar
+    ? `<img src="${l.avatar}" alt="" onerror="this.outerHTML='<span>${initial}</span>'">`
+    : `<span>${initial}</span>`;
+  document.getElementById('modal-name').textContent = l.name || '未命名';
+  let host = '';
+  try { host = l.url ? new URL(l.url).hostname.replace(/^www\./, '') : ''; } catch {}
+  const hostEl = document.getElementById('modal-host');
+  hostEl.textContent = host;
+  hostEl.style.display = host ? '' : 'none';
+  document.getElementById('modal-desc').textContent = l.desc || '';
+  document.getElementById('modal-url').textContent = l.url || '';
+  document.getElementById('modal-go').href = l.url || '#';
+  modalOverlay.classList.add('open');
+  modalOverlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closeLinkModal() {
+  modalOverlay.classList.remove('open');
+  modalOverlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeLinkModal(); });
+document.getElementById('modal-close').addEventListener('click', closeLinkModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLinkModal(); });
 
 /* copy site info */
 const SITE_INFO = [

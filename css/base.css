@@ -172,6 +172,13 @@ footer {
 }
 footer p { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink4); }
 footer .busuanzi-count { position: absolute; left: 50%; transform: translateX(-50%); }
+@media (max-width: 600px) {
+  footer { flex-wrap: wrap; row-gap: 0.9rem; }
+  footer .busuanzi-count {
+    position: static; transform: none;
+    width: 100%; order: 3; text-align: center;
+  }
+}
 
 /* ── empty state ── */
 .empty { padding: 4rem 0; text-align: center; }
@@ -232,9 +239,15 @@ footer .busuanzi-count { position: absolute; left: 50%; transform: translateX(-5
 
 /* ── mobile base ── */
 @media (max-width: 600px) {
-  .nav-inner { padding: 0 1.2rem; }
-  .nav-links a { padding: 6px 8px; font-size: 10px; }
-  .theme-switch { margin-left: 6px; }
+  .nav-inner { flex-wrap: wrap; height: auto; padding: 0.6rem 1.2rem; row-gap: 0.55rem; }
+  .theme-switch { margin-left: auto; }
+  .nav-links {
+    order: 3; width: 100%; margin-left: 0;
+    justify-content: space-between;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--line);
+  }
+  .nav-links a { padding: 5px 10px; font-size: 10.5px; }
   /* collapse wide 3-state switch into a compact icon button */
   .switch-track { width: 32px; height: 32px; padding: 0; background: var(--surface); border-color: var(--line); justify-content: center; }
   .switch-thumb { transform: none !important; width: 24px; height: 24px; background: transparent; box-shadow: none; }
