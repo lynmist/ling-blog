@@ -565,7 +565,7 @@ function doExportIndex() {
   // update published index
   let published = loadPublished();
   const existing = published.findIndex(x => x.slug === d.slug);
-  const entry = { slug: d.slug, title: d.title, tag: d.tag, date: d.date, author: d.author, authorUrl: d.authorUrl, lead: d.lead };
+  const entry = { slug: d.slug, title: d.title, tag: d.tag, theme: d.theme, date: d.date, author: d.author, authorUrl: d.authorUrl, lead: d.lead };
   if (existing > -1) published[existing] = entry;
   else published.unshift(entry);
   savePublished(published);

@@ -15,7 +15,9 @@
 }
 html{scroll-behavior:smooth;color-scheme:light dark}
 ::selection{background:var(--selection)}
-body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC','Inter',sans-serif;-webkit-font-smoothing:antialiased;transition:background .35s ease,color .35s ease}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC','Inter',sans-serif;-webkit-font-smoothing:antialiased;transition:background .35s ease,color .35s ease;animation:page-in .35s ease}
+@keyframes page-in{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){body{animation:none}}
 body::before{content:'';position:fixed;top:-200px;right:-150px;width:700px;height:700px;background:radial-gradient(ellipse,var(--glow) 0%,transparent 65%);pointer-events:none;z-index:0;transition:background .35s ease}
 [data-theme="dark"] img{filter:brightness(.96) contrast(1.02)}
 

@@ -1,8 +1,19 @@
 [
   {
+    "slug": "mung-bean-soup",
+    "title": "绿豆汤凉下来的时候",
+    "tag": "随笔",
+    "theme": "post-warm",
+    "date": "2026.07.28",
+    "author": "ling",
+    "lead": "夏天的好，是慢慢凉下来的。",
+    "authorUrl": "https://yling2719.top/about.html"
+  },
+  {
     "slug": "another-post",
     "title": "雨天拍照这件事",
     "tag": "摄影记",
+    "theme": "post-blue",
     "date": "2025.04.02",
     "author": "ling",
     "lead": "相机怕水，但雨天的光是平时遇不到的。",
@@ -12,6 +23,7 @@
     "slug": "my-first-post",
     "title": "傍晚路过一家花店",
     "tag": "随笔",
+    "theme": "post-blue",
     "date": "2025.06.14",
     "author": "ling",
     "lead": "有些事情不值得记录，但如果不记录就真的消失了。",
