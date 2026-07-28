@@ -113,3 +113,41 @@ nav{position:sticky;top:0;z-index:100;background:var(--nav-bg);backdrop-filter:b
   .page{padding-left:1.4rem;padding-right:1.4rem}
   .article-header{padding-top:4rem}
 }
+
+/* ── warm intro: open in the site's blue, then flow into warm ── */
+@property --bg      { syntax:'<color>'; inherits:true; initial-value:#f9f7f4; }
+@property --nav-bg  { syntax:'<color>'; inherits:true; initial-value:rgba(249,247,244,0.82); }
+@property --glow    { syntax:'<color>'; inherits:true; initial-value:rgba(220,175,130,0.16); }
+@property --hover   { syntax:'<color>'; inherits:true; initial-value:#f2e4d4; }
+@property --selection { syntax:'<color>'; inherits:true; initial-value:rgba(201,139,91,0.16); }
+@property --blue    { syntax:'<color>'; inherits:true; initial-value:#c68b5a; }
+@property --blue-l  { syntax:'<color>'; inherits:true; initial-value:#e6d0b8; }
+@property --blue-ll { syntax:'<color>'; inherits:true; initial-value:#f3e8dd; }
+@property --blue-d  { syntax:'<color>'; inherits:true; initial-value:#9f6a3a; }
+@property --line    { syntax:'<color>'; inherits:true; initial-value:#e6dfd6; }
+@property --ink     { syntax:'<color>'; inherits:true; initial-value:#1c2533; }
+@property --ink2    { syntax:'<color>'; inherits:true; initial-value:#4a5a6d; }
+@property --ink3    { syntax:'<color>'; inherits:true; initial-value:#8f9aaa; }
+@property --ink4    { syntax:'<color>'; inherits:true; initial-value:#c9c4bc; }
+
+:root { animation: warm-in 1.6s cubic-bezier(.4,0,.2,1) .55s both; }
+@keyframes warm-in {
+  from {
+    --bg:#f5f7fa; --nav-bg:rgba(245,247,250,0.82); --glow:rgba(145,195,230,0.16);
+    --hover:#d4ebf8; --selection:rgba(90,157,200,0.18);
+    --blue:#5a9dc8; --blue-l:#b5d7ee; --blue-ll:#e3f1fa; --blue-d:#2a6fa0;
+    --line:#dde5ee; --ink:#1c2533; --ink2:#4a5a6d; --ink3:#8798ab; --ink4:#c2cdd8;
+  }
+}
+[data-theme="dark"] { animation: warm-in-dark 1.6s cubic-bezier(.4,0,.2,1) .55s both; }
+@keyframes warm-in-dark {
+  from {
+    --bg:#0b0f14; --nav-bg:rgba(11,15,20,0.82); --glow:rgba(70,130,200,0.14);
+    --hover:#223244; --selection:rgba(110,179,236,0.22);
+    --blue:#6eb3ec; --blue-l:#365575; --blue-ll:#1b2836; --blue-d:#93cbff;
+    --line:#253039; --ink:#e6edf5; --ink2:#9fb3c7; --ink3:#6a7f94; --ink4:#465565;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root, [data-theme="dark"] { animation: none; }
+}
