@@ -129,7 +129,6 @@ function resize() {
   initAnimated();
 }
 addEventListener('resize', resize);
-resize();
 
 /* ── 静态画面:宣纸、月、群山、水面、近景、印章 ── */
 function renderStatic() {
@@ -572,6 +571,7 @@ function frame(now) {
   updateRipples(t, dt);
   requestAnimationFrame(frame);
 }
+resize();
 requestAnimationFrame(frame);
 </script>
 </body>
