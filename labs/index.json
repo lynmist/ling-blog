@@ -31,10 +31,23 @@
     ]
   },
   {
-    "name": "DS V4 Flash",
-    "desc": "极速推理模型的闪电与流光演示。",
-    "path": "labs/ds-v4f/index.html",
-    "icon": "闪"
+    "name": "DeepSeek V4",
+    "desc": "同一模型的两种速度:一瞬的闪电,与一生的深潜。",
+    "icon": "D",
+    "children": [
+      {
+        "name": "V4F · 闪速",
+        "desc": "极速推理的闪电与流光:程序化闪电、脉冲核心与轨迹粒子。",
+        "path": "labs/ds-v4f/index.html",
+        "icon": "闪"
+      },
+      {
+        "name": "V4F · 鲸潜",
+        "desc": "深海里的单笔鲸:生物荧光粒子与一道无声下潜的线。",
+        "path": "labs/ds-whale/index.html",
+        "icon": "鲸"
+      }
+    ]
   },
   {
     "name": "Kimi K3",
