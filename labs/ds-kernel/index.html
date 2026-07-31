@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>內核 · KERNEL — DS-V4F 监控台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080c;
+  --panel: rgba(9, 15, 22, .78);
+  --grid: rgba(70, 140, 190, .10);
+  --line: rgba(90, 200, 255, .45);
+  --line2: rgba(90, 200, 255, .15);
+  --cyan: #4de1ff;
+  --green: #4dffa6;
+  --amber: #ffc14d;
+  --red: #ff5d5d;
+  --ink: #cfe4ef;
+  --dim: #5e7a8c;
+  --mono: 'Share Tech Mono', Consolas, 'Courier New', monospace;
+  --cjk: 'Noto Sans SC', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--cjk);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(77,225,255,.3); }
+
+/* 背景:网格 + 电路 + 暗角 */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(1200px 700px at 50% 38%, transparent 40%, rgba(0,0,0,.55) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg fill='none' stroke='%234a9bd8' stroke-opacity='0.045'%3E%3Cpath d='M0 200 H120 V120 H240 M0 40 H80 V200 M160 0 V120 H240 M80 80 H120'/%3E%3Ccircle cx='120' cy='120' r='3'/%3E%3Ccircle cx='80' cy='200' r='3'/%3E%3Ccircle cx='160' cy='120' r='3'/%3E%3Ccircle cx='120' cy='40' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  mix-blend-mode: screen;
+}
+/* 扫描线 */
+#scan {
+  position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+}
+#scan::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 90px;
+  background: linear-gradient(180deg, transparent, rgba(120,220,255,.05), transparent);
+  animation: sweep 7s linear infinite;
+}
+@keyframes sweep { from { top: -20%; } to { top: 120%; } }
+
+/* ── 启动画面 ── */
+#boot {
+  position: fixed; inset: 0; z-index: 100; background: #04070b;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8vh 9vw; font-family: var(--mono); font-size: 14px;
+  color: var(--cyan); line-height: 2.1; transition: opacity .5s ease;
+}
+#boot.off { opacity: 0; pointer-events: none; }
+#boot .line { white-space: pre-wrap; text-shadow: 0 0 8px rgba(77,225,255,.5); }
+#boot .ok { color: var(--green); }
+.bootbar {
+  margin-top: 26px; width: min(480px, 80vw); height: 8px;
+  border: 1px solid var(--line); background: rgba(77,225,255,.06);
+}
+.bootbar i { display: block; height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+  box-shadow: 0 0 12px rgba(77,225,255,.7); transition: width .12s linear; }
+#bootMsg { margin-top: 12px; font-size: 11px; color: var(--dim); }
+
+/* ── 主 HUD ── */
+#hud {
+  position: fixed; inset: 0; z-index: 5;
+  display: grid; grid-template-rows: 44px 1fr 30px;
+  opacity: 0; pointer-events: none; transition: opacity .6s ease;
+}
+#hud.on { opacity: 1; pointer-events: auto; }
+
+#topbar {
+  display: flex; align-items: center; gap: 22px;
+  padding: 0 14px; border-bottom: 1px solid var(--line2);
+  background: rgba(6, 11, 16, .7); font-family: var(--mono); font-size: 12px;
+  letter-spacing: .08em;
+}
+#topbar .brand { color: var(--cyan); text-shadow: 0 0 8px rgba(77,225,255,.5); }
+#topbar .mid { flex: 1; text-align: center; color: var(--dim); }
+#topbar .mid b { color: var(--green); font-weight: 400; }
+#topbar .rt { display: flex; gap: 18px; align-items: center; color: var(--dim); }
+#topbar .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 8px var(--green); animation: blink 1.6s steps(1) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+
+main#stageWrap {
+  display: grid; grid-template-columns: 300px 1fr 330px; gap: 10px;
+  padding: 10px; min-height: 0;
+}
+.panel {
+  position: relative; background: var(--panel);
+  border: 1px solid var(--line2); box-shadow: inset 0 0 24px rgba(77,225,255,.04);
+  min-height: 0; overflow: hidden;
+}
+.panel::before, .panel::after {
+  content: ""; position: absolute; width: 10px; height: 10px; pointer-events: none;
+  border: 1px solid var(--line);
+}
+.panel::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.panel::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+.phead {
+  padding: 8px 12px; border-bottom: 1px solid var(--line2);
+  font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: .2em;
+  display: flex; justify-content: space-between;
+}
+.phead b { color: var(--cyan); font-weight: 400; }
+
+/* 指标面板 */
+#metrics { display: flex; flex-direction: column; }
+#metrics .phead { flex: none; }
+.mList { flex: 1; overflow: auto; padding: 8px 12px; display: flex; flex-direction: column; gap: 12px; }
+.mRow { display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-items: end; }
+.mRow .lab { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: .16em; }
+.mRow .val { font-family: var(--mono); font-size: 22px; line-height: 1; text-align: right; text-shadow: 0 0 10px currentColor; }
+.mRow .spark { grid-column: 1 / -1; width: 100%; height: 26px; margin-top: 4px; }
+.mRow.c-cy { color: var(--cyan); }
+.mRow.c-gr { color: var(--green); }
+.mRow.c-am { color: var(--amber); }
+.mRow.c-re { color: var(--red); }
+
+/* 中心舞台 */
+#stage { position: relative; }
+#core { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+.stageTag {
+  position: absolute; left: 10px; top: 8px; font-family: var(--mono); font-size: 10px;
+  color: var(--dim); letter-spacing: .2em; pointer-events: none;
+}
+.stageTag b { color: var(--cyan); font-weight: 400; }
+#coords { position: absolute; right: 10px; bottom: 8px; font-family: var(--mono);
+  font-size: 10px; color: var(--dim); pointer-events: none; }
+#xhair { position: absolute; width: 18px; height: 18px; pointer-events: none;
+  border-left: 1px solid var(--cyan); border-top: 1px solid var(--cyan);
+  opacity: .6; z-index: 3; }
+
+/* 终端面板 */
+#term { display: flex; flex-direction: column; }
+#log {
+  flex: 1; overflow: hidden; padding: 8px 12px;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.85;
+}
+#log .t { color: var(--dim); margin-right: 8px; }
+#log .inf { color: var(--cyan); }
+#log .ok { color: var(--green); }
+#log .warn { color: var(--amber); }
+#log .err { color: var(--red); }
+#log .sys { color: var(--dim); }
+#cmdline {
+  display: flex; align-items: center; gap: 6px;
+  border-top: 1px solid var(--line2); padding: 8px 12px;
+  font-family: var(--mono); font-size: 12.5px;
+}
+#cmdline .ps { color: var(--green); flex: none; }
+#cmd { flex: 1; background: transparent; border: 0; outline: 0; color: var(--ink);
+  font-family: var(--mono); font-size: 12.5px; caret-color: var(--cyan); }
+
+/* 状态栏 */
+#statusbar {
+  display: flex; align-items: center; gap: 22px; padding: 0 14px;
+  border-top: 1px solid var(--line2); background: rgba(6, 11, 16, .7);
+  font-family: var(--mono); font-size: 11px; color: var(--dim);
+}
+#statusbar .sp { flex: 1; text-align: center; }
+#statusbar b { color: var(--cyan); font-weight: 400; }
+#statusbar .cur { animation: blink 1s steps(1) infinite; color: var(--green); }
+
+@media (max-width: 1000px) {
+  main#stageWrap { grid-template-columns: 1fr; grid-template-rows: 170px 44vh 260px; overflow: auto; }
+  #topbar .mid { display: none; }
+  #statusbar .sp { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="scan"></div>
+
+<div id="boot">
+  <div id="bootLines"></div>
+  <div class="bootbar"><i id="bootFill"></i></div>
+  <div id="bootMsg">ENTER/CLICK 可跳过 · skip</div>
+</div>
+
+<div id="hud">
+  <header id="topbar">
+    <span class="brand">DS-V4F // INFERENCE CORE</span>
+    <span class="mid">status:<b id="topStatus">STEADY</b></span>
+    <span class="rt"><span id="clock">00:00:00</span><span class="dot"></span>SYS ONLINE</span>
+  </header>
+
+  <main id="stageWrap">
+    <aside class="panel" id="metrics">
+      <div class="phead"><span>METRICS</span><b>LIVE</b></div>
+      <div class="mList" id="mList"></div>
+    </aside>
+
+    <section class="panel" id="stage">
+      <canvas id="core"></canvas>
+      <div class="stageTag">INFERENCE <b>CORE</b> // MODE:<b id="modeTag">CORE</b></div>
+      <div id="coords">X:0000 Y:0000</div>
+      <div id="xhair"></div>
+    </section>
+
+    <aside class="panel" id="term">
+      <div class="phead"><span>TERMINAL</span><b>TTY-01</b></div>
+      <div id="log"></div>
+      <div id="cmdline"><span class="ps">root@v4f:~$</span><input id="cmd" autocomplete="off" spellcheck="false"><span class="cur">▌</span></div>
+    </aside>
+  </main>
+
+  <footer id="statusbar">
+    <span>MODE:<b id="sbMode">CORE</b></span>
+    <span class="sp"></span>
+    <span>FPS:<b id="sbFps">60</b></span>
+    <span>NODES:<b id="sbNodes">0</b></span>
+    <span class="cur">█</span>
+  </footer>
+</div>
+
+<script>
+/* ═══════════ 內核:启动 → 监控台 → 粒子核心 + 终端 ═══════════ */
+const $ = s => document.querySelector(s);
+const bootEl = $('#boot'), hudEl = $('#hud');
+const logEl = $('#log'), cmdEl = $('#cmd');
+const canvas = $('#core'), ctx = canvas.getContext('2d');
+
+let W = 0, H = 0, DPR = 1;
+let bootDone = false, skip = false;
+
+function resize() {
+  DPR = Math.min(devicePixelRatio || 1, 1.6);
+  W = canvas.clientWidth; H = canvas.clientHeight;
+  canvas.width = Math.round(W * DPR);
+  canvas.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  initMode();
+}
+addEventListener('resize', resize);
+
+/* ── 启动 ── */
+const BOOT = [
+  '> DS-V4F KERNEL v4.2.1  (deepseek-v4-flash)',
+  '> MOUNTING INFERENCE CORE .......... OK',
+  '> LOADING TENSOR GRAPH [72 layers] .. OK',
+  '> CALIBRATING FLASH MEMORY ......... OK',
+  '> SPINNING UP PARTICLE ENGINE ...... OK',
+  '> LINK-01 UP ................ 24ms',
+  '> LINK-02 UP ................ 19ms',
+  '> ALL SYSTEMS NOMINAL'
+];
+function runBoot() {
+  bootEl.classList.remove('off');
+  const box = $('#bootLines');
+  box.innerHTML = '';
+  $('#bootFill').style.width = '0%';
+  let li = 0;
+  function nextLine() {
+    if (li >= BOOT.length) { startProgress(); return; }
+    const line = BOOT[li++];
+    const div = document.createElement('div');
+    div.className = 'line';
+    box.appendChild(div);
+    let i = 0;
+    const typer = setInterval(() => {
+      if (skip) { i = line.length; }
+      div.textContent = line.slice(0, i);
+      i += 2;
+      if (i >= line.length) {
+        clearInterval(typer);
+        setTimeout(nextLine, skip ? 0 : 60);
+      }
+    }, skip ? 1 : 12);
+  }
+  nextLine();
+  function startProgress() {
+    let p = 0;
+    const iv = setInterval(() => {
+      p = skip ? 100 : Math.min(100, p + Math.random() * 14 + 3);
+      $('#bootFill').style.width = p + '%';
+      $('#bootMsg').textContent = 'LOADING ' + p.toFixed(0) + '%';
+      if (p >= 100) {
+        clearInterval(iv);
+        setTimeout(finishBoot, 260);
+      }
+    }, 70);
+  }
+}
+function finishBoot() {
+  bootDone = true;
+  bootEl.classList.add('off');
+  hudEl.classList.add('on');
+  initMode();
+  log('core online · 推理核心已上线', 'ok');
+  log('type <b class="ok">help</b> for commands', 'sys');
+  setTimeout(() => log('TOKEN STREAM → 128 tokens 已入列', 'inf'), 900);
+  setTimeout(() => log('CACHE HIT 0.98 · 命中复用', 'inf'), 2600);
+}
+addEventListener('keydown', e => { if (!bootDone && (e.key === 'Enter' || e.key === ' ')) skip = true; });
+addEventListener('pointerdown', e => { if (!bootDone) skip = true; });
+runBoot();
+setTimeout(() => { if (!bootDone) { skip = true; } }, 9000);
+
+/* ── 顶部状态 ── */
+const STATUS_WORDS = ['STEADY', 'SPIKING', 'COOLING', 'STEADY', 'DEEP', 'WARM'];
+let si = 0;
+setInterval(() => {
+  const el = $('#topStatus');
+  si = (si + 1) % STATUS_WORDS.length;
+  el.textContent = STATUS_WORDS[si];
+  el.style.color = si % 2 ? 'var(--amber)' : 'var(--green)';
+}, 2600);
+setInterval(() => {
+  const d = new Date();
+  $('#clock').textContent = d.toUTCString().slice(17, 25) + ' UTC';
+}, 1000);
+
+/* ── 指标 ── */
+const METS = [
+  { k: '吞吐 TOKENS/S', u: 't/s', v: 0, t: 1847, f: v => Math.round(v), col: 'c-cy', spark: [] },
+  { k: 'GPU 负载', u: '%', v: 0, t: 76, f: v => Math.round(v), col: 'c-gr', spark: [] },
+  { k: '显存 VRAM', u: 'GB', v: 0, t: 13.2, f: v => v.toFixed(1) + ' / 24', col: 'c-gr', spark: [] },
+  { k: '延迟 LATENCY', u: 'ms', v: 0, t: 12, f: v => Math.round(v), col: 'c-am', spark: [] },
+  { k: '温度 TEMP', u: '°C', v: 0, t: 41, f: v => Math.round(v), col: 'c-am', spark: [] },
+  { k: '队列 QUEUE', u: '', v: 0, t: 0, f: v => Math.round(v), col: 'c-re', spark: [] }
+];
+const mList = $('#mList');
+const mEls = METS.map(m => {
+  const row = document.createElement('div');
+  row.className = 'mRow ' + m.col;
+  row.innerHTML = '<div class="lab">' + m.k + '</div><div class="val">0</div><canvas class="spark"></canvas>';
+  const val = row.querySelector('.val'), sp = row.querySelector('.spark');
+  sp.width = 240; sp.height = 52;
+  mList.appendChild(row);
+  return { m, val, sp };
+});
+function drawSpark(m, el) {
+  const g = el.getContext('2d');
+  g.clearRect(0, 0, el.width, el.height);
+  const max = Math.max(...m.spark, 1);
+  const n = m.spark.length;
+  g.strokeStyle = getComputedStyle(el).color;
+  g.lineWidth = 2;
+  g.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = (i / 47) * el.width;
+    const y = el.height - (m.spark[i] / max) * (el.height - 6) - 3;
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.stroke();
+}
+setInterval(() => {
+  METS.forEach(m => {
+    m.t += (Math.random() - 0.5) * m.t * 0.12;
+    if (m.k.indexOf('GPU') === 0) m.t = Math.max(40, Math.min(96, m.t));
+    if (m.k.indexOf('温度') === 0) m.t = Math.max(34, Math.min(52, m.t));
+    if (m.k.indexOf('延迟') === 0) m.t = Math.max(6, Math.min(34, m.t));
+    if (m.k.indexOf('队列') === 0) m.t = Math.max(0, Math.min(5, m.t));
+    if (m.k.indexOf('显存') === 0) m.t = Math.max(8, Math.min(18, m.t));
+    if (m.k.indexOf('吞吐') === 0) m.t = Math.max(300, Math.min(3600, m.t));
+  });
+}, 1200);
+
+/* ── 终端 ── */
+function log(msg, cls) {
+  const d = document.createElement('div');
+  d.innerHTML = '<span class="t">' + new Date().toISOString().slice(11, 19) + '</span><span class="' + (cls || 'inf') + '">' + msg + '</span>';
+  logEl.appendChild(d);
+  while (logEl.childElementCount > 60) logEl.removeChild(logEl.firstChild);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+const EVENTS = [
+  ['TOKEN STREAM → 256 tokens 已入列', 'inf'],
+  ['CACHE HIT 0.97 · 命中复用', 'ok'],
+  ['梯度同步完成 · grad sync ok', 'ok'],
+  ['批量调度 batch=512 · 3 任务并行', 'inf'],
+  ['链路重路由 · link-02 19ms', 'warn'],
+  ['KV-CACHE 预热完成 · 命中率 96%', 'ok'],
+  ['长链推理 步数=14 · 深潜中', 'inf'],
+  ['负载回落 · gpu 78% → 64%', 'ok'],
+  ['丢包率 0.02% · 重传 0', 'ok'],
+  ['未知请求拦截 · firewalled', 'warn']
+];
+setInterval(() => {
+  if (!bootDone) return;
+  const e = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  log(e[0], e[1]);
+}, 3200);
+
+const CMDS = {
+  help: () => log('可用命令: help · clear · mode core|matrix|wave|net · ping · status · whoami · reboot', 'sys'),
+  clear: () => { logEl.innerHTML = ''; },
+  ping: () => log('pong · 0.4ms', 'ok'),
+  whoami: () => log('ds/deepseek-v4-flash · flash-tier inference kernel', 'ok'),
+  time: () => log(new Date().toISOString(), 'sys'),
+  status: () => log('CORE ONLINE · 72 layers · kv-cache 96% · 4/8 workers', 'ok'),
+  about: () => log('DS-V4F // INFERENCE CORE — 终端监控台,一切皆程序生成', 'inf'),
+  reboot: () => { bootDone = false; skip = false; logEl.innerHTML = ''; hudEl.classList.remove('on'); runBoot(); }
+};
+cmdEl.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const raw = cmdEl.value.trim();
+  cmdEl.value = '';
+  if (!raw) return;
+  log('$ ' + raw, 'sys');
+  const parts = raw.toLowerCase().split(/\s+/);
+  if (parts[0] === 'mode' && parts[1] && ['core', 'matrix', 'wave', 'net'].includes(parts[1])) {
+    MODE = parts[1];
+    initMode();
+    log('mode → ' + MODE.toUpperCase(), 'ok');
+  } else if (CMDS[parts[0]]) {
+    CMDS[parts[0]]();
+  } else {
+    log("ERR: unknown command '" + raw + "' — type help", 'err');
+  }
+});
+$('#term').addEventListener('pointerdown', () => cmdEl.focus());
+setInterval(() => cmdEl.focus(), 2000);
+
+/* ── 粒子核心 ── */
+let MODE = 'core';
+let modeState = null;
+
+function initMode() {
+  modeState = null;
+  if (MODE === 'core') initCore();
+  else if (MODE === 'matrix') initMatrix();
+  else if (MODE === 'wave') initWave();
+  else if (MODE === 'net') initNet();
+  $('#modeTag').textContent = MODE.toUpperCase();
+  $('#sbMode').textContent = MODE.toUpperCase();
+}
+
+/* CORE:轨道节点 + 连线 */
+function initCore() {
+  const n = 150;
+  modeState = {
+    pts: Array.from({ length: n }, () => ({
+      a: Math.random() * 6.2832, r: Math.random() * Math.min(W, H) * 0.34 + 10,
+      vr: (Math.random() - 0.5) * 0.6, sz: 0.8 + Math.random() * 1.8,
+      ph: Math.random() * 6.2832
+    })),
+    rings: []
+  };
+}
+function stepCore(dt, t, px, py) {
+  const s = modeState;
+  const cx = W / 2, cy = H / 2;
+  const pos = [];
+  for (const p of s.pts) {
+    p.a += p.vr * dt * (1 + Math.sin(t * 0.3 + p.ph) * 0.3);
+    const rr = p.r * (1 + 0.08 * Math.sin(t * 0.7 + p.ph));
+    let x = cx + Math.cos(p.a) * rr, y = cy + Math.sin(p.a) * rr;
+    if (px != null) {
+      const dx = x - px, dy = y - py, d2 = dx * dx + dy * dy, R = 120;
+      if (d2 < R * R && d2 > 1) {
+        const d = Math.sqrt(d2), f = (1 - d / R) * 160 * dt;
+        x += dx / d * f; y += dy / d * f;
+      }
+    }
+    pos.push({ x, y, sz: p.sz });
+  }
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineWidth = 0.7;
+  for (let i = 0; i < pos.length; i++) {
+    for (let j = i + 1; j < pos.length; j++) {
+      const dx = pos[i].x - pos[j].x, dy = pos[i].y - pos[j].y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < 4200) {
+        const a = (1 - d2 / 4200) * 0.5;
+        ctx.strokeStyle = 'rgba(90,200,255,' + a.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.moveTo(pos[i].x, pos[i].y);
+        ctx.lineTo(pos[j].x, pos[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  const coreG = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60 + 8 * Math.sin(t * 2));
+  coreG.addColorStop(0, 'rgba(255,255,255,0.9)');
+  coreG.addColorStop(0.3, 'rgba(77,225,255,0.35)');
+  coreG.addColorStop(1, 'rgba(77,225,255,0)');
+  ctx.fillStyle = coreG;
+  ctx.beginPath(); ctx.arc(cx, cy, 68, 0, 6.2832); ctx.fill();
+  for (let i = 0; i < pos.length; i++) {
+    const p = pos[i];
+    ctx.fillStyle = 'rgba(77,225,255,0.9)';
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'rgba(160,240,255,0.5)';
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.sz * 3.2, 0, 6.2832); ctx.fill();
+  }
+  for (let i = s.rings.length - 1; i >= 0; i--) {
+    const r = s.rings[i];
+    r.a += dt; r.r += (r.maxR - r.r) * dt * 4;
+    if (r.a > 1) { s.rings.splice(i, 1); continue; }
+    ctx.strokeStyle = 'rgba(255,255,255,' + (0.6 * (1 - r.a)).toFixed(3) + ')';
+    ctx.lineWidth = 2 * (1 - r.a) + 0.4;
+    ctx.beginPath(); ctx.arc(cx, cy, r.r, 0, 6.2832); ctx.stroke();
+  }
+  $('#sbNodes').textContent = pos.length;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* MATRIX:数字雨 */
+function initMatrix() {
+  const fs = 15;
+  const cols = Math.ceil(W / fs);
+  const rows = Math.ceil(H / fs);
+  const drops = Array.from({ length: cols }, () => Math.floor(Math.random() * rows));
+  const chars = '0123456789ABCDEFｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ';
+  modeState = { fs, cols, rows, drops, chars };
+}
+function stepMatrix(dt, t) {
+  const s = modeState;
+  ctx.fillStyle = 'rgba(4,8,12,0.28)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.font = s.fs + 'px monospace';
+  ctx.textAlign = 'center';
+  for (let c = 0; c < s.cols; c++) {
+    const y = s.drops[c] * s.fs;
+    const ch = s.chars[Math.floor(Math.random() * s.chars.length)];
+    ctx.fillStyle = 'rgba(77,255,166,0.85)';
+    ctx.fillText(ch, c * s.fs + s.fs / 2, y);
+    ctx.fillStyle = 'rgba(77,255,166,0.3)';
+    ctx.fillText(s.chars[Math.floor(Math.random() * s.chars.length)], c * s.fs + s.fs / 2, y - s.fs);
+    if (y > H && Math.random() > 0.975) s.drops[c] = 0;
+    s.drops[c]++;
+  }
+  $('#sbNodes').textContent = s.cols;
+}
+function clearFrame() {
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#05080c';
+  ctx.fillRect(0, 0, W, H);
+}
+
+/* WAVE:示波器 */
+function initWave() {
+  modeState = { buf: new Array(160).fill(H / 2), sp: 0 };
+}
+function stepWave(dt, t) {
+  const s = modeState;
+  clearFrame();
+  const cx = W / 2, cy = H / 2;
+  ctx.strokeStyle = 'rgba(77,225,255,0.12)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, cy); ctx.lineTo(W, cy);
+  ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
+  ctx.stroke();
+  for (let x = 0; x < W; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, cy - 8); ctx.lineTo(x, cy + 8); ctx.stroke();
+  }
+  const freq = 3;
+  const v = cy + Math.sin(t * freq) * 30 + Math.sin(t * 7.3) * 14 + Math.sin(t * 13.7 + 1) * 6;
+  s.buf.push(v);
+  if (s.buf.length > 160) s.buf.shift();
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = '#4de1ff';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#4de1ff';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  s.buf.forEach((y, i) => {
+    const x = i / (s.buf.length - 1) * W;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  });
+  ctx.stroke();
+  ctx.restore();
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 46 + 6 * Math.sin(t * 3));
+  g.addColorStop(0, 'rgba(77,225,255,0.28)');
+  g.addColorStop(1, 'rgba(77,225,255,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(cx, cy, 52, 0, 6.2832); ctx.fill();
+  $('#sbNodes').textContent = s.buf.length;
+}
+
+/* NET:神经网格 */
+function initNet() {
+  const cols = 5, rows = 12, gap = 46;
+  const nodes = [];
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) {
+      nodes.push({ x: W * 0.5 + (c - (cols - 1) / 2) * gap, y: H * 0.5 + (r - (rows - 1) / 2) * gap, c, r });
+    }
+  }
+  const edges = [];
+  for (const n of nodes) {
+    if (n.c >= cols - 1) continue;
+    const next = nodes.filter(m => m.c === n.c + 1);
+    const m = next[Math.floor(Math.random() * next.length)];
+    edges.push({ a: n, b: m });
+  }
+  modeState = { nodes, edges, pulses: [], spawn: 0 };
+}
+function stepNet(dt, t) {
+  const s = modeState;
+  clearFrame();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineWidth = 0.8;
+  for (const e of s.edges) {
+    ctx.strokeStyle = 'rgba(90,200,255,0.22)';
+    ctx.beginPath();
+    ctx.moveTo(e.a.x, e.a.y);
+    ctx.lineTo(e.b.x, e.b.y);
+    ctx.stroke();
+  }
+  s.spawn -= dt;
+  if (s.spawn <= 0) {
+    s.spawn = 0.25 + Math.random() * 0.3;
+    const src = s.nodes.filter(n => n.c === 0);
+    const e = s.edges.filter(e => e.a === src[Math.floor(Math.random() * src.length)]);
+    if (e[0]) s.pulses.push({ e: e[0], u: 0 });
+  }
+  for (let i = s.pulses.length - 1; i >= 0; i--) {
+    const p = s.pulses[i];
+    p.u += dt * 0.9;
+    if (p.u > 1) { s.pulses.splice(i, 1); continue; }
+    const x = p.e.a.x + (p.e.b.x - p.e.a.x) * p.u;
+    const y = p.e.a.y + (p.e.b.y - p.e.a.y) * p.u;
+    const glow = 1 - p.u;
+    ctx.fillStyle = 'rgba(77,255,166,' + glow + ')';
+    ctx.beginPath(); ctx.arc(x, y, 2.4, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'rgba(77,255,166,' + (glow * 0.3) + ')';
+    ctx.beginPath(); ctx.arc(x, y, 7, 0, 6.2832); ctx.fill();
+  }
+  for (const n of s.nodes) {
+    ctx.fillStyle = 'rgba(77,225,255,0.85)';
+    ctx.beginPath(); ctx.arc(n.x, n.y, 2.2, 0, 6.2832); ctx.fill();
+  }
+  $('#sbNodes').textContent = s.nodes.length;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+canvas.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  if (MODE === 'core') {
+    modeState.rings.push({ r: 10, maxR: Math.min(W, H) * 0.4, a: 0 });
+  }
+});
+const pointer = { x: null, y: null };
+canvas.addEventListener('pointermove', e => {
+  const r = canvas.getBoundingClientRect();
+  pointer.x = e.clientX - r.left;
+  pointer.y = e.clientY - r.top;
+  const xh = $('#xhair');
+  xh.style.left = (pointer.x - 9) + 'px';
+  xh.style.top = (pointer.y - 9) + 'px';
+  $('#coords').textContent = 'X:' + String(Math.round(pointer.x)).padStart(4, '0') + ' Y:' + String(Math.round(pointer.y)).padStart(4, '0');
+});
+canvas.addEventListener('pointerleave', () => { pointer.x = null; pointer.y = null; });
+
+/* ── 主循环 ── */
+let last = performance.now(), fps = 60;
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  const t = now / 1000;
+  fps += (1 / Math.max(dt, 0.001) - fps) * 0.05;
+  $('#sbFps').textContent = Math.round(fps);
+
+  if (bootDone && W > 0) {
+    if (MODE === 'core') stepCore(dt, t, pointer.x, pointer.y);
+    else if (MODE === 'matrix') stepMatrix(dt, t);
+    else if (MODE === 'wave') stepWave(dt, t);
+    else stepNet(dt, t);
+  }
+
+  mEls.forEach(({ m, val, sp }) => {
+    m.v += (m.t - m.v) * Math.min(1, dt * 1.6);
+    m.spark.push(m.v);
+    if (m.spark.length > 48) m.spark.shift();
+    val.textContent = m.f(m.v);
+    drawSpark(m, sp);
+  });
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+resize();
+</script>
+</body>
+</html>

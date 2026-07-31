@@ -52,6 +52,12 @@
         "desc": "中式美学交互导览:二十四国色、程序化纹样、永字八法与二十四节气。",
         "path": "labs/dongfang/index.html",
         "icon": "方"
+      },
+      {
+        "name": "V4F · 內核",
+        "desc": "终端式监控台:开机自检、实时指标、粒子推理核心与可输命令的 HUD。",
+        "path": "labs/ds-kernel/index.html",
+        "icon": "核"
       }
     ]
   },
