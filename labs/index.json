@@ -46,6 +46,12 @@
         "desc": "深海里的单笔鲸:生物荧光粒子与一道无声下潜的线。",
         "path": "labs/ds-whale/index.html",
         "icon": "鲸"
+      },
+      {
+        "name": "V4F · 问山",
+        "desc": "水墨山水卷轴:宣纸、淡墨远山、扁舟渔火与一笔朱印,全程序生成。",
+        "path": "labs/ds-shanshui/index.html",
+        "icon": "山"
       }
     ]
   },

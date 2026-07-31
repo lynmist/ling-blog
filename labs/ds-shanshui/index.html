@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>问山 · 水墨山水</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f1e7d3;
+  --ink: #3a342c;
+  --ink2: #6b5f4d;
+  --seal: #b03a2e;
+  --cn: "KaiTi", "STKaiti", "FangSong", "Noto Serif SC", "SimSun", serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--cn);
+  font-weight: 300;
+  height: 100vh; overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(176,58,46,.25); }
+
+#cv {
+  position: fixed; inset: 0; z-index: 1;
+  width: 100vw; height: 100vh; display: block;
+  cursor: crosshair;
+}
+
+/* 装裱边线 */
+.mount { position: fixed; inset: 16px; z-index: 20; pointer-events: none;
+  border: 1px solid rgba(120,100,70,.55); }
+.mount::after { content: ""; position: absolute; inset: 7px; border: 1px solid rgba(120,100,70,.28); }
+
+/* 题字:左竖排 */
+.title {
+  position: fixed; left: 7vw; top: 11vh; z-index: 25; pointer-events: none;
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-size: clamp(40px, 4.6vw, 68px); font-weight: 200;
+  letter-spacing: .5em; color: var(--ink);
+}
+
+/* 诗:右竖排 + 印章 */
+.frame { position: fixed; right: 6vw; top: 11vh; z-index: 25; pointer-events: none;
+  display: flex; flex-direction: row; align-items: flex-start; }
+.poem {
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-size: clamp(15px, 1.5vw, 19px); font-weight: 300;
+  letter-spacing: .55em; line-height: 1.5; color: var(--ink2);
+  margin-right: 20px;
+}
+.seal {
+  writing-mode: vertical-rl; text-orientation: upright;
+  width: 46px; height: 46px; margin-top: 30px;
+  border: 2px solid var(--seal); color: var(--seal);
+  font-size: 15px; letter-spacing: .12em;
+  display: flex; align-items: center; justify-content: center;
+  transform: rotate(-2deg); opacity: .92;
+}
+
+.foot {
+  position: fixed; left: 7vw; bottom: 5vh; z-index: 25; pointer-events: none;
+  font-family: Georgia, 'Times New Roman', serif; font-style: italic;
+  font-size: 12px; letter-spacing: .18em; color: rgba(90,78,60,.55);
+}
+
+.hint {
+  position: fixed; left: 50%; bottom: 4.5vh; z-index: 25; pointer-events: none;
+  transform: translateX(-50%);
+  font-size: 12px; letter-spacing: .35em; text-indent: .35em; color: rgba(90,78,60,.6);
+  animation: hint 3.5s ease-in-out infinite; white-space: nowrap;
+}
+@keyframes hint { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
+
+@media (max-width: 720px) {
+  .title { left: 5vw; top: 9vh; }
+  .frame { right: 5vw; top: 9vh; }
+  .poem { letter-spacing: .3em; font-size: 13px; }
+  .hint { letter-spacing: .2em; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div class="mount"></div>
+
+<div class="title">问&thinsp;山</div>
+
+<div class="frame">
+  <div class="poem">远山近水皆归墨<br>扁舟一叶问平生<br>坐看云起复云灭<br>满目青山不答声</div>
+  <div class="seal">求索</div>
+</div>
+
+<div class="foot">SHANSHUI · 问山 — 无一张图片,全程序水墨</div>
+<div class="hint">移动 · 拨动扁舟&emsp;点击 · 墨入清水</div>
+
+<script>
+/* ═══════════ 问山:宣纸 · 淡墨 · 扁舟 · 雾 · 墨入水 ═══════════ */
+const cv = document.getElementById('cv');
+const g = cv.getContext('2d');
+
+let W = 0, H = 0, dpr = 1, cx = 0, cy = 0, waterY = 0;
+let sc = null, scg = null;
+
+const S1 = 1.7, S2 = 4.3, S3 = 8.9;
+
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(H * dpr);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx = W / 2; cy = H / 2;
+  waterY = H * 0.62;
+  renderStatic();
+  initAnimated();
+}
+addEventListener('resize', resize);
+resize();
+
+/* ── 静态画面:宣纸、月、群山、水面、近景、印章 ── */
+function renderStatic() {
+  sc = document.createElement('canvas');
+  sc.width = W * dpr; sc.height = H * dpr;
+  scg = sc.getContext('2d');
+  scg.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  paper();
+  moon();
+  const layers = [
+    { base: 0.46, amp: 0.035, peaks: [], col: '140,128,105', a: 0.45, blur: 2.5 },
+    { base: 0.55, amp: 0.050, peaks: [{ x: 0.30, w: 0.12, h: 0.06 }, { x: 0.74, w: 0.10, h: 0.05 }], col: '110,98,78', a: 0.6, blur: 1.5 },
+    { base: 0.63, amp: 0.060, peaks: [{ x: 0.16, w: 0.09, h: 0.10 }, { x: 0.52, w: 0.13, h: 0.15 }, { x: 0.86, w: 0.08, h: 0.08 }], col: '62,55,45', a: 0.95, blur: 0 }
+  ];
+  for (const l of layers) drawLayer(l);
+  water();
+  foreground();
+  painterSeal();
+  vignette();
+}
+
+function paper() {
+  scg.fillStyle = '#f1e7d3';
+  scg.fillRect(0, 0, W, H);
+  const n = Math.round(W * H / 2600);
+  for (let i = 0; i < n; i++) {
+    scg.fillStyle = Math.random() < 0.5 ? 'rgba(120,100,70,0.05)' : 'rgba(255,255,255,0.05)';
+    const r = Math.random() * 1.8 + 0.4;
+    scg.fillRect(Math.random() * W, Math.random() * H, r, r);
+  }
+  for (let i = 0; i < 70; i++) {
+    scg.strokeStyle = 'rgba(120,100,70,0.035)';
+    scg.lineWidth = 0.6;
+    const x = Math.random() * W, y = Math.random() * H;
+    const a = Math.random() * 3.14, l = 15 + Math.random() * 45;
+    scg.beginPath();
+    scg.moveTo(x, y);
+    scg.quadraticCurveTo(
+      x + Math.cos(a) * l * 0.5 + (Math.random() - 0.5) * 8,
+      y + Math.sin(a) * l * 0.5 + (Math.random() - 0.5) * 8,
+      x + Math.cos(a) * l, y + Math.sin(a) * l);
+    scg.stroke();
+  }
+}
+
+function moon() {
+  const mx = W * 0.78, my = H * 0.17, r = Math.min(W, H) * 0.042;
+  const halo = scg.createRadialGradient(mx, my, 0, mx, my, r * 4);
+  halo.addColorStop(0, 'rgba(247,242,226,0.5)');
+  halo.addColorStop(0.35, 'rgba(247,242,226,0.18)');
+  halo.addColorStop(1, 'rgba(247,242,226,0)');
+  scg.fillStyle = halo;
+  scg.beginPath(); scg.arc(mx, my, r * 4, 0, 6.2832); scg.fill();
+  scg.fillStyle = '#f7f2e2';
+  scg.beginPath(); scg.arc(mx, my, r, 0, 6.2832); scg.fill();
+  scg.fillStyle = 'rgba(180,165,140,0.18)';
+  scg.beginPath(); scg.arc(mx + r * 0.25, my - r * 0.15, r * 0.2, 0, 6.2832); scg.fill();
+  scg.beginPath(); scg.arc(mx - r * 0.2, my + r * 0.2, r * 0.13, 0, 6.2832); scg.fill();
+}
+
+function drawLayer(l) {
+  const baseY = l.base * H;
+  scg.save();
+  if (l.blur) scg.filter = 'blur(' + l.blur + 'px)';
+  const step = 6;
+  let first = true, minY = 1e9;
+  scg.beginPath();
+  for (let x = 0; x <= W; x += step) {
+    const u = x / W;
+    let t = 0;
+    t += Math.sin(u * Math.PI * 2.5 + S1) * l.amp * H;
+    t += Math.sin(u * Math.PI * 6.3 + S2) * l.amp * 0.55 * H;
+    t += Math.sin(u * Math.PI * 13.7 + S3) * l.amp * 0.28 * H;
+    for (const p of l.peaks) {
+      const d = (u - p.x) / p.w;
+      t -= p.h * H * Math.exp(-d * d);
+    }
+    const y = baseY - t;
+    if (y < minY) minY = y;
+    if (first) { scg.moveTo(x, y); first = false; }
+    else scg.lineTo(x, y);
+  }
+  scg.lineTo(W, waterY);
+  scg.lineTo(0, waterY);
+  scg.closePath();
+  const gr = scg.createLinearGradient(0, minY, 0, waterY);
+  gr.addColorStop(0, 'rgba(' + l.col + ',' + l.a + ')');
+  gr.addColorStop(1, 'rgba(' + l.col + ',' + l.a * 0.12 + ')');
+  scg.fillStyle = gr;
+  scg.fill();
+  scg.restore();
+}
+
+function water() {
+  const gr = scg.createLinearGradient(0, waterY, 0, H);
+  gr.addColorStop(0, '#e3d8be');
+  gr.addColorStop(1, '#d6c9a8');
+  scg.fillStyle = gr;
+  scg.fillRect(0, waterY, W, H - waterY);
+
+  scg.strokeStyle = 'rgba(90,78,60,0.35)';
+  scg.lineWidth = 1.2;
+  scg.beginPath();
+  for (let x = 0; x <= W; x += 12) {
+    const y = waterY + Math.sin(x * 0.01 + 3) * 1.5;
+    if (x === 0) scg.moveTo(x, y); else scg.lineTo(x, y);
+  }
+  scg.stroke();
+
+  const g2 = scg.createLinearGradient(0, waterY, 0, waterY + H * 0.08);
+  g2.addColorStop(0, 'rgba(150,135,105,0.18)');
+  g2.addColorStop(1, 'rgba(150,135,105,0)');
+  scg.fillStyle = g2;
+  scg.fillRect(0, waterY, W, H * 0.08);
+}
+
+function foreground() {
+  scg.save();
+  scg.filter = 'blur(1.5px)';
+  blob(-W * 0.1, H * 0.86, W * 0.34, H * 0.16, '52,46,38', 0.95);
+  blob(W * 0.82, H * 0.9, W * 0.26, H * 0.12, '52,46,38', 0.95);
+  scg.restore();
+  for (let i = 0; i < 8; i++) {
+    const bx = W * (0.08 + Math.random() * 0.12);
+    scg.strokeStyle = 'rgba(52,46,38,0.7)';
+    scg.lineWidth = 1.2;
+    scg.beginPath();
+    scg.moveTo(bx, H * 0.99);
+    scg.quadraticCurveTo(bx + (Math.random() - 0.5) * 6, H * 0.97, bx + (Math.random() - 0.5) * 12, H * 0.95);
+    scg.stroke();
+  }
+}
+
+function blob(x, y, w, h, col, a) {
+  scg.beginPath();
+  scg.moveTo(x, H);
+  scg.quadraticCurveTo(x + w * 0.3, y - h * 0.5, x + w * 0.5, y);
+  scg.quadraticCurveTo(x + w * 0.7, y - h * 0.6, x + w, H);
+  scg.closePath();
+  scg.fillStyle = 'rgba(' + col + ',' + a + ')';
+  scg.fill();
+}
+
+function painterSeal() {
+  scg.save();
+  scg.translate(W * 0.9, H * 0.87);
+  scg.rotate(-0.06);
+  scg.strokeStyle = 'rgba(176,58,46,0.85)';
+  scg.lineWidth = 1.5;
+  scg.strokeRect(-14, -14, 28, 28);
+  scg.fillStyle = 'rgba(176,58,46,0.85)';
+  scg.font = '13px KaiTi, STKaiti, "Noto Serif SC", serif';
+  scg.textAlign = 'center';
+  scg.fillText('问山', 0, 4);
+  scg.restore();
+}
+
+function vignette() {
+  const gr = scg.createRadialGradient(cx, cy, H * 0.3, cx, cy, Math.max(W, H) * 0.72);
+  gr.addColorStop(0, 'rgba(120,100,70,0)');
+  gr.addColorStop(1, 'rgba(120,100,70,0.18)');
+  scg.fillStyle = gr;
+  scg.fillRect(0, 0, W, H);
+}
+
+/* ── 动态层:雾、水波、鸟、墨、扁舟 ── */
+const mistDefs = [
+  { y: 0.40, amp: 0.05, sp: 7, a: 0.42, rad: 0.14 },
+  { y: 0.52, amp: 0.07, sp: 11, a: 0.36, rad: 0.17 },
+  { y: 0.62, amp: 0.05, sp: 9, a: 0.30, rad: 0.14 }
+];
+let mistBlobs = [], waves = [], birds = [], ripples = [];
+let boatX = 0, nextFlocks = 0, ptr = null;
+
+function initAnimated() {
+  mistBlobs = [];
+  mistDefs.forEach((m, band) => {
+    for (let i = 0; i < 4; i++) {
+      mistBlobs.push({
+        band, x: (Math.random() * 1.6 - 0.1) * W, baseY: m.y * H,
+        rad: W * m.rad, ph: Math.random() * 6.28,
+        sp: Math.random() < 0.5 ? -m.sp : m.sp, a: m.a
+      });
+    }
+  });
+  waves = [];
+  const wn = Math.max(6, Math.min(14, Math.round(W / 90)));
+  for (let i = 0; i < wn; i++) {
+    waves.push({
+      x: Math.random() * W, y: waterY + H * (0.05 + Math.random() * 0.3),
+      len: 18 + Math.random() * 36, ph: Math.random() * 6.28, sp: 3 + Math.random() * 5
+    });
+  }
+  if (!boatX) boatX = W * 0.5;
+  boatX = Math.max(W * 0.15, Math.min(W * 0.85, boatX));
+  nextFlocks = performance.now() + 2500;
+}
+
+addEventListener('pointermove', e => { ptr = { x: e.clientX, y: e.clientY }; });
+addEventListener('pointerleave', () => { ptr = null; });
+addEventListener('pointerdown', e => {
+  splash(e.clientX, e.clientY);
+  flockFrom(e.clientX, e.clientY);
+});
+
+function drawMist(t, dt) {
+  for (const b of mistBlobs) {
+    const m = mistDefs[b.band];
+    b.x += b.sp * dt;
+    if (b.x < -b.rad * 2) b.x = W + b.rad * 2;
+    if (b.x > W + b.rad * 2) b.x = -b.rad * 2;
+    const yy = b.baseY + Math.sin(t * 0.35 + b.ph) * m.amp * H;
+    const pulse = 0.75 + 0.25 * Math.sin(t * 0.5 + b.ph * 1.7);
+    const rg = g.createRadialGradient(b.x, yy, 0, b.x, yy, b.rad);
+    rg.addColorStop(0, 'rgba(250,246,238,' + b.a * pulse + ')');
+    rg.addColorStop(1, 'rgba(250,246,238,0)');
+    g.fillStyle = rg;
+    g.beginPath(); g.arc(b.x, yy, b.rad, 0, 6.2832); g.fill();
+  }
+}
+
+function drawWaves(t, dt) {
+  g.strokeStyle = 'rgba(95,84,64,0.25)';
+  g.lineWidth = 1;
+  for (const w of waves) {
+    w.x += w.sp * dt;
+    if (w.x > W + w.len) w.x = -w.len;
+    g.beginPath();
+    g.moveTo(w.x, w.y);
+    g.quadraticCurveTo(w.x + w.len * 0.5, w.y + Math.sin(t * 2 + w.ph) * 2.2, w.x + w.len, w.y);
+    g.stroke();
+  }
+}
+
+function drawBird(b, t) {
+  g.strokeStyle = '#4a4234';
+  g.lineWidth = Math.max(1, b.s * 0.06);
+  g.lineCap = 'round';
+  const flap = Math.sin(t * 7 + b.ph) * b.s * 0.16;
+  g.beginPath();
+  g.moveTo(b.x, b.y);
+  g.quadraticCurveTo(b.x - b.s * 0.35, b.y - b.s * 0.14 - flap, b.x - b.s * 0.72, b.y + Math.sin(t * 7 + b.ph + 0.6) * b.s * 0.05);
+  g.moveTo(b.x, b.y);
+  g.quadraticCurveTo(b.x - b.s * 0.35, b.y + b.s * 0.14 + flap, b.x - b.s * 0.72, b.y);
+  g.stroke();
+}
+
+function updateBirds(t, dt, now) {
+  if (now > nextFlocks) {
+    nextFlocks = now + 4500 + Math.random() * 5000;
+    const n = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < n; i++) {
+      birds.push({
+        x: W * 0.85 + Math.random() * 60, y: H * (0.16 + Math.random() * 0.12),
+        vx: -(28 + Math.random() * 20), vy: -(6 + Math.random() * 8),
+        s: 7 + Math.random() * 7, ph: Math.random() * 6.28
+      });
+    }
+  }
+  for (let i = birds.length - 1; i >= 0; i--) {
+    const b = birds[i];
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    if (b.x < -80 || b.y < -80) { birds.splice(i, 1); continue; }
+    drawBird(b, t);
+  }
+}
+
+function flockFrom(x, y) {
+  for (let i = 0; i < 3 + Math.floor(Math.random() * 2); i++) {
+    birds.push({
+      x: x + (Math.random() - 0.5) * 40, y: y + (Math.random() - 0.5) * 30,
+      vx: -(30 + Math.random() * 40), vy: -(20 + Math.random() * 20),
+      s: 6 + Math.random() * 6, ph: Math.random() * 6.28
+    });
+  }
+}
+
+function splash(x, y) {
+  ripples.push({ x, y, r: 6, maxR: Math.min(W, H) * 0.16 + Math.random() * 40, age: 0, life: 1.7, seed: Math.random() * 10 });
+}
+
+function updateRipples(t, dt) {
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const r = ripples[i];
+    r.age += dt;
+    if (r.age >= r.life) { ripples.splice(i, 1); continue; }
+    const k = Math.min(1, r.age / r.life);
+    const e = 1 - Math.pow(1 - k, 3);
+    const R = r.r + (r.maxR - r.r) * e;
+    g.strokeStyle = 'rgba(60,52,40,' + 0.5 * (1 - k) + ')';
+    g.lineWidth = 1.4 * (1 - k) + 0.4;
+    g.beginPath(); g.arc(r.x, r.y, R, 0, 6.2832); g.stroke();
+    const ir = Math.max(2, r.r * 3 * (1 - k));
+    const rg = g.createRadialGradient(r.x, r.y, 0, r.x, r.y, ir);
+    rg.addColorStop(0, 'rgba(45,40,32,' + 0.5 * (1 - k) + ')');
+    rg.addColorStop(1, 'rgba(45,40,32,0)');
+    g.fillStyle = rg;
+    g.beginPath(); g.arc(r.x, r.y, ir, 0, 6.2832); g.fill();
+    for (let j = 0; j < 4; j++) {
+      const a = r.seed + j * 2.3;
+      const sx = r.x + Math.cos(a) * R * (0.6 + 0.3 * Math.sin(a * 7));
+      const sy = r.y + Math.sin(a) * R * (0.6 + 0.3 * Math.sin(a * 5));
+      g.fillStyle = 'rgba(50,44,36,' + 0.4 * (1 - k) + ')';
+      g.beginPath(); g.arc(sx, sy, Math.max(0.6, 1.5 * (1 - k)), 0, 6.2832); g.fill();
+    }
+  }
+}
+
+function drawBoat(t) {
+  const bs = Math.max(16, Math.min(W, H) * 0.02);
+  const tilt = Math.sin(t * 1.2) * 0.035;
+  const by = waterY + H * 0.03;
+
+  g.save();
+  g.translate(boatX, by);
+  g.rotate(tilt);
+  g.scale(1, -1);
+  g.lineCap = 'round';
+
+  g.beginPath();
+  g.moveTo(-bs, 0);
+  g.quadraticCurveTo(0, -bs * 0.5, bs, 0);
+  g.quadraticCurveTo(bs * 0.55, bs * 0.06, 0, bs * 0.05);
+  g.quadraticCurveTo(-bs * 0.55, bs * 0.06, -bs, 0);
+  g.closePath();
+  g.fillStyle = '#3a342c';
+  g.fill();
+  g.strokeStyle = 'rgba(40,35,28,0.9)';
+  g.lineWidth = 1.2;
+  g.stroke();
+
+  const fy = bs * 0.22;
+  g.strokeStyle = '#3a342c';
+  g.lineWidth = 1;
+  g.beginPath();
+  g.moveTo(-bs * 0.3, fy + bs * 0.05);
+  g.quadraticCurveTo(bs * 0.6, fy, bs * 0.95, fy - bs * 0.35);
+  g.stroke();
+
+  g.lineWidth = bs * 0.09;
+  g.beginPath();
+  g.moveTo(-bs * 0.3, fy + bs * 0.06);
+  g.lineTo(-bs * 0.28, fy - bs * 0.16);
+  g.stroke();
+
+  g.fillStyle = '#3a342c';
+  g.beginPath();
+  g.arc(-bs * 0.28, fy - bs * 0.2, bs * 0.05, 0, 6.2832);
+  g.fill();
+  g.beginPath();
+  g.moveTo(-bs * 0.42, fy - bs * 0.18);
+  g.quadraticCurveTo(-bs * 0.28, fy - bs * 0.34, -bs * 0.12, fy - bs * 0.18);
+  g.closePath();
+  g.fill();
+
+  const lx = -bs * 0.5, ly = fy - bs * 0.02;
+  const lg = g.createRadialGradient(lx, ly, 0, lx, ly, bs * 0.3);
+  lg.addColorStop(0, 'rgba(255,196,110,0.9)');
+  lg.addColorStop(1, 'rgba(255,180,90,0)');
+  g.fillStyle = lg;
+  g.beginPath(); g.arc(lx, ly, bs * 0.3, 0, 6.2832); g.fill();
+  g.fillStyle = '#e8a04a';
+  g.beginPath(); g.arc(lx, ly, bs * 0.05, 0, 6.2832); g.fill();
+
+  g.restore();
+
+  g.strokeStyle = 'rgba(70,60,45,0.15)';
+  g.lineWidth = 1.2;
+  for (let i = 0; i < 3; i++) {
+    const yy = by + bs * 0.5 + i * bs * 0.35;
+    g.beginPath();
+    g.moveTo(boatX - bs * 0.9, yy);
+    g.quadraticCurveTo(boatX, yy + Math.sin(t * 2 + i) * 2, boatX + bs * 0.9, yy);
+    g.stroke();
+  }
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  const t = now / 1000;
+
+  g.drawImage(sc, 0, 0, W, H);
+
+  updateBirds(t, dt, now);
+  drawMist(t, dt);
+  drawWaves(t, dt);
+
+  const tx = ptr ? ptr.x : W * 0.5;
+  boatX += Math.max(-0.4 * W * dt, Math.min(0.4 * W * dt, (tx - boatX) * dt * 1.1));
+  boatX += Math.sin(t * 0.25) * 3 * dt;
+  boatX = Math.max(W * 0.15, Math.min(W * 0.85, boatX));
+  drawBoat(t);
+
+  updateRipples(t, dt);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
