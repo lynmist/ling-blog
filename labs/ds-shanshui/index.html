@@ -106,20 +106,26 @@ body {
 const cv = document.getElementById('cv');
 const g = cv.getContext('2d');
 
-let W = 0, H = 0, dpr = 1, cx = 0, cy = 0, waterY = 0;
+let W = 0, H = 0, renderScale = 1, baseScale = 1, cx = 0, cy = 0, waterY = 0;
 let sc = null, scg = null;
 
 const S1 = 1.7, S2 = 4.3, S3 = 8.9;
+const BOAT0 = 64, LANTERN0 = 22;
+
+function applyScale() {
+  cv.width = Math.max(1, Math.round(W * renderScale));
+  cv.height = Math.max(1, Math.round(H * renderScale));
+  g.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+  renderStatic();
+}
 
 function resize() {
-  dpr = Math.min(devicePixelRatio || 1, 2);
+  baseScale = Math.min(devicePixelRatio || 1, 2);
+  renderScale = Math.min(baseScale, Math.max(0.75, renderScale));
   W = innerWidth; H = innerHeight;
-  cv.width = Math.round(W * dpr);
-  cv.height = Math.round(H * dpr);
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
   cx = W / 2; cy = H / 2;
   waterY = H * 0.62;
-  renderStatic();
+  applyScale();
   initAnimated();
 }
 addEventListener('resize', resize);
@@ -128,9 +134,10 @@ resize();
 /* ── 静态画面:宣纸、月、群山、水面、近景、印章 ── */
 function renderStatic() {
   sc = document.createElement('canvas');
-  sc.width = W * dpr; sc.height = H * dpr;
+  sc.width = Math.max(1, Math.round(W * renderScale));
+  sc.height = Math.max(1, Math.round(H * renderScale));
   scg = sc.getContext('2d');
-  scg.setTransform(dpr, 0, 0, dpr, 0, 0);
+  scg.setTransform(renderScale, 0, 0, renderScale, 0, 0);
 
   paper();
   moon();
@@ -296,6 +303,77 @@ const mistDefs = [
   { y: 0.52, amp: 0.07, sp: 11, a: 0.36, rad: 0.17 },
   { y: 0.62, amp: 0.05, sp: 9, a: 0.30, rad: 0.14 }
 ];
+
+/* ── 预渲染 sprite:雾团、渔火、扁舟 ── */
+const mistSprites = mistDefs.map(() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const h = c.getContext('2d');
+  const rg = h.createRadialGradient(128, 128, 0, 128, 128, 128);
+  rg.addColorStop(0, 'rgba(250,246,238,1)');
+  rg.addColorStop(1, 'rgba(250,246,238,0)');
+  h.fillStyle = rg;
+  h.fillRect(0, 0, 256, 256);
+  return c;
+});
+const lanternSprite = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = LANTERN0 * 2;
+  const h = c.getContext('2d');
+  const rg = h.createRadialGradient(LANTERN0, LANTERN0, 0, LANTERN0, LANTERN0, LANTERN0);
+  rg.addColorStop(0, 'rgba(255,196,110,0.9)');
+  rg.addColorStop(0.4, 'rgba(255,180,90,0.35)');
+  rg.addColorStop(1, 'rgba(255,180,90,0)');
+  h.fillStyle = rg;
+  h.fillRect(0, 0, c.width, c.height);
+  h.fillStyle = '#e8a04a';
+  h.beginPath(); h.arc(LANTERN0, LANTERN0, 3, 0, 6.2832); h.fill();
+  return c;
+})();
+let boatSprite = null;
+function buildBoatSprite() {
+  const c = document.createElement('canvas');
+  c.width = c.height = BOAT0 * 2;
+  const h = c.getContext('2d');
+  h.translate(BOAT0, BOAT0);
+  h.scale(1, -1);
+  h.lineCap = 'round';
+  const bs = BOAT0;
+  h.beginPath();
+  h.moveTo(-bs, 0);
+  h.quadraticCurveTo(0, -bs * 0.5, bs, 0);
+  h.quadraticCurveTo(bs * 0.55, bs * 0.06, 0, bs * 0.05);
+  h.quadraticCurveTo(-bs * 0.55, bs * 0.06, -bs, 0);
+  h.closePath();
+  h.fillStyle = '#3a342c';
+  h.fill();
+  h.strokeStyle = 'rgba(40,35,28,0.9)';
+  h.lineWidth = 1.2;
+  h.stroke();
+  const fy = bs * 0.22;
+  h.strokeStyle = '#3a342c';
+  h.lineWidth = 1;
+  h.beginPath();
+  h.moveTo(-bs * 0.3, fy + bs * 0.05);
+  h.quadraticCurveTo(bs * 0.6, fy, bs * 0.95, fy - bs * 0.35);
+  h.stroke();
+  h.lineWidth = bs * 0.09;
+  h.beginPath();
+  h.moveTo(-bs * 0.3, fy + bs * 0.06);
+  h.lineTo(-bs * 0.28, fy - bs * 0.16);
+  h.stroke();
+  h.fillStyle = '#3a342c';
+  h.beginPath();
+  h.arc(-bs * 0.28, fy - bs * 0.2, bs * 0.05, 0, 6.2832);
+  h.fill();
+  h.beginPath();
+  h.moveTo(-bs * 0.42, fy - bs * 0.18);
+  h.quadraticCurveTo(-bs * 0.28, fy - bs * 0.34, -bs * 0.12, fy - bs * 0.18);
+  h.closePath();
+  h.fill();
+  boatSprite = c;
+}
+
 let mistBlobs = [], waves = [], birds = [], ripples = [];
 let boatX = 0, nextFlocks = 0, ptr = null;
 
@@ -320,6 +398,7 @@ function initAnimated() {
   }
   if (!boatX) boatX = W * 0.5;
   boatX = Math.max(W * 0.15, Math.min(W * 0.85, boatX));
+  buildBoatSprite();
   nextFlocks = performance.now() + 2500;
 }
 
@@ -338,12 +417,10 @@ function drawMist(t, dt) {
     if (b.x > W + b.rad * 2) b.x = -b.rad * 2;
     const yy = b.baseY + Math.sin(t * 0.35 + b.ph) * m.amp * H;
     const pulse = 0.75 + 0.25 * Math.sin(t * 0.5 + b.ph * 1.7);
-    const rg = g.createRadialGradient(b.x, yy, 0, b.x, yy, b.rad);
-    rg.addColorStop(0, 'rgba(250,246,238,' + b.a * pulse + ')');
-    rg.addColorStop(1, 'rgba(250,246,238,0)');
-    g.fillStyle = rg;
-    g.beginPath(); g.arc(b.x, yy, b.rad, 0, 6.2832); g.fill();
+    g.globalAlpha = b.a * pulse;
+    g.drawImage(mistSprites[b.band], b.x - b.rad, yy - b.rad, b.rad * 2, b.rad * 2);
   }
+  g.globalAlpha = 1;
 }
 
 function drawWaves(t, dt) {
@@ -441,54 +518,12 @@ function drawBoat(t) {
   g.save();
   g.translate(boatX, by);
   g.rotate(tilt);
-  g.scale(1, -1);
-  g.lineCap = 'round';
-
-  g.beginPath();
-  g.moveTo(-bs, 0);
-  g.quadraticCurveTo(0, -bs * 0.5, bs, 0);
-  g.quadraticCurveTo(bs * 0.55, bs * 0.06, 0, bs * 0.05);
-  g.quadraticCurveTo(-bs * 0.55, bs * 0.06, -bs, 0);
-  g.closePath();
-  g.fillStyle = '#3a342c';
-  g.fill();
-  g.strokeStyle = 'rgba(40,35,28,0.9)';
-  g.lineWidth = 1.2;
-  g.stroke();
-
-  const fy = bs * 0.22;
-  g.strokeStyle = '#3a342c';
-  g.lineWidth = 1;
-  g.beginPath();
-  g.moveTo(-bs * 0.3, fy + bs * 0.05);
-  g.quadraticCurveTo(bs * 0.6, fy, bs * 0.95, fy - bs * 0.35);
-  g.stroke();
-
-  g.lineWidth = bs * 0.09;
-  g.beginPath();
-  g.moveTo(-bs * 0.3, fy + bs * 0.06);
-  g.lineTo(-bs * 0.28, fy - bs * 0.16);
-  g.stroke();
-
-  g.fillStyle = '#3a342c';
-  g.beginPath();
-  g.arc(-bs * 0.28, fy - bs * 0.2, bs * 0.05, 0, 6.2832);
-  g.fill();
-  g.beginPath();
-  g.moveTo(-bs * 0.42, fy - bs * 0.18);
-  g.quadraticCurveTo(-bs * 0.28, fy - bs * 0.34, -bs * 0.12, fy - bs * 0.18);
-  g.closePath();
-  g.fill();
-
-  const lx = -bs * 0.5, ly = fy - bs * 0.02;
-  const lg = g.createRadialGradient(lx, ly, 0, lx, ly, bs * 0.3);
-  lg.addColorStop(0, 'rgba(255,196,110,0.9)');
-  lg.addColorStop(1, 'rgba(255,180,90,0)');
-  g.fillStyle = lg;
-  g.beginPath(); g.arc(lx, ly, bs * 0.3, 0, 6.2832); g.fill();
-  g.fillStyle = '#e8a04a';
-  g.beginPath(); g.arc(lx, ly, bs * 0.05, 0, 6.2832); g.fill();
-
+  g.scale(bs / BOAT0, -bs / BOAT0);
+  g.drawImage(boatSprite, -BOAT0, -BOAT0);
+  const pulse = 0.7 + 0.3 * Math.sin(t * 3);
+  g.globalAlpha = pulse;
+  g.drawImage(lanternSprite, -BOAT0 * 0.5 - LANTERN0, BOAT0 * 0.2 - LANTERN0);
+  g.globalAlpha = 1;
   g.restore();
 
   g.strokeStyle = 'rgba(70,60,45,0.15)';
@@ -503,10 +538,24 @@ function drawBoat(t) {
 }
 
 let last = performance.now();
+let ema = 16.7, perfT = 0;
 function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
   const t = now / 1000;
+
+  ema += (dt * 1000 - ema) * 0.08;
+  perfT += dt;
+  if (perfT > 1) {
+    if (ema > 21 && renderScale > 0.75) {
+      renderScale = Math.max(0.75, renderScale * 0.85);
+      applyScale();
+    } else if (ema < 15 && renderScale < baseScale) {
+      renderScale = Math.min(baseScale, renderScale / 0.85);
+      applyScale();
+    }
+    perfT = 0;
+  }
 
   g.drawImage(sc, 0, 0, W, H);
 
