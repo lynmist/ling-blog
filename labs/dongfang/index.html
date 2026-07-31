@@ -552,11 +552,12 @@ function huiwenSVG() {
 }
 function fangshengSVG() {
   return svgWrap('<g fill="none" stroke="' + INK + '" stroke-width="1">'
-    + '<rect x="18" y="18" width="64" height="64" transform="rotate(45 50 50)"/>'
-    + '<rect x="38" y="38" width="24" height="24" transform="rotate(45 50 50)"/>'
-    + '<circle cx="50" cy="50" r="3"/>'
-    + '<rect x="6" y="6" width="10" height="10" transform="rotate(45 11 11)"/>'
-    + '<rect x="84" y="84" width="10" height="10" transform="rotate(45 89 89)"/>'
+    + '<rect x="18" y="18" width="44" height="44" transform="rotate(45 40 40)"/>'
+    + '<rect x="38" y="38" width="44" height="44" transform="rotate(45 60 60)"/>'
+    + '<rect x="26" y="26" width="20" height="20" transform="rotate(45 36 36)"/>'
+    + '<rect x="46" y="46" width="20" height="20" transform="rotate(45 56 56)"/>'
+    + '<circle cx="40" cy="40" r="2.4"/>'
+    + '<circle cx="60" cy="60" r="2.4"/>'
     + '</g>');
 }
 function xiangyunSVG(seed) {
@@ -583,14 +584,31 @@ function shuiboSVG() {
   return svgWrap('<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round"/>');
 }
 function chanruSVG() {
-  const lvs = [
-    [22, 14, -30], [40, 32, 42], [60, 8, -42], [80, 34, 30],
-    [30, 62, 40], [52, 86, -35], [74, 58, 30]
-  ].map(e => '<ellipse cx="' + e[0] + '" cy="' + e[1] + '" rx="9" ry="4" transform="rotate(' + e[2] + ' ' + e[0] + ' ' + e[1] + ')"/>').join('');
+  const stems = [
+    { base: 26, amp: 12, ph: 0.3 },
+    { base: 50, amp: 14, ph: 1.6 },
+    { base: 74, amp: 12, ph: 2.9 }
+  ];
+  let d = '', lvs = '', leafN = 0;
+  stems.forEach(s => {
+    for (let x = 0; x <= 100; x += 3) {
+      const k = x * Math.PI * 2 / 100 + s.ph;
+      const y = s.base + s.amp * Math.sin(k);
+      d += (x === 0 ? 'M' : 'L') + x + ' ' + y.toFixed(1) + ' ';
+    }
+    for (let x = 8; x <= 92; x += 11) {
+      const k = x * Math.PI * 2 / 100 + s.ph;
+      const y = s.base + s.amp * Math.sin(k);
+      const tan = Math.atan(s.amp * Math.PI * 2 / 100 * Math.cos(k));
+      const ang = (tan * 180 / Math.PI).toFixed(1);
+      const side = (leafN++ % 2 ? 1 : -1);
+      const lx = x + side * 7 * Math.cos(tan);
+      const ly = y + side * 7 * Math.sin(tan);
+      lvs += '<ellipse cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" rx="7" ry="3.4" transform="rotate(' + ang + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) + ')"/>';
+    }
+  });
   return svgWrap('<g fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round">'
-    + '<path d="M0 22 C30 -6 70 50 100 20"/>'
-    + '<path d="M0 72 C30 44 70 100 100 70"/>'
-    + lvs + '</g>');
+    + '<path d="' + d + '"/>' + lvs + '</g>');
 }
 function binglieSVG(seed) {
   const rnd = mulberry32(seed);
