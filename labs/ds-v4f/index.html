@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>闪速 · Flash — DeepSeek V4 Flash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04060f;
+  --ink: #e8ecf7;
+  --dim: #8b93ab;
+  --faint: #4a5168;
+  --serif: 'Noto Serif SC', serif;
+  --latin: 'Cormorant Garamond', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-weight: 300;
+  height: 100vh; overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(90,140,255,.35); }
+
+#cv {
+  position: fixed; inset: 0; z-index: 1;
+  width: 100vw; height: 100vh; display: block;
+  cursor: crosshair;
+}
+
+/* 文案层 */
+.caption {
+  position: fixed; z-index: 25; pointer-events: none;
+  left: 6vw; bottom: 7vh;
+}
+.caption .no {
+  font-family: var(--latin); font-style: italic;
+  font-size: 13px; letter-spacing: .34em; color: var(--faint);
+}
+.caption h1 {
+  font-size: clamp(34px, 4.6vw, 58px); font-weight: 200;
+  letter-spacing: .34em; margin: 14px 0 8px;
+  background: linear-gradient(110deg, #f4f8ff, #8fb0ff 45%, #3b6bff);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.caption .sci {
+  font-family: var(--latin); font-style: italic;
+  font-size: 15px; letter-spacing: .16em; color: #8296cc;
+}
+.caption p {
+  margin-top: 20px; max-width: 320px;
+  font-size: 12px; line-height: 2.2; letter-spacing: .14em; color: var(--dim);
+}
+.spec {
+  position: fixed; z-index: 25; pointer-events: none;
+  right: 6vw; bottom: 7vh; text-align: right;
+  font-size: 11px; letter-spacing: .26em; color: var(--faint); line-height: 2.4;
+}
+.spec b { color: var(--dim); font-weight: 400; }
+
+.hint {
+  position: fixed; z-index: 25; pointer-events: none;
+  left: 50%; bottom: 4.5vh; transform: translateX(-50%);
+  font-size: 10px; letter-spacing: .5em; text-indent: .5em; color: var(--faint);
+  animation: hint 3.5s ease-in-out infinite;
+}
+@keyframes hint { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
+
+@media (max-width: 720px) {
+  .caption { left: 7vw; bottom: 9vh; }
+  .caption p { display: none; }
+  .spec { display: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div class="caption">
+  <div class="no">MODEL 00 — DS / V4-FLASH</div>
+  <h1>闪&thinsp;速</h1>
+  <div class="sci">DeepSeek V4 Flash · 极速推理</div>
+  <p>它不是算得快,而是想得快——同一道题,别人还在翻书,它已划下路径。这里每一道弧光,都是它的一次分叉、一步思考。</p>
+</div>
+
+<div class="spec">
+  <div><b>型号</b> DeepSeek V4 Flash</div>
+  <div><b>定位</b> 极速 · 轻量推理</div>
+  <div><b>节奏</b> 每令牌一次闪电</div>
+  <div><b>素材</b> 零图片 · 全程序生成</div>
+</div>
+
+<div class="hint">移动 · 引动闪电</div>
+
+<script>
+/* ═══════════ 闪速:程序化闪电 + 流光粒子 ═══════════ */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+let W = 0, H = 0, cx = 0, cy = 0;
+let stars = [];
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx = W / 2; cy = H / 2;
+  stars = [];
+  const n = Math.round((W * H) / 14000);
+  for (let i = 0; i < n; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.1 + 0.3,
+      ph: Math.random() * Math.PI * 2,
+      sp: 1 + Math.random() * 2
+    });
+  }
+}
+addEventListener('resize', resize);
+resize();
+
+/* 指针:引导闪电落点 */
+let ptr = null, ptrAt = 0;
+addEventListener('pointermove', e => {
+  ptr = { x: e.clientX, y: e.clientY };
+  ptrAt = performance.now();
+});
+addEventListener('pointerdown', e => {
+  ptr = { x: e.clientX, y: e.clientY };
+  ptrAt = performance.now();
+  strikeAt(ptr.x, ptr.y, true);
+});
+
+/* 闪电路径:递归中点位移 */
+function makeBolt(tx, ty, sx, sy) {
+  let pts = [{ x: sx, y: sy }, { x: tx, y: ty }];
+  let maxOff = Math.hypot(tx - sx, ty - sy) * 0.22;
+  for (let it = 0; it < 5; it++) {
+    const next = [];
+    for (let j = 0; j < pts.length - 1; j++) {
+      const a = pts[j], b = pts[j + 1];
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const off = (Math.random() * 2 - 1) * maxOff;
+      next.push(a, { x: mx - (dy / len) * off, y: my + (dx / len) * off });
+    }
+    next.push(pts[pts.length - 1]);
+    maxOff *= 0.5;
+    pts = next;
+  }
+  return pts;
+}
+
+let bolts = [], rings = [], particles = [];
+let nextStrike = 0;
+
+function strikeAt(tx, ty, fromUser) {
+  tx = Math.max(8, Math.min(W - 8, tx));
+  ty = Math.max(8, Math.min(H - 8, ty));
+  const pts = makeBolt(tx, ty, cx, cy);
+  const bi = 1 + Math.floor(Math.random() * (pts.length - 2));
+  const sub = [];
+  for (let s = 0; s < 2; s++) {
+    sub.push(makeBolt(
+      tx + (Math.random() - 0.5) * 130,
+      ty + (Math.random() - 0.5) * 130,
+      pts[bi].x, pts[bi].y
+    ));
+  }
+  const life = fromUser ? 0.28 : 0.2 + Math.random() * 0.12;
+  bolts.push({ pts, sub, age: 0, life, seed: Math.random() * 100 });
+
+  rings.push({ max: Math.max(40, Math.hypot(tx - cx, ty - cy) * 0.9), life: 1, k: 0 });
+
+  const dir = Math.atan2(ty - cy, tx - cx);
+  const burst = 14 + Math.floor(Math.random() * 18);
+  for (let i = 0; i < burst; i++) {
+    const life2 = 0.6 + Math.random() * 0.7;
+    particles.push({
+      a: dir + (Math.random() - 0.5) * 0.9,
+      r: 8 + Math.random() * 14,
+      sp: 60 + Math.random() * 220,
+      acc: 160 + Math.random() * 260,
+      life: life2, max: life2,
+      w: 1 + Math.random() * 1.6,
+      tint: Math.random()
+    });
+  }
+  if (particles.length > 700) particles.splice(0, particles.length - 700);
+  nextStrike = performance.now() + (fromUser ? 480 : 0);
+}
+
+function emitAmbient(dt) {
+  if (particles.length > 500 || Math.random() > dt * 40) return;
+  const life = 1.2 + Math.random() * 1.2;
+  particles.push({
+    a: Math.random() * Math.PI * 2,
+    r: 4 + Math.random() * 20,
+    sp: 30 + Math.random() * 90,
+    acc: 60 + Math.random() * 140,
+    life, max: life,
+    w: 0.6 + Math.random() * 0.8,
+    tint: Math.random()
+  });
+}
+
+function drawBackground(t) {
+  const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.75);
+  bg.addColorStop(0, '#0a1024');
+  bg.addColorStop(0.5, '#060a18');
+  bg.addColorStop(1, '#03040a');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  for (const s of stars) {
+    const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
+    ctx.fillStyle = 'rgba(190,205,235,' + tw * 0.7 + ')';
+    ctx.fillRect(s.x, s.y, s.r, s.r);
+  }
+}
+
+function drawCore(t) {
+  const R = Math.min(W, H) * (0.10 + 0.018 * Math.sin(t * 1.7));
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 3);
+  g.addColorStop(0, 'rgba(210,228,255,0.9)');
+  g.addColorStop(0.18, 'rgba(96,140,255,0.28)');
+  g.addColorStop(0.5, 'rgba(40,70,180,0.10)');
+  g.addColorStop(1, 'rgba(20,30,80,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const a0 = t * (0.6 + i * 0.22) * (i % 2 ? 1 : -1) + i * 2.09;
+    ctx.strokeStyle = 'rgba(150,190,255,' + (0.35 - i * 0.08) + ')';
+    ctx.lineWidth = 2 - i * 0.4;
+    ctx.beginPath();
+    ctx.arc(0, 0, R * (1.15 + i * 0.5), a0, a0 + 1.6);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(180,205,255,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 1.05, 0, Math.PI * 2);
+  ctx.stroke();
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6 + t * 0.8;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * R * 1.05, Math.sin(a) * R * 1.05);
+    ctx.lineTo(Math.cos(a) * R * 1.18, Math.sin(a) * R * 1.18);
+    ctx.stroke();
+  }
+  const g2 = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 0.6);
+  g2.addColorStop(0, 'rgba(255,255,255,0.95)');
+  g2.addColorStop(0.4, 'rgba(190,215,255,0.55)');
+  g2.addColorStop(1, 'rgba(120,160,255,0)');
+  ctx.fillStyle = g2;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBolt(pts, alpha, scale) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(150,190,255,' + alpha * 0.5 + ')';
+  ctx.lineWidth = 3.4 * scale;
+  ctx.shadowColor = 'rgba(120,170,255,' + alpha * 0.8 + ')';
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(235,244,255,' + alpha + ')';
+  ctx.lineWidth = 1.1 * scale;
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function updateBolts(dt) {
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = bolts.length - 1; i >= 0; i--) {
+    const b = bolts[i];
+    b.age += dt;
+    if (b.age >= b.life) { bolts.splice(i, 1); continue; }
+    const k = b.age / b.life;
+    const alpha = Math.pow(1 - k, 1.6);
+    drawBolt(b.pts, alpha, 1);
+    for (const s of b.sub) drawBolt(s, alpha * 0.6, 0.7);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function updateRings(dt) {
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = rings.length - 1; i >= 0; i--) {
+    const g = rings[i];
+    g.life -= dt;
+    if (g.life <= 0) { rings.splice(i, 1); continue; }
+    g.k = Math.min(1, g.k + dt * 2.6);
+    const e = 1 - Math.pow(1 - g.k, 3);
+    ctx.strokeStyle = 'rgba(140,180,255,' + (1 - g.k) * 0.5 + ')';
+    ctx.lineWidth = 2.5 * (1 - g.k) + 0.4;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 6 + g.max * e, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+function updateParticles(dt) {
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life -= dt;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    p.sp += p.acc * dt;
+    p.r += p.sp * dt;
+    const prev = p.r - p.sp * dt * 0.6;
+    const k = Math.min(1, p.life / p.max);
+    const alpha = Math.min(1, k * 1.4);
+    const color = p.tint > 0.66 ? '255,255,255'
+      : p.tint > 0.33 ? '150,190,255'
+      : '110,150,255';
+    ctx.strokeStyle = 'rgba(' + color + ',' + alpha + ')';
+    ctx.lineWidth = Math.max(0.4, p.w * k);
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(p.a) * prev, cy + Math.sin(p.a) * prev);
+    ctx.lineTo(cx + Math.cos(p.a) * p.r, cy + Math.sin(p.a) * p.r);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  const t = now / 1000;
+
+  drawBackground(t);
+  drawCore(t);
+
+  if (now > nextStrike) {
+    let tx, ty;
+    if (ptr && now - ptrAt < 1600) { tx = ptr.x; ty = ptr.y; }
+    else {
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.max(W, H) * (0.32 + Math.random() * 0.3);
+      tx = cx + Math.cos(a) * r;
+      ty = cy + Math.sin(a) * r;
+    }
+    strikeAt(tx, ty, false);
+    nextStrike = now + (260 + Math.random() * 640);
+  }
+
+  emitAmbient(dt);
+  updateParticles(dt);
+  updateRings(dt);
+  updateBolts(dt);
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

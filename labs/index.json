@@ -31,6 +31,12 @@
     ]
   },
   {
+    "name": "DS V4 Flash",
+    "desc": "极速推理模型的闪电与流光演示。",
+    "path": "labs/ds-v4f/index.html",
+    "icon": "闪"
+  },
+  {
     "name": "Kimi K3",
     "desc": "同一模型的六种视觉表达，点开选一个看。",
     "icon": "K3",
