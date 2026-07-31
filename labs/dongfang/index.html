@@ -644,7 +644,8 @@ function tile(kind, seed) {
     const svg = kind === 'huiwen' ? huiwenSVG() : kind === 'fangsheng' ? fangshengSVG()
       : kind === 'xiangyun' ? xiangyunSVG(seed || 7) : kind === 'shuibo' ? shuiboSVG()
       : kind === 'chanru' ? chanruSVG() : binglieSVG(seed || 3);
-    tileCache[key] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    tileCache[key] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+      .replace(/[()']/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   }
   return tileCache[key];
 }
