@@ -32,7 +32,7 @@
   },
   {
     "name": "DeepSeek V4",
-    "desc": "闪电与山水:极速推理的两种剖面。",
+    "desc": "闪电、山水与东方:极速推理的三个剖面。",
     "icon": "D",
     "children": [
       {
@@ -46,6 +46,12 @@
         "desc": "水墨山水卷轴:宣纸、淡墨远山、扁舟渔火与一笔朱印,全程序生成。",
         "path": "labs/ds-shanshui/index.html",
         "icon": "山"
+      },
+      {
+        "name": "V4F · 東方",
+        "desc": "中式美学交互导览:二十四国色、程序化纹样、永字八法与二十四节气。",
+        "path": "labs/dongfang/index.html",
+        "icon": "方"
       }
     ]
   },

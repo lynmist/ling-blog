@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東方 · 中式美学导览</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;600&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f2e9d6;
+  --paper2: #e8dcc2;
+  --card: #f7f1e2;
+  --ink: #2a241c;
+  --ink2: #5d4f3d;
+  --faint: #9a8a6e;
+  --cinnabar: #a8362a;
+  --gold: #b7872f;
+  --jade: #4c7a6b;
+  --cn: "KaiTi", "STKaiti", "FangSong", "Noto Serif SC", "SimSun", serif;
+  --lat: "Cormorant Garamond", Georgia, serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--cn);
+  font-weight: 300;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 999; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+::selection { background: rgba(168,54,42,.22); }
+
+/* ── 顶部导航 ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4vw; height: 58px;
+  background: rgba(242,233,214,.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(122,102,72,.28);
+}
+.brand { display: flex; align-items: center; gap: 12px; font-size: 17px; letter-spacing: .3em; color: var(--ink); }
+.brand .seal {
+  width: 30px; height: 30px; border: 1.5px solid var(--cinnabar); color: var(--cinnabar);
+  display: grid; place-items: center; font-size: 14px; transform: rotate(-3deg);
+}
+.nav-links { display: flex; gap: 2px; }
+.nav-links a {
+  color: var(--ink2); text-decoration: none; font-size: 14px; letter-spacing: .35em; text-indent: .35em;
+  padding: 6px 14px; position: relative; transition: color .3s;
+}
+.nav-links a:hover { color: var(--cinnabar); }
+.nav-links a.on { color: var(--cinnabar); }
+.nav-links a.on::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 0; height: 1.5px; background: var(--cinnabar);
+}
+
+/* ── 章节通用 ── */
+section { position: relative; max-width: 1180px; margin: 0 auto; padding: 96px 4vw 40px; }
+.sec-head { display: flex; align-items: baseline; gap: 20px; margin-bottom: 44px; }
+.sec-head .char {
+  font-size: 34px; color: var(--cinnabar); letter-spacing: 0;
+  flex: none;
+}
+.sec-head h2 { font-size: clamp(30px, 4vw, 46px); font-weight: 300; letter-spacing: .3em; }
+.sec-head .lat {
+  font-family: var(--lat); font-style: italic; color: var(--faint);
+  font-size: 14px; letter-spacing: .2em; margin-left: auto;
+}
+.sec-head .rule { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(122,102,72,.5), transparent); }
+.lede { color: var(--ink2); max-width: 640px; font-size: 15px; margin-bottom: 40px; }
+.hw-strip { height: 22px; background-size: 44px 22px; background-repeat: repeat-x; opacity: .7; margin: 0 4vw; }
+
+/* 滚动显现 */
+.rv { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
+.rv.in { opacity: 1; transform: none; }
+
+/* ── 首屏 ── */
+.hero {
+  position: relative; min-height: 100vh; display: grid; place-items: center;
+  padding: 60px 4vw; text-align: center; overflow: hidden;
+}
+.hero .frame {
+  position: absolute; inset: 20px; border: 1px solid rgba(122,102,72,.5); pointer-events: none;
+}
+.hero .frame::after { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(122,102,72,.28); }
+.hero .bgchar {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: min(72vh, 72vw); color: rgba(90,74,52,.06); letter-spacing: 0; line-height: 1;
+  user-select: none; pointer-events: none;
+}
+.hero .lat {
+  font-family: var(--lat); font-style: italic; letter-spacing: .5em; color: var(--faint);
+  font-size: 13px; margin-bottom: 22px;
+}
+.hero h1 { font-size: clamp(64px, 15vw, 170px); font-weight: 200; letter-spacing: .22em; line-height: 1.1; }
+.hero h1 span { display: inline-block; animation: rise 1.4s cubic-bezier(.2,.7,.2,1) both; }
+.hero h1 span:nth-child(2) { animation-delay: .15s; }
+@keyframes rise { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+.hero .seal {
+  margin: 30px auto 0; width: 54px; height: 54px; border: 2px solid var(--cinnabar); color: var(--cinnabar);
+  display: grid; place-items: center; font-size: 22px; transform: rotate(-3deg);
+  animation: rise 1.4s .5s both;
+}
+.hero .sub { margin-top: 26px; color: var(--ink2); letter-spacing: .4em; font-size: 14px; animation: rise 1.4s .7s both; }
+.hero .scroll { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+  font-size: 11px; letter-spacing: .5em; color: var(--faint); animation: bob 2.4s ease-in-out infinite; }
+@keyframes bob { 0%,100% { opacity: .3; } 50% { opacity: .9; } }
+.hero .verse {
+  position: absolute; right: 6vw; top: 50%; transform: translateY(-50%);
+  writing-mode: vertical-rl; text-orientation: upright;
+  color: var(--faint); font-size: 13px; letter-spacing: .45em; line-height: 2; pointer-events: none;
+}
+.hero .verse b { color: var(--ink2); font-weight: 400; }
+
+/* ── 色 ── */
+.palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.sw {
+  position: relative; aspect-ratio: 1; border-radius: 6px; cursor: pointer; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(60,45,25,.15);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.sw:hover { transform: translateY(-5px) scale(1.03); box-shadow: 0 10px 22px rgba(60,45,25,.25); z-index: 2; }
+.sw .fill { position: absolute; inset: 0; }
+.sw .meta {
+  position: absolute; inset: auto 0 0 0; padding: 22px 10px 8px; text-align: center;
+  background: linear-gradient(transparent, rgba(255,255,255,.75));
+  opacity: 0; transform: translateY(8px); transition: all .35s ease;
+}
+.sw:hover .meta { opacity: 1; transform: none; }
+.sw .meta .nm { font-size: 16px; letter-spacing: .2em; color: #222; }
+.sw .meta .px { font-family: var(--lat); font-style: italic; font-size: 12px; color: #555; }
+.sw .meta .py { font-size: 11px; color: #666; }
+.sw:active .fill { filter: brightness(.9); }
+.tip { margin-top: 18px; font-size: 12px; color: var(--faint); letter-spacing: .2em; }
+
+/* ── 纹 ── */
+.pat-wrap { display: grid; grid-template-columns: 300px 1fr; gap: 26px; }
+.pat-list { display: flex; flex-direction: column; gap: 8px; }
+.pat-btn {
+  display: flex; align-items: center; gap: 14px; padding: 10px 14px;
+  background: var(--card); border: 1px solid rgba(122,102,72,.35); border-radius: 6px;
+  cursor: pointer; transition: all .25s; text-align: left;
+}
+.pat-btn:hover { border-color: var(--cinnabar); }
+.pat-btn.on { border-color: var(--cinnabar); background: #f6e9d4; box-shadow: inset 0 0 0 1px var(--cinnabar); }
+.pat-btn .ico { width: 46px; height: 46px; flex: none; border-radius: 4px; background-size: 46px; border: 1px solid rgba(122,102,72,.3); }
+.pat-btn .inf { flex: 1; }
+.pat-btn .inf .nm { font-size: 15px; letter-spacing: .3em; }
+.pat-btn .inf .cn { font-family: var(--lat); font-style: italic; font-size: 11px; color: var(--faint); }
+.pat-stage { background: var(--card); border: 1px solid rgba(122,102,72,.4); border-radius: 8px; padding: 18px; }
+.pat-stage .preview {
+  width: 100%; aspect-ratio: 1; border-radius: 6px; background-position: 0 0;
+  border: 1px solid rgba(122,102,72,.25);
+}
+.pat-stage .info { margin-top: 16px; display: flex; align-items: baseline; gap: 14px; }
+.pat-stage .info .nm { font-size: 22px; letter-spacing: .3em; }
+.pat-stage .info .cn { font-family: var(--lat); font-style: italic; color: var(--faint); }
+.pat-stage .info .regen { margin-left: auto; }
+.pat-stage .desc { margin-top: 8px; color: var(--ink2); font-size: 14px; }
+.size-row { display: flex; gap: 8px; margin-top: 14px; align-items: center; font-size: 13px; color: var(--ink2); }
+.size-row button {
+  font-family: var(--cn); font-size: 12px; padding: 4px 12px; cursor: pointer;
+  background: transparent; border: 1px solid rgba(122,102,72,.5); color: var(--ink2); border-radius: 4px;
+}
+.size-row button.on { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
+button.regen {
+  font-family: var(--cn); font-size: 13px; letter-spacing: .2em; padding: 6px 16px; cursor: pointer;
+  background: transparent; border: 1px solid var(--cinnabar); color: var(--cinnabar); border-radius: 4px; transition: all .25s;
+}
+button.regen:hover { background: var(--cinnabar); color: #fff; }
+
+/* ── 字 ── */
+.cal-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+.cal-card { background: var(--card); border: 1px solid rgba(122,102,72,.35); border-radius: 8px; padding: 20px; }
+.cal-card h3 { font-size: 17px; letter-spacing: .3em; margin-bottom: 10px; color: var(--ink); }
+.brush-svg { width: 100%; height: auto; display: block; }
+.brush-svg path {
+  fill: none; stroke: var(--ink); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: write 2.6s cubic-bezier(.4,0,.3,1) forwards;
+}
+.brush-svg path.static { stroke-dasharray: none; stroke-dashoffset: 0; animation: none; }
+.brush-svg path.d { animation-delay: var(--d); }
+@keyframes write { to { stroke-dashoffset: 0; } }
+.stroke-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stroke-item {
+  text-align: center; padding: 10px 4px; border: 1px solid rgba(122,102,72,.3); border-radius: 6px; cursor: pointer;
+  transition: all .25s; background: var(--card);
+}
+.stroke-item:hover, .stroke-item.on { border-color: var(--cinnabar); color: var(--cinnabar); }
+.stroke-item .big { font-size: 22px; letter-spacing: 0; }
+.stroke-item .nm { font-size: 12px; }
+.stroke-item .ds { font-size: 11px; color: var(--faint); margin-top: 4px; }
+.char-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 26px; }
+.char-card { background: var(--card); border: 1px solid rgba(122,102,72,.3); border-radius: 8px; padding: 10px; text-align: center; }
+.char-card .cn { font-family: var(--lat); font-style: italic; color: var(--faint); font-size: 11px; }
+
+/* ── 器 / 筑 ── */
+.gal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.card { position: relative; overflow: hidden; border-radius: 8px; background: var(--card);
+  border: 1px solid rgba(122,102,72,.35); }
+.card .ph { aspect-ratio: 4/3; overflow: hidden; }
+.card .ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .8s ease; }
+.card:hover .ph img { transform: scale(1.06); }
+.card .cp { padding: 14px 16px 18px; }
+.card .cp .nm { font-size: 17px; letter-spacing: .25em; }
+.card .cp .cn { font-family: var(--lat); font-style: italic; color: var(--faint); font-size: 12px; }
+.card .cp .ds { font-size: 13px; color: var(--ink2); margin-top: 6px; }
+.card.missing .ph img { display: none; }
+.card.missing .ph { display: grid; place-items: center; color: var(--faint); font-size: 13px; letter-spacing: .3em; }
+.crit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 22px; }
+.crit .cell { background: var(--card); border: 1px solid rgba(122,102,72,.35); border-radius: 8px; padding: 22px; }
+.crit .cell .nm { font-size: 19px; letter-spacing: .3em; color: var(--cinnabar); }
+.crit .cell .ds { font-size: 13px; color: var(--ink2); margin-top: 8px; }
+
+/* ── 節 ── */
+.terms-wrap { display: grid; grid-template-columns: 420px 1fr; gap: 30px; align-items: center; }
+.ring-box { position: relative; max-width: 420px; width: 100%; margin: 0 auto; }
+.ring-box svg { width: 100%; height: auto; display: block; }
+.ring-box text { font-family: var(--cn); fill: var(--ink2); }
+.term-node { cursor: pointer; }
+.term-node circle.hit { fill: transparent; }
+.term-node .dot { fill: var(--card); stroke: var(--ink2); stroke-width: 1.2; transition: all .25s; }
+.term-node .lab { font-size: 11px; text-anchor: middle; letter-spacing: 0; }
+.term-node:hover .dot, .term-node.on .dot { fill: var(--cinnabar); stroke: var(--cinnabar); }
+.term-node.on .lab { fill: var(--cinnabar); font-weight: 600; }
+.term-node.cur .dot { fill: var(--gold); stroke: var(--gold); }
+.term-detail { background: var(--card); border: 1px solid rgba(122,102,72,.35); border-radius: 8px; padding: 30px; }
+.term-detail .big { font-size: 56px; letter-spacing: .25em; color: var(--ink); }
+.term-detail .date { font-family: var(--lat); font-style: italic; color: var(--faint); margin-top: 6px; letter-spacing: .2em; }
+.term-detail .ds { margin-top: 14px; color: var(--ink2); font-size: 15px; }
+.term-detail .tl { margin-top: 10px; font-size: 12px; color: var(--faint); letter-spacing: .15em; }
+.season { font-size: 12px; letter-spacing: .3em; color: var(--jade); margin-top: 4px; }
+
+/* ── 页脚 ── */
+footer { position: relative; margin-top: 60px; padding: 70px 4vw 46px; text-align: center;
+  border-top: 1px solid rgba(122,102,72,.4); background: linear-gradient(180deg, transparent, rgba(168,54,42,.05)); }
+footer .seal { margin: 0 auto 20px; width: 64px; height: 64px; border: 2px solid var(--cinnabar); color: var(--cinnabar);
+  display: grid; place-items: center; font-size: 22px; transform: rotate(-3deg); }
+footer .line { color: var(--ink2); letter-spacing: .3em; font-size: 14px; }
+footer .credits { margin-top: 10px; color: var(--faint); font-size: 11px; letter-spacing: .18em; }
+.to-top { display: inline-block; margin-top: 26px; color: var(--ink2); text-decoration: none; letter-spacing: .3em; font-size: 13px; border-bottom: 1px solid var(--cinnabar); padding-bottom: 2px; }
+.to-top:hover { color: var(--cinnabar); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translate(-50%, 20px);
+  background: var(--ink); color: var(--paper); padding: 10px 24px; border-radius: 30px;
+  font-size: 13px; letter-spacing: .2em; opacity: 0; pointer-events: none;
+  transition: all .35s ease; z-index: 100;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 860px) {
+  .pat-wrap { grid-template-columns: 1fr; }
+  .cal-wrap, .terms-wrap { grid-template-columns: 1fr; }
+  .gal, .crit, .char-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero .verse { display: none; }
+  .nav-links a { letter-spacing: .12em; text-indent: .12em; padding: 6px 8px; font-size: 13px; }
+  .brand span.txt { display: none; }
+}
+@media (max-width: 520px) {
+  .stroke-list { grid-template-columns: repeat(4, 1fr); }
+  .gal, .crit { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><span class="seal">方</span><span class="txt">東方 · 中式美学导览</span></div>
+  <div class="nav-links">
+    <a href="#colors">色</a>
+    <a href="#patterns">紋</a>
+    <a href="#calligraphy">字</a>
+    <a href="#artifacts">器</a>
+    <a href="#build">築</a>
+    <a href="#terms">節</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="frame"></div>
+  <div class="bgchar">東</div>
+  <div>
+    <div class="lat">Dong Fang — a guide to Chinese aesthetics</div>
+    <h1><span>東</span><span>方</span></h1>
+    <div class="seal">雅</div>
+    <div class="sub">色 · 紋 · 字 · 器 · 築 · 節</div>
+  </div>
+  <div class="verse"><b>上善若水</b><br>厚德載物<br>大美不言<br>大象無形</div>
+  <div class="scroll">往下 · 走進東方</div>
+</header>
+
+<div class="hw-strip" data-hw></div>
+
+<main>
+
+  <section id="colors" class="rv">
+    <div class="sec-head">
+      <span class="char">色</span>
+      <h2>国色</h2>
+      <span class="lat">traditional colors</span>
+      <span class="rule"></span>
+    </div>
+    <p class="lede">古人从天地万物中取名:月白、竹青、赭石、胭脂……每一种颜色都是一句诗。点按色块,复制它的六位代码。</p>
+    <div class="palette" id="palette"></div>
+    <div class="tip">hover 看名 · click 复制</div>
+  </section>
+
+  <div class="hw-strip" data-hw></div>
+
+  <section id="patterns" class="rv">
+    <div class="sec-head">
+      <span class="char">紋</span>
+      <h2>纹样</h2>
+      <span class="lat">motifs</span>
+      <span class="rule"></span>
+    </div>
+    <p class="lede">回纹连绵不断,祥云升腾如意,冰裂天成一格。纹样由代码现场生成,无一张图片——试着调节疏密,再裂一次。</p>
+    <div class="pat-wrap">
+      <div class="pat-list" id="patList"></div>
+      <div class="pat-stage">
+        <div class="preview" id="patPreview"></div>
+        <div class="info">
+          <span class="nm" id="patName"></span>
+          <span class="cn" id="patPinyin"></span>
+          <button class="regen" id="patRegen">再裂一次</button>
+        </div>
+        <div class="desc" id="patDesc"></div>
+        <div class="size-row">疏密
+          <button data-s="46">密</button>
+          <button data-s="64" class="on">中</button>
+          <button data-s="100">疏</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hw-strip" data-hw></div>
+
+  <section id="calligraphy" class="rv">
+    <div class="sec-head">
+      <span class="char">字</span>
+      <h2>永字八法</h2>
+      <span class="lat">eight strokes</span>
+      <span class="rule"></span>
+    </div>
+    <p class="lede">「永」一字八法,涵盖楷书所有笔势。点选下方笔画,在左图寻找它的位置;再往下,四个字由笔触缓缓写就。</p>
+    <div class="cal-wrap">
+      <div class="cal-card">
+        <svg class="brush-svg" id="yongSvg" viewBox="0 0 200 200" aria-label="永字八法">
+          <path class="static" d="M96 24 Q98 20 103 24 Q106 28 102 32" />
+          <path class="static" d="M40 56 Q100 50 162 58" />
+          <path class="static" d="M100 56 L100 150 Q100 168 82 162" />
+          <path class="static" d="M100 148 Q106 172 82 164" />
+          <path class="static" d="M48 88 Q86 78 100 70" />
+          <path class="static" d="M100 96 Q64 126 40 168" />
+          <path class="static" d="M64 62 Q54 84 44 98" />
+          <path class="static" d="M100 122 Q142 152 168 178" />
+        </svg>
+      </div>
+      <div>
+        <div class="cal-card">
+          <h3>八法</h3>
+          <div class="stroke-list" id="strokeList"></div>
+        </div>
+        <div class="char-grid" id="charGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hw-strip" data-hw></div>
+
+  <section id="artifacts" class="rv">
+    <div class="sec-head">
+      <span class="char">器</span>
+      <h2>器物</h2>
+      <span class="lat">artifacts</span>
+      <span class="rule"></span>
+    </div>
+    <p class="lede">青花一色的蓝,落在温润的白釉上;青铜一身的锈,记下三千年前的一句话。影像来自 Wikimedia Commons,为自由许可。</p>
+    <div class="gal" id="artGal"></div>
+  </section>
+
+  <div class="hw-strip" data-hw></div>
+
+  <section id="build" class="rv">
+    <div class="sec-head">
+      <span class="char">築</span>
+      <h2>营造</h2>
+      <span class="lat">architecture</span>
+      <span class="rule"></span>
+    </div>
+    <p class="lede">飞檐如翼,斗拱承天。中式建筑不追求向高刺破,而在水平铺展中安放人与天地的关系。</p>
+    <div class="gal" id="buildGal"></div>
+    <div class="crit">
+      <div class="cell"><div class="nm">斗拱</div><div class="ds">层层出跳的木构件,把屋檐的重力温柔地传递到柱上,是力学的诗。</div></div>
+      <div class="cell"><div class="nm">飞檐</div><div class="ds">檐角如鸟展翅向上,让沉重的屋顶显得轻盈,是「上」的哲学。</div></div>
+      <div class="cell"><div class="nm">对称</div><div class="ds">中轴线上殿宇相望,左右平衡,是对秩序的敬意。</div></div>
+    </div>
+  </section>
+
+  <div class="hw-strip" data-hw></div>
+
+  <section id="terms" class="rv">
+    <div class="sec-head">
+      <span class="char">節</span>
+      <h2>二十四节气</h2>
+      <span class="lat">solar terms</span>
+      <span class="rule"></span>
+    </div>
+    <p class="lede">一年被切成二十四段,每一段都有自己的名字与物候。环上金色者为今日所处节气,点任意一个,读它的句子。</p>
+    <div class="terms-wrap">
+      <div class="ring-box" id="ringBox"></div>
+      <div class="term-detail" id="termDetail"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="seal">東方</div>
+  <div class="line">色即詩,紋即語,字即骨,器即魂</div>
+  <div class="credits">影像取自 Wikimedia Commons(CC 许可)· 纹样与色彩由代码现场生成 · 无一张位图素材</div>
+  <a class="to-top" href="#top">回到開端 ↑</a>
+</footer>
+
+<div id="toast"></div>
+
+<script type="application/json" id="data">
+{
+  "colors": [
+    {"n":"玄","h":"#14100d","p":"xuan","d":"极夜之黑,天玄地黄"},
+    {"n":"墨","h":"#241f19","p":"mo","d":"松烟所凝,万色归宗"},
+    {"n":"鸦青","h":"#39485c","p":"ya qing","d":"暮鸦背光之青"},
+    {"n":"黛蓝","h":"#3f5f7d","p":"dai lan","d":"女子画眉之色"},
+    {"n":"藏青","h":"#2c3a55","p":"cang qing","d":"深而沉稳的蓝"},
+    {"n":"苍青","h":"#4c6f7a","p":"cang qing","d":"海天苍茫之青"},
+    {"n":"天青","h":"#7fb0b6","p":"tian qing","d":"雨过云破,汝窑釉色"},
+    {"n":"月白","h":"#d7e4e8","p":"yue bai","d":"月光透云之白"},
+    {"n":"竹青","h":"#4c7a64","p":"zhu qing","d":"雨后新竹之色"},
+    {"n":"黛绿","h":"#52765f","p":"dai lu","d":"深翠如黛"},
+    {"n":"豆绿","h":"#8a9a5b","p":"dou lu","d":"青豆微黄之色"},
+    {"n":"松花","h":"#a9b877","p":"song hua","d":"松花落枝的绿"},
+    {"n":"藤黄","h":"#e2bf4c","p":"teng huang","d":"海藤提炼,皇家御用"},
+    {"n":"缃","h":"#d9a441","p":"xiang","d":"浅黄如桑叶初生"},
+    {"n":"赭石","h":"#8a4b2a","p":"zhe shi","d":"赤铁土,画山石之基"},
+    {"n":"茶褐","h":"#7b5a3a","p":"cha he","d":"茶汤之褐"},
+    {"n":"驼褐","h":"#77684f","p":"tuo he","d":"驼绒之色"},
+    {"n":"朱砂","h":"#a8362a","p":"zhu sha","d":"丹砂,印章与宫墙"},
+    {"n":"胭脂","h":"#c3346b","p":"yan zhi","d":"胭脂膏的绯红"},
+    {"n":"妃红","h":"#dd5a6e","p":"fei hong","d":"妃嫔华裳之红"},
+    {"n":"藕荷","h":"#d3b3c2","p":"ou he","d":"莲藕之淡紫粉"},
+    {"n":"黛紫","h":"#6a5a8a","p":"dai zi","d":"暮云沉紫"},
+    {"n":"檀","h":"#5c3a44","p":"tan","d":"紫檀木色"},
+    {"n":"乳白","h":"#f3efe4","p":"ru bai","d":"牛乳之色,釉之本"}
+  ],
+  "patterns": [
+    {"n":"回纹","c":"囬","k":"huiwen","d":"由「回」字演变,环环相扣,取「富贵不断头」之意,多饰于器物边沿。"},
+    {"n":"方胜","c":"勝","k":"fangsheng","d":"两菱相叠、同心相扣,象征连续与同心,见于织锦与窗棂。"},
+    {"n":"祥云","c":"雲","k":"xiangyun","d":"卷云之气,如意之形,寓意祥瑞升腾,常伴龙纹飞天。"},
+    {"n":"水波","c":"波","k":"shuibo","d":"粼粼细浪,如见水面涟漪,常衬于龙身之下。"},
+    {"n":"缠枝","c":"纏","k":"chanru","d":"藤蔓绵绵、回转不断,寓意生生不息,繁花缠枝。"},
+    {"n":"冰裂","c":"裂","k":"binglie","d":"似开片瓷釉的裂纹,天成纹理,每帧皆不相同——点按可再裂一次。"}
+  ],
+  "strokes": [
+    {"k":"側","n":"点","d":"如高山坠石"},
+    {"k":"勒","n":"横","d":"如千里阵云"},
+    {"k":"弩","n":"竖","d":"如万岁枯藤"},
+    {"k":"趯","n":"钩","d":"出锋锐利如踢"},
+    {"k":"策","n":"提","d":"如鞭策马"},
+    {"k":"掠","n":"长撇","d":"如飞燕掠水"},
+    {"k":"啄","n":"短撇","d":"如鸟啄食"},
+    {"k":"磔","n":"捺","d":"一波三折"}
+  ],
+  "chars": [
+    {"c":"山","w":"山"},
+    {"c":"水","w":"水"},
+    {"c":"東","w":"东"},
+    {"c":"方","w":"方"}
+  ],
+  "terms": [
+    {"n":"立春","d":"2月4日","ds":"东风解冻,万物始苏。","s":"春"},
+    {"n":"雨水","d":"2月19日","ds":"獭祭鱼,草木萌动。","s":"春"},
+    {"n":"惊蛰","d":"3月6日","ds":"春雷乍响,桃始华。","s":"春"},
+    {"n":"春分","d":"3月21日","ds":"昼夜均,玄鸟至。","s":"春"},
+    {"n":"清明","d":"4月5日","ds":"气清景明,桐始华。","s":"春"},
+    {"n":"谷雨","d":"4月20日","ds":"雨生百谷,萍始生。","s":"春"},
+    {"n":"立夏","d":"5月6日","ds":"蝼蝈鸣,蚯蚓出。","s":"夏"},
+    {"n":"小满","d":"5月21日","ds":"物致于此,小得盈满。","s":"夏"},
+    {"n":"芒种","d":"6月6日","ds":"有芒之种,忙收忙种。","s":"夏"},
+    {"n":"夏至","d":"6月21日","ds":"日长之至,鹿角解。","s":"夏"},
+    {"n":"小暑","d":"7月7日","ds":"温风至,蟋蟀居壁。","s":"夏"},
+    {"n":"大暑","d":"7月23日","ds":"腐草为萤,大雨时行。","s":"夏"},
+    {"n":"立秋","d":"8月7日","ds":"凉风至,白露生。","s":"秋"},
+    {"n":"处暑","d":"8月23日","ds":"鹰乃祭鸟,禾乃登。","s":"秋"},
+    {"n":"白露","d":"9月8日","ds":"鸿雁来,玄鸟归。","s":"秋"},
+    {"n":"秋分","d":"9月23日","ds":"雷始收声,蛰虫坯户。","s":"秋"},
+    {"n":"寒露","d":"10月8日","ds":"鸿雁来宾,雀入大水为蛤。","s":"秋"},
+    {"n":"霜降","d":"10月23日","ds":"豺乃祭兽,草木黄落。","s":"秋"},
+    {"n":"立冬","d":"11月7日","ds":"水始冰,地始冻。","s":"冬"},
+    {"n":"小雪","d":"11月22日","ds":"虹藏不见,天气上升。","s":"冬"},
+    {"n":"大雪","d":"12月7日","ds":"鹖鴠不鸣,虎始交。","s":"冬"},
+    {"n":"冬至","d":"12月22日","ds":"日短之至,一阳生。","s":"冬"},
+    {"n":"小寒","d":"1月6日","ds":"雁北乡,鹊始巢。","s":"冬"},
+    {"n":"大寒","d":"1月20日","ds":"鸡始乳,征鸟厉疾。","s":"冬"}
+  ]
+}
+</script>
+
+<script>
+/* ═══════════ 東方:数据驱动 · 程序纹样 · 交互导览 ═══════════ */
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const INK = '#2a241c';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+/* ── 纹样生成器 ── */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function huiwenSVG() {
+  let r = '';
+  for (let c = 0; c < 5; c++) for (let y = 0; y < 5; y++) {
+    const x = c * 20 + 10, yy = y * 20 + 10;
+    r += '<rect x="' + (x - 7) + '" y="' + (yy - 7) + '" width="14" height="14"/>';
+    r += '<rect x="' + (x - 3.5) + '" y="' + (yy - 3.5) + '" width="7" height="7"/>';
+  }
+  return svgWrap('<g fill="none" stroke="' + INK + '" stroke-width="1">' + r + '</g>');
+}
+function fangshengSVG() {
+  return svgWrap('<g fill="none" stroke="' + INK + '" stroke-width="1">'
+    + '<rect x="18" y="18" width="64" height="64" transform="rotate(45 50 50)"/>'
+    + '<rect x="38" y="38" width="24" height="24" transform="rotate(45 50 50)"/>'
+    + '<circle cx="50" cy="50" r="3"/>'
+    + '<rect x="6" y="6" width="10" height="10" transform="rotate(45 11 11)"/>'
+    + '<rect x="84" y="84" width="10" height="10" transform="rotate(45 89 89)"/>'
+    + '</g>');
+}
+function xiangyunSVG(seed) {
+  const rnd = mulberry32(seed);
+  let d = '';
+  const spots = [[25, 25], [75, 25], [25, 75], [75, 75]];
+  spots.forEach(s => {
+    const turns = 1.5 + rnd() * 0.35, rot = rnd() * Math.PI * 2, n = 40;
+    let p = '';
+    for (let i = 0; i <= n; i++) {
+      const u = i / n, th = u * turns * Math.PI * 2 + rot, r = 1.5 + 16 * u;
+      p += (i ? 'L' : 'M') + (s[0] + Math.cos(th) * r).toFixed(1) + ' ' + (s[1] + Math.sin(th) * r).toFixed(1) + ' ';
+    }
+    d += p;
+  });
+  return svgWrap('<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round"/>');
+}
+function shuiboSVG() {
+  let d = '';
+  [15, 42, 69, 96].forEach(y => {
+    d += 'M0 ' + y + ' Q12.5 ' + (y - 7) + ' 25 ' + y + ' T50 ' + y + ' T75 ' + y + ' T100 ' + y + ' ';
+  });
+  d += 'M8 30 a6 6 0 0 1 12 0 a6 6 0 0 1 -12 0 M70 56 a6 6 0 0 1 12 0 a6 6 0 0 1 -12 0';
+  return svgWrap('<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round"/>');
+}
+function chanruSVG() {
+  const lvs = [
+    [22, 14, -30], [40, 32, 42], [60, 8, -42], [80, 34, 30],
+    [30, 62, 40], [52, 86, -35], [74, 58, 30]
+  ].map(e => '<ellipse cx="' + e[0] + '" cy="' + e[1] + '" rx="9" ry="4" transform="rotate(' + e[2] + ' ' + e[0] + ' ' + e[1] + ')"/>').join('');
+  return svgWrap('<g fill="none" stroke="' + INK + '" stroke-width="1" stroke-linecap="round">'
+    + '<path d="M0 22 C30 -6 70 50 100 20"/>'
+    + '<path d="M0 72 C30 44 70 100 100 70"/>'
+    + lvs + '</g>');
+}
+function binglieSVG(seed) {
+  const rnd = mulberry32(seed);
+  const lines = [];
+  const j = () => (rnd() - 0.5) * 6;
+  function rect(x, y, w, h) {
+    const p = [[x + j(), y + j()], [x + w + j(), y + j()], [x + w + j(), y + h + j()], [x + j(), y + h + j()]];
+    for (let i = 0; i < 4; i++) lines.push([p[i], p[(i + 1) % 4]]);
+  }
+  function split(x, y, w, h, dep) {
+    if (dep <= 0 || (w < 14 && h < 14)) { rect(x, y, w, h); return; }
+    if (w >= h && w > 14) {
+      const fx = w * (0.35 + rnd() * 0.3);
+      lines.push([[x + fx, y], [x + fx, y + h]]);
+      split(x, y, fx, h, dep - 1); split(x + fx, y, w - fx, h, dep - 1);
+    } else if (h > 14) {
+      const fy = h * (0.35 + rnd() * 0.3);
+      lines.push([[x, y + fy], [x + w, y + fy]]);
+      split(x, y, w, fy, dep - 1); split(x, y + fy, w, h - fy, dep - 1);
+    } else rect(x, y, w, h);
+  }
+  split(0, 0, 100, 100, 3);
+  const d = lines.map(l => 'M' + l[0][0].toFixed(1) + ' ' + l[0][1].toFixed(1) + ' L' + l[1][0].toFixed(1) + ' ' + l[1][1].toFixed(1)).join(' ');
+  return svgWrap('<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="1"/>');
+}
+function svgWrap(inner) {
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">' + inner + '</svg>';
+}
+const tileCache = {};
+function tile(kind, seed) {
+  const key = kind + (seed || '');
+  if (!tileCache[key]) {
+    const svg = kind === 'huiwen' ? huiwenSVG() : kind === 'fangsheng' ? fangshengSVG()
+      : kind === 'xiangyun' ? xiangyunSVG(seed || 7) : kind === 'shuibo' ? shuiboSVG()
+      : kind === 'chanru' ? chanruSVG() : binglieSVG(seed || 3);
+    tileCache[key] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+  return tileCache[key];
+}
+function refreshTiles() {
+  $$('.hw-strip[data-hw]').forEach(el => {
+    el.style.backgroundImage = 'url(' + tile('huiwen') + ')';
+    el.style.backgroundSize = '44px 22px';
+  });
+}
+refreshTiles();
+
+/* ── 色 ── */
+const palette = $('#palette');
+DATA.colors.forEach(c => {
+  const d = document.createElement('div');
+  d.className = 'sw';
+  d.title = c.n + ' ' + c.h;
+  d.innerHTML = '<div class="fill" style="background:' + c.h + '"></div>'
+    + '<div class="meta"><div class="nm">' + c.n + '</div>'
+    + '<div class="px">' + c.h + '</div><div class="py">' + c.p + '</div></div>';
+  d.querySelector('.fill').addEventListener('click', () => {
+    const cb = () => { toast('已复制 · ' + c.n + ' ' + c.h); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(c.h).then(cb).catch(() => fallbackCopy(c.h, cb));
+    } else fallbackCopy(c.h, cb);
+  });
+  palette.appendChild(d);
+});
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb(); } catch (e) { }
+  ta.remove();
+}
+
+/* ── 纹 ── */
+let curPat = DATA.patterns[0], patSize = 64, patSeed = 3;
+const patList = $('#patList');
+const preview = $('#patPreview');
+function renderPat() {
+  const kind = curPat.k;
+  const seed = kind === 'binglie' ? patSeed : (kind === 'xiangyun' ? 7 : '');
+  preview.style.backgroundImage = 'url(' + tile(kind, seed) + ')';
+  preview.style.backgroundSize = patSize + 'px';
+  $('#patName').textContent = curPat.n;
+  $('#patPinyin').textContent = curPat.c;
+  $('#patDesc').textContent = curPat.d;
+  $('#patRegen').style.visibility = kind === 'binglie' ? 'visible' : 'hidden';
+}
+DATA.patterns.forEach((p, idx) => {
+  const b = document.createElement('div');
+  b.className = 'pat-btn';
+  b.innerHTML = '<div class="ico"></div><div class="inf"><div class="nm">' + p.n + '</div><div class="cn">' + p.c + '</div></div>';
+  b.querySelector('.ico').style.backgroundImage = 'url(' + tile(p.k, p.k === 'binglie' ? 3 : p.k === 'xiangyun' ? 7 : '') + ')';
+  if (idx === 0) b.classList.add('on');
+  b.addEventListener('click', () => {
+    $$('.pat-btn').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    curPat = p;
+    if (p.k === 'binglie') patSeed = Math.floor(Math.random() * 100000);
+    renderPat();
+  });
+  patList.appendChild(b);
+});
+$('#patRegen').addEventListener('click', () => {
+  patSeed = Math.floor(Math.random() * 100000);
+  renderPat();
+});
+$$('.size-row button').forEach(btn => btn.addEventListener('click', () => {
+  $$('.size-row button').forEach(x => x.classList.remove('on'));
+  btn.classList.add('on');
+  patSize = parseInt(btn.dataset.s, 10);
+  renderPat();
+}));
+renderPat();
+
+/* ── 字:永字八法 ── */
+const yongPaths = $$('#yongSvg path');
+const strokeList = $('#strokeList');
+DATA.strokes.forEach((s, i) => {
+  const it = document.createElement('div');
+  it.className = 'stroke-item';
+  it.innerHTML = '<div class="big">' + s.k + '</div><div class="nm">' + s.n + '</div><div class="ds">' + s.d + '</div>';
+  it.addEventListener('mouseenter', () => { setStroke(i); });
+  it.addEventListener('mouseleave', () => { setStroke(-1); });
+  it.addEventListener('click', () => { setStroke(i, true); });
+  strokeList.appendChild(it);
+});
+function setStroke(i, sticky) {
+  if (sticky === undefined) { /* hover */ }
+  $$('#yongSvg path').forEach((p, j) => {
+    const on = j === i;
+    p.style.stroke = on ? '#a8362a' : INK;
+    p.style.strokeWidth = on ? '9' : '6';
+    p.style.transition = 'stroke .2s, stroke-width .2s';
+  });
+  $$('.stroke-item').forEach((el, j) => el.classList.toggle('on', sticky && j === i));
+}
+
+/* 四字挥毫 */
+const CHAR_PATHS = {
+  '山': ['M24 96 L24 30 Q24 22 30 22', 'M60 96 L60 18 Q60 12 64 12', 'M96 96 L96 34 Q96 28 100 28', 'M12 96 H108'],
+  '水': ['M60 14 L60 80 Q60 94 50 90', 'M18 40 Q38 52 54 68', 'M102 40 Q84 52 70 64', 'M104 86 Q86 98 74 102'],
+  '東': ['M16 22 H104', 'M60 16 L60 104', 'M60 104 Q46 118 28 120', 'M60 104 Q76 118 94 116',
+        'M26 44 H94', 'M30 46 V74', 'M90 46 V74', 'M26 74 H94', 'M30 60 H90'],
+  '方': ['M52 16 Q56 24 60 32', 'M18 38 H92', 'M92 38 V64 Q92 72 82 72 H52 Q46 72 46 66', 'M58 74 Q48 94 32 108']
+};
+const charGrid = $('#charGrid');
+DATA.chars.forEach(c => {
+  const paths = CHAR_PATHS[c.c];
+  if (!paths) return;
+  const card = document.createElement('div');
+  card.className = 'char-card';
+  card.innerHTML = '<div class="cn">' + c.w + '</div>'
+    + '<svg class="brush-svg" viewBox="0 0 120 120">'
+    + paths.map((p, i) => '<path class="d" d="' + p + '" pathLength="1" style="--d:' + (i * 0.5) + 's"/>').join('')
+    + '</svg>';
+  charGrid.appendChild(card);
+});
+
+/* ── 器 / 築 ── */
+function imgCard(pic, nm, pinyin, ds) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<div class="ph"><img alt="' + nm + '" loading="lazy"></div>'
+    + '<div class="cp"><div class="nm">' + nm + '</div><div class="cn">' + pinyin + '</div><div class="ds">' + ds + '</div></div>';
+  const img = card.querySelector('img');
+  img.onerror = () => card.classList.add('missing');
+  img.src = pic;
+  return card;
+}
+const ART = [
+  ['https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Blue_and_white_bowl_Jingdezhen_Ming_Yongle_1403_1424.jpg/960px-Blue_and_white_bowl_Jingdezhen_Ming_Yongle_1403_1424.jpg', '永乐青花碗', 'qing hua', '明永乐青花缠枝莲纹碗。钴蓝落于白釉,一笔是一段海上丝路的旅行。'],
+  ['https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/20241025_Blue_and_White_Porcelain_Flasks%2C_Qing_Dynasty.jpg/960px-20241025_Blue_and_White_Porcelain_Flasks%2C_Qing_Dynasty.jpg', '青花扁瓶', 'qing hua', '清代青花扁瓶一对。浓淡分五色,叫「青花分水」。'],
+  ['https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Song_ding_inscription.jpg/960px-Song_ding_inscription.jpg', '鼎上铭文', 'jin wen', '青铜鼎腹的金文。字是被火铸进青铜里的,比纸上的寿命长得多。']
+];
+const ART_ALT = ['汝窑天青釉 · 雨过天青云破处', '磁州窑刻花 · 刀锋即笔锋', '甲骨卜辞 · 汉字最初的模样'];
+ART.forEach((a, i) => $('#artGal').appendChild(imgCard(a[0], a[1], a[2], a[3])));
+const BLD = [
+  ['https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Golden_Water_River_at_the_Forbidden_City_02.jpg/960px-Golden_Water_River_at_the_Forbidden_City_02.jpg', '故宫金水河', 'jin shui he', '午门前的金水河与五座石桥。中轴线的第一笔,从天安门直抵太和殿。'],
+  ['https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Golden_Water_River_at_the_Forbidden_City_03.jpg/960px-Golden_Water_River_at_the_Forbidden_City_03.jpg', '宫墙一瞥', 'gong qiang', '红墙黄瓦、青砖玉阶。颜色在此处不只是装饰,而是等级与秩序。'],
+  ['https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Conclusion_to_Huizhou_Vernacular_Architecture_%289979418446%29.jpg/960px-Conclusion_to_Huizhou_Vernacular_Architecture_%289979418446%29.jpg', '徽派民居', 'hui pai', '粉墙黛瓦马头墙。黑与白之间,是徽州人留给烟雨的留白。']
+];
+BLD.forEach((b, i) => $('#buildGal').appendChild(imgCard(b[0], b[1], b[2], b[3])));
+
+/* ── 節:二十四节气环 ── */
+const C = 200, R = 140;
+function makeRing() {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 400 400');
+  const today = new Date();
+  const nowIdx = termIndex(today);
+  svg.innerHTML = ''
+    + '<circle cx="200" cy="200" r="150" fill="none" stroke="rgba(122,102,72,.3)"/>'
+    + '<circle cx="200" cy="200" r="128" fill="none" stroke="rgba(122,102,72,.15)" stroke-dasharray="2 5"/>'
+    + '<circle cx="200" cy="200" r="52" fill="rgba(247,241,226,.6)" stroke="rgba(122,102,72,.3)"/>'
+    + '<text x="200" y="196" text-anchor="middle" font-size="13" fill="#5d4f3d">今日</text>'
+    + '<text x="200" y="216" text-anchor="middle" font-size="22" fill="#b7872f" font-weight="600">' + DATA.terms[nowIdx].n + '</text>';
+  DATA.terms.forEach((tm, i) => {
+    const a = (i * 15 - 90) * Math.PI / 180;
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('class', 'term-node' + (i === nowIdx ? ' cur' : ''));
+    g.innerHTML = ''
+      + '<line x1="' + (C + Math.cos(a) * 132) + '" y1="' + (C + Math.sin(a) * 132)
+      + '" x2="' + (C + Math.cos(a) * 150) + '" y2="' + (C + Math.sin(a) * 150)
+      + '" stroke="rgba(122,102,72,.4)"/>'
+      + '<circle class="dot" cx="' + (C + Math.cos(a) * 141) + '" cy="' + (C + Math.sin(a) * 141) + '" r="5"/>'
+      + '<text class="lab" x="' + (C + Math.cos(a) * 176) + '" y="' + (C + Math.sin(a) * 176 + 4) + '">' + tm.n + '</text>';
+    g.addEventListener('click', () => { selectTerm(i); setCur(g); });
+    g.addEventListener('mouseenter', () => { selectTerm(i, false); });
+    svg.appendChild(g);
+  });
+  $('#ringBox').appendChild(svg);
+  selectTerm(nowIdx);
+}
+function termIndex(date) {
+  const md = (date.getMonth() + 1) * 100 + date.getDate();
+  const sorted = [
+    [106, 22], [120, 23], [204, 0], [219, 1], [306, 2], [321, 3], [405, 4], [420, 5],
+    [506, 6], [521, 7], [606, 8], [621, 9], [707, 10], [723, 11], [807, 12], [823, 13],
+    [908, 14], [923, 15], [1008, 16], [1023, 17], [1107, 18], [1122, 19], [1207, 20], [1222, 21]
+  ];
+  if (md < sorted[0][0]) return 23;
+  for (let i = 0; i < sorted.length; i++) {
+    if (md < sorted[i][0]) return sorted[i - 1][1];
+  }
+  return 21;
+}
+function selectTerm(i, sticky) {
+  const tm = DATA.terms[i];
+  $('#termDetail').innerHTML = '<div class="season">' + tm.s + ' · ' + (i % 6 + 1) + ' / 6</div>'
+    + '<div class="big">' + tm.n + '</div>'
+    + '<div class="date">' + tm.d + '</div>'
+    + '<div class="ds">' + tm.ds + '</div>'
+    + '<div class="tl">一年二十四番花信,这是第 ' + (i + 1) + ' 番</div>';
+  if (sticky) {
+    $$('.term-node').forEach(x => x.classList.remove('on'));
+  }
+}
+function setCur(g) {
+  $$('.term-node').forEach(x => x.classList.remove('on'));
+  g.classList.add('on');
+}
+makeRing();
+
+/* ── 导航高亮 ── */
+const secs = $$('section');
+const navs = $$('.nav-links a');
+const io = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) {
+      navs.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+secs.forEach(s => io.observe(s));
+
+/* ── 滚动显现 ── */
+const rv = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rv.unobserve(e.target); } });
+}, { threshold: 0.12 });
+$$('.rv').forEach(el => rv.observe(el));
+
+/* 首屏入场 */
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>
