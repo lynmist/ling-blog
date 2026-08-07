@@ -108,7 +108,7 @@ fetch('books/index.json')
       return;
     }
     list.innerHTML = books.map(b => `
-      <a class="book-card" href="book.html?id=${b.id || ''}">
+      <a class="book-card" href="book/index.html?id=${b.id || ''}">
         <div class="book-cover">书</div>
         <div class="book-main">
           <div class="book-meta">
