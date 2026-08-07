@@ -164,23 +164,36 @@ html[data-theme="dark"] .cover-glow { opacity: .38; }
 .detail-sec { margin-bottom: 2.2rem; }
 
 /* ── quotes ── */
-.quote-list { display: flex; flex-direction: column; gap: 1rem; }
+.quote-list { display: flex; flex-direction: column; gap: .9rem; }
 .quote {
-  position: relative;
-  margin: 0; padding: 1.05rem 1.4rem 1.05rem 2.7rem;
-  background: var(--blue-ll);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  font-family: 'Noto Serif SC', serif;
-  font-size: 14px; color: var(--ink2); line-height: 2;
-  transition: transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s;
+  position: relative; margin: 0;
+  padding: 1.35rem 1.5rem 1.15rem 3.1rem;
+  background: var(--surface);
+  border: 1px solid var(--line); border-radius: 14px;
+  transition: border-color .25s, box-shadow .25s;
 }
-.quote:hover { transform: translateX(6px); border-color: var(--blue-l); box-shadow: var(--shadow-sm); }
 .quote::before {
   content: '「';
-  position: absolute; left: 1.05rem; top: .95rem;
-  color: var(--blue); font-size: 17px;
+  position: absolute; left: 1.15rem; top: 1.1rem;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.55rem; line-height: 1;
+  color: var(--blue-l);
+  transition: color .25s;
 }
+.quote:hover { border-color: var(--blue-l); box-shadow: var(--shadow-sm); }
+.quote:hover::before { color: var(--blue); }
+.quote-text {
+  margin: 0;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14.5px; color: var(--ink); line-height: 2.05;
+}
+.quote-src {
+  display: block; margin-top: .6rem; text-align: right;
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px; letter-spacing: .14em; color: var(--ink4);
+  transition: color .25s;
+}
+.quote:hover .quote-src { color: var(--blue); }
 
 /* ── quotes more / modal ── */
 .quotes-more {
@@ -354,8 +367,8 @@ footer { margin-top: 6rem; }
   .detail-cover span { font-size: 15px; }
   .detail-name { font-size: 1.45rem; }
   .detail-eyebrow { letter-spacing: .18em; }
-  .quote { padding: .9rem 1.1rem .9rem 2.3rem; }
-  .quote::before { left: .85rem; top: .78rem; font-size: 15px; }
+  .quote { padding: 1.1rem 1.2rem 1rem 2.6rem; }
+  .quote::before { left: .95rem; top: .95rem; font-size: 1.3rem; }
   .notes-fold { padding: 1rem 1.05rem; }
   .notes-fold .md-body { padding-top: 1rem; }
   .md-body table { min-width: 540px; }
@@ -445,7 +458,7 @@ function render(b) {
     <div class="detail-sec">
       <h2 class="detail-h">书摘</h2>
       <div class="quote-list">
-        ${b.quotes.slice(0, 5).map(q => `<blockquote class="quote"><p>${esc(q)}</p></blockquote>`).join('')}
+        ${b.quotes.slice(0, 5).map(q => quoteHtml(q)).join('')}
         ${b.quotes.length > 5 ? `<button class="quotes-more" id="quotes-more" type="button">查看全部书摘 · ${b.quotes.length} 条</button>` : ''}
       </div>
     </div>
@@ -458,7 +471,7 @@ function render(b) {
           <button class="quote-modal-close" type="button" data-close aria-label="关闭">✕</button>
         </div>
         <div class="quote-list">
-          ${b.quotes.map(q => `<blockquote class="quote"><p>${esc(q)}</p></blockquote>`).join('')}
+          ${b.quotes.map(q => quoteHtml(q)).join('')}
         </div>
       </div>
     </div>` : ''}` : ''}
@@ -507,6 +520,12 @@ function mountTilt() {
 }
 function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function quoteHtml(q) {
+  const m = String(q).match(/^(.*?)\s*——(第\d+章)$/);
+  const text = m ? m[1] : q;
+  const src = m ? m[2] : '';
+  return `<blockquote class="quote"><p class="quote-text">${esc(text)}</p>${src ? `<span class="quote-src">${esc(src)}</span>` : ''}</blockquote>`;
 }
 function loadScript(src) {
   return new Promise((resolve, reject) => {
