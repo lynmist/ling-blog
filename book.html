@@ -42,21 +42,6 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
   margin-bottom: 2.8rem;
 }
 
-/* giant vertical outline of the book's name behind the hero */
-.watermark {
-  position: absolute; right: -1rem; top: -2.5rem; z-index: -1;
-  writing-mode: vertical-rl;
-  font-family: 'Noto Serif SC', serif;
-  font-size: clamp(5rem, 14vw, 8.5rem);
-  letter-spacing: .1em; line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--blue-l);
-  opacity: .35;
-  pointer-events: none; user-select: none;
-  white-space: nowrap;
-}
-html[data-theme="dark"] .watermark { opacity: .22; }
-
 .cover-stage { flex-shrink: 0; transition: transform .25s ease-out; }
 .detail-cover {
   position: relative;
@@ -190,7 +175,6 @@ html[data-theme="dark"] .watermark { opacity: .22; }
 footer { margin-top: 6rem; }
 @media (max-width: 600px) {
   .book-hero { gap: 1.4rem; padding-top: 3rem; }
-  .watermark { right: 0; top: -1.5rem; }
   .detail-cover { width: 108px; }
   .detail-cover span { font-size: 15px; }
   .detail-name { font-size: 1.45rem; }
@@ -247,7 +231,6 @@ function render(b) {
   const full = b.rating != null ? Math.max(0, Math.min(5, Math.round(b.rating))) : 0;
   page.innerHTML = `
     <div class="book-hero">
-      <div class="watermark" aria-hidden="true">${esc(b.name || '')}</div>
       <div class="cover-stage" id="cover-stage">
         <div class="detail-cover" style="--c1:${c1};--c2:${c2}">${cover}</div>
       </div>
