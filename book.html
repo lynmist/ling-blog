@@ -345,10 +345,13 @@ function renderMissing() {
   `;
 }
 const id = new URLSearchParams(location.search).get('id');
-fetch('books/index.json')
-  .then(r => r.json())
-  .then(books => {
-    const b = (books || []).find(x => x.id === id) || (!id && books && books[0]);
+Promise.all([
+  fetch('books/index.json').then(r => r.json()),
+  id ? fetch(`books/${encodeURIComponent(id)}.json`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null)
+])
+  .then(([books, detail]) => {
+    const base = (books || []).find(x => x.id === id) || (!id && books && books[0]);
+    const b = base ? Object.assign({}, base, detail) : detail;
     if (b) render(b); else renderMissing();
   })
   .catch(renderMissing);
