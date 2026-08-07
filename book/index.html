@@ -167,6 +167,15 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
   display: flex; justify-content: center;
 }
 /* ── collapsible notes ── */
+.notes-fold {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  padding: 1.15rem 1.35rem;
+  transition: border-color .25s, box-shadow .25s;
+}
+.notes-fold:hover { border-color: var(--blue-l); box-shadow: var(--shadow-sm); }
+.notes-fold[open] { border-color: var(--blue-l); }
 .notes-fold summary {
   display: flex; align-items: center; gap: .9rem;
   cursor: pointer; list-style: none; user-select: none;
@@ -174,6 +183,8 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
 .notes-fold summary::-webkit-details-marker { display: none; }
 .notes-fold summary .detail-h { flex: 1; margin-bottom: 0; transition: color .2s; }
 .notes-fold summary:hover .detail-h { color: var(--ink2); }
+.fold-hint { font-size: 10px; letter-spacing: .15em; color: var(--ink4); flex-shrink: 0; }
+.notes-fold[open] .fold-hint { display: none; }
 .fold-chevron {
   width: 14px; height: 14px; flex-shrink: 0;
   stroke: var(--ink4); fill: none; stroke-width: 2;
@@ -182,6 +193,7 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
 }
 .notes-fold[open] .fold-chevron { transform: rotate(90deg); stroke: var(--blue); }
 .notes-fold .md-body { padding-top: 1.3rem; }
+.notes-fold[open] .md-body { border-top: 1px solid var(--line); margin-top: 1.1rem; }
 
 .md-body hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 
@@ -328,6 +340,7 @@ function render(b) {
     <details class="detail-sec notes-fold" id="notes-fold">
       <summary>
         <h2 class="detail-h">笔记</h2>
+        <span class="fold-hint">展开</span>
         <svg class="fold-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
       </summary>
       <div class="md-body" id="md-body"><p style="color:var(--ink4);font-size:12px">笔记加载中…</p></div>
