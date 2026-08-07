@@ -43,8 +43,8 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
   filter: blur(70px) saturate(1.35);
   opacity: 0;
   transition: opacity 1.4s ease .25s;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 96%);
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 96%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 72%, transparent 100%);
 }
 .cover-ambient.on { opacity: .42; }
 html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
@@ -113,8 +113,8 @@ html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
   padding: 1px 8px;
 }
 .detail-eyebrow {
-  font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
-  color: var(--ink4); font-family: 'Inter', sans-serif;
+  font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
+  color: var(--ink2); font-weight: 500; font-family: 'Inter', sans-serif;
   margin-bottom: 1.1rem;
 }
 .detail-name {
