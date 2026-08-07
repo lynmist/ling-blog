@@ -35,11 +35,42 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
   to   { transform: translate(4vw, 3vh) scale(1.1); }
 }
 
+/* ── blurred cover as page ambience ── */
+.cover-ambient {
+  position: fixed; left: -5vw; right: -5vw; top: -5vh; height: 70vh;
+  z-index: -1; pointer-events: none;
+  background-size: cover; background-position: center 28%;
+  filter: blur(70px) saturate(1.35);
+  opacity: 0;
+  transition: opacity 1.4s ease .25s;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 96%);
+}
+.cover-ambient.on { opacity: .42; }
+html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
+
+/* hero info staggered entrance */
+.detail-info > * { opacity: 0; animation: info-in .6s cubic-bezier(.2,.8,.2,1) forwards; }
+.detail-info > *:nth-child(1) { animation-delay: .4s; }
+.detail-info > *:nth-child(2) { animation-delay: .5s; }
+.detail-info > *:nth-child(3) { animation-delay: .6s; }
+.detail-info > *:nth-child(4) { animation-delay: .7s; }
+.detail-info > *:nth-child(5) { animation-delay: .8s; }
+@keyframes info-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .detail-info > * { animation: none; opacity: 1; }
+}
+
 .book-hero {
   position: relative;
   padding-top: 4.5rem;
   display: flex; gap: 2.4rem; align-items: flex-end;
-  margin-bottom: 2.8rem;
+  margin-bottom: 3.6rem;
+}
+.book-hero::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1.8rem; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue-l), transparent);
+  opacity: .6;
 }
 
 .cover-stage { flex-shrink: 0; transition: transform .25s ease-out; }
@@ -114,6 +145,12 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
 .detail-desc { font-size: 13.5px; color: var(--ink2); line-height: 2.1; margin-bottom: 2.2rem; }
 .detail-review { font-family: 'Noto Serif SC', serif; font-size: 14px; color: var(--ink2); line-height: 2.2; margin-bottom: 1.1rem; }
 .detail-review:last-child { margin-bottom: 0; }
+.detail-sec .detail-review:first-of-type::first-letter {
+  float: left;
+  font-size: 2.6em; line-height: 1;
+  padding: .08em .12em 0 0;
+  color: var(--blue);
+}
 .detail-sec { margin-bottom: 2.2rem; }
 
 /* ── quotes ── */
@@ -347,6 +384,15 @@ function render(b) {
     </details>` : ''}
     ${FOOTER}
   `;
+  if (b.cover) {
+    const amb = document.createElement('div');
+    amb.className = 'cover-ambient';
+    amb.style.backgroundImage = `url("${b.cover}")`;
+    document.body.appendChild(amb);
+    requestAnimationFrame(() => requestAnimationFrame(() => amb.classList.add('on')));
+    const aur = document.querySelector('.aurora');
+    if (aur) aur.style.display = 'none';
+  }
   const fold = document.getElementById('notes-fold');
   if (fold) {
     let notesMounted = false;
