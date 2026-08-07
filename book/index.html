@@ -37,14 +37,14 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
 
 /* ── blurred cover as page ambience ── */
 .cover-ambient {
-  position: fixed; left: -5vw; right: -5vw; top: -5vh; height: 70vh;
+  position: fixed; left: -5vw; right: -5vw; top: -22vh; height: 92vh;
   z-index: -1; pointer-events: none;
   background-size: cover; background-position: center 28%;
   filter: blur(70px) saturate(1.35);
   opacity: 0;
   transition: opacity 1.4s ease .25s;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 72%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
 }
 .cover-ambient.on { opacity: .42; }
 html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
@@ -126,7 +126,15 @@ html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
   -webkit-text-fill-color: transparent;
 }
 .detail-author { font-size: 13px; color: var(--ink2); margin-bottom: .8rem; }
-.detail-rating { font-size: 13px; letter-spacing: .12em; color: var(--blue); }
+.detail-rating {
+  display: inline-flex; align-items: center;
+  padding: .38rem .85rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  font-size: 13px; letter-spacing: .12em; color: var(--blue);
+}
 .detail-rating .num { font-size: 11px; color: var(--blue); opacity: .6; margin-left: .5rem; letter-spacing: .03em; }
 
 /* nav fades into the cover ambience instead of a hard edge */
