@@ -124,6 +124,24 @@ html[data-theme="dark"] .cover-glow { opacity: .38; }
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.name-row { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin-bottom: .55rem; }
+.name-row .detail-name { margin-bottom: 0; }
+.read-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  flex-shrink: 0;
+  font-size: 11px; letter-spacing: .06em;
+  color: var(--blue); text-decoration: none;
+  border: 1px solid var(--blue-l); border-radius: 999px;
+  padding: .38rem .9rem;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: background .2s, color .2s, border-color .2s, transform .2s, box-shadow .2s;
+}
+.read-btn:hover {
+  background: var(--blue); color: #fff; border-color: var(--blue);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px -6px rgba(122, 162, 255, .5);
+}
 .detail-author { font-size: 13px; color: var(--ink2); margin-bottom: .8rem; }
 .detail-rating { font-size: 12px; letter-spacing: .14em; color: var(--blue-l); }
 .detail-rating .num { font-size: 11px; color: var(--ink3); margin-left: .5rem; letter-spacing: .03em; }
@@ -364,7 +382,10 @@ function render(b) {
         <div class="detail-chips">
           <span class="book-type">${b.type || '其他'}</span>
         </div>
-        <h1 class="detail-name">${b.name || '未命名'}</h1>
+        <div class="name-row">
+          <h1 class="detail-name">${b.name || '未命名'}</h1>
+          ${b.link ? `<a class="read-btn" href="${b.link}" target="_blank" rel="noopener">在线阅读 →</a>` : ''}
+        </div>
         <p class="detail-author">${b.author || ''}</p>
         ${b.rating != null ? `<div class="detail-rating">${'★'.repeat(full)}${'☆'.repeat(5 - full)}<span class="num">${b.rating} / 5</span></div>` : ''}
       </div>
