@@ -129,7 +129,7 @@ html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
 .detail-rating { font-size: 13px; letter-spacing: .12em; color: var(--blue); }
 .detail-rating .num { font-size: 11px; color: var(--ink4); margin-left: .5rem; letter-spacing: .03em; }
 .detail-h {
-  font-size: 11px; letter-spacing: .2em; color: var(--ink4);
+  font-size: 11px; letter-spacing: .2em; color: var(--ink3);
   font-weight: 400; margin-bottom: .9rem;
   display: flex; align-items: center; gap: .8rem;
 }
@@ -139,7 +139,7 @@ html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
   content: '0' counter(sec);
   font-family: 'Inter', sans-serif;
   font-size: 10px; letter-spacing: .08em;
-  color: var(--blue-l);
+  color: var(--blue);
 }
 .detail-h::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .detail-desc { font-size: 13.5px; color: var(--ink2); line-height: 2.1; margin-bottom: 2.2rem; }
@@ -268,6 +268,8 @@ html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
   width: 100%; border-collapse: collapse;
   margin-bottom: 1.5rem; font-size: 12.5px;
 }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1.5rem; }
+.table-wrap .md-body table, .table-wrap table { margin-bottom: 0; }
 .md-body th, .md-body td {
   padding: .55rem .7rem; text-align: left; vertical-align: top;
   border-bottom: 1px solid var(--line); line-height: 1.7;
@@ -287,7 +289,8 @@ html[data-theme="dark"] .cover-ambient.on { opacity: .26; }
 .not-found a { font-size: 12px; color: var(--blue); text-decoration: none; }
 footer { margin-top: 6rem; }
 @media (max-width: 600px) {
-  .book-hero { gap: 1.4rem; padding-top: 3rem; }
+  .book-hero { flex-direction: column; align-items: flex-start; gap: 1.6rem; padding-top: 3rem; }
+  .detail-info { width: 100%; }
   .detail-cover { width: 108px; }
   .detail-cover span { font-size: 15px; }
   .detail-name { font-size: 1.45rem; }
@@ -296,7 +299,7 @@ footer { margin-top: 6rem; }
   .quote::before { left: .85rem; top: .78rem; font-size: 15px; }
   .notes-fold { padding: 1rem 1.05rem; }
   .notes-fold .md-body { padding-top: 1rem; }
-  .md-body table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .md-body table { min-width: 540px; }
   .md-body th, .md-body td { padding: .5rem .55rem; }
   .tl { padding-left: 1.15rem; }
   .tl-item { padding-left: .85rem; }
@@ -451,6 +454,12 @@ function mountNotes(b) {
       return `<pre><code>${esc(code)}</code></pre>`;
     };
     document.getElementById('md-body').innerHTML = marked.parse(b.notes, { renderer });
+    document.querySelectorAll('#md-body table').forEach(t => {
+      const wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      t.parentNode.insertBefore(wrap, t);
+      wrap.appendChild(t);
+    });
     const diagrams = document.querySelectorAll('.mermaid');
     if (!diagrams.length) return;
     loadScript('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js').then(() => {
@@ -477,8 +486,8 @@ function renderMissing() {
 }
 const id = new URLSearchParams(location.search).get('id');
 Promise.all([
-  fetch('../books/index.json').then(r => r.json()),
-  id ? fetch(`../books/${encodeURIComponent(id)}.json`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null)
+  fetch('index.json').then(r => r.json()),
+  id ? fetch(`${encodeURIComponent(id)}.json`).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null)
 ])
   .then(([books, detail]) => {
     const base = (books || []).find(x => x.id === id) || (!id && books && books[0]);

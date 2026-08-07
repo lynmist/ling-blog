@@ -105,7 +105,7 @@ footer { margin-top: 6rem; }
 </div>
 
 <script>
-fetch('books/index.json')
+fetch('book/index.json')
   .then(r => r.json())
   .then(books => {
     const list = document.getElementById('book-list');
