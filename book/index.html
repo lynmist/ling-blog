@@ -166,6 +166,23 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
   background: transparent; border: none; padding: 1rem 0;
   display: flex; justify-content: center;
 }
+/* ── collapsible notes ── */
+.notes-fold summary {
+  display: flex; align-items: center; gap: .9rem;
+  cursor: pointer; list-style: none; user-select: none;
+}
+.notes-fold summary::-webkit-details-marker { display: none; }
+.notes-fold summary .detail-h { flex: 1; margin-bottom: 0; transition: color .2s; }
+.notes-fold summary:hover .detail-h { color: var(--ink2); }
+.fold-chevron {
+  width: 14px; height: 14px; flex-shrink: 0;
+  stroke: var(--ink4); fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), stroke .2s;
+}
+.notes-fold[open] .fold-chevron { transform: rotate(90deg); stroke: var(--blue); }
+.notes-fold .md-body { padding-top: 1.3rem; }
+
 .md-body hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
 
 /* ── timeline block (```timeline) ── */
@@ -178,9 +195,10 @@ html[data-theme="dark"] .aurora i { opacity: .16; }
   position: relative;
   padding: .5rem 0 .5rem 1rem;
   opacity: 0;
-  animation: d-rise .5s cubic-bezier(.2,.8,.2,1) forwards;
+  animation: tl-in .5s cubic-bezier(.2,.8,.2,1) forwards;
   animation-delay: calc(var(--i, 0) * .07s + .1s);
 }
+@keyframes tl-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .tl-item::before {
   content: ''; position: absolute; left: calc(-1.4rem - 1px); top: 1.05rem;
   width: 9px; height: 9px; border-radius: 50%;
@@ -299,11 +317,6 @@ function render(b) {
       <h2 class="detail-h">短评</h2>
       ${String(b.review).split(/\n+/).filter(p => p.trim()).map(p => `<p class="detail-review">${esc(p)}</p>`).join('')}
     </div>` : ''}
-    ${b.notes ? `
-    <div class="detail-sec">
-      <h2 class="detail-h">笔记</h2>
-      <div class="md-body" id="md-body"><p style="color:var(--ink4);font-size:12px">笔记加载中…</p></div>
-    </div>` : ''}
     ${b.quotes && b.quotes.length ? `
     <div class="detail-sec">
       <h2 class="detail-h">书摘</h2>
@@ -311,9 +324,23 @@ function render(b) {
         ${b.quotes.map(q => `<blockquote class="quote"><p>${esc(q)}</p></blockquote>`).join('')}
       </div>
     </div>` : ''}
+    ${b.notes ? `
+    <details class="detail-sec notes-fold" id="notes-fold">
+      <summary>
+        <h2 class="detail-h">笔记</h2>
+        <svg class="fold-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </summary>
+      <div class="md-body" id="md-body"><p style="color:var(--ink4);font-size:12px">笔记加载中…</p></div>
+    </details>` : ''}
     ${FOOTER}
   `;
-  mountNotes(b);
+  const fold = document.getElementById('notes-fold');
+  if (fold) {
+    let notesMounted = false;
+    fold.addEventListener('toggle', () => {
+      if (fold.open && !notesMounted) { notesMounted = true; mountNotes(b); }
+    });
+  }
   mountTilt();
 }
 function mountTilt() {
