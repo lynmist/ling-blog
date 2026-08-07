@@ -54,11 +54,6 @@
   border: 1px solid var(--blue-l); border-radius: 99px;
   padding: 1px 8px;
 }
-.detail-status {
-  font-size: 9px; letter-spacing: .14em;
-  color: var(--ink3); border: 1px solid var(--line); border-radius: 99px;
-  padding: 1px 8px;
-}
 .detail-name {
   font-family: 'Noto Serif SC', serif;
   font-size: 1.9rem; font-weight: 400; color: var(--ink);
@@ -76,7 +71,59 @@
 .detail-desc { font-size: 13.5px; color: var(--ink2); line-height: 2.1; margin-bottom: 2.2rem; }
 .detail-review { font-family: 'Noto Serif SC', serif; font-size: 14px; color: var(--ink2); line-height: 2.2; }
 .detail-sec { margin-bottom: 2.2rem; }
-.book-hero, .detail-sec { }
+
+/* ── quotes ── */
+.quote-list { display: flex; flex-direction: column; gap: 1rem; }
+.quote {
+  position: relative;
+  margin: 0; padding: 1.05rem 1.4rem 1.05rem 2.7rem;
+  background: var(--blue-ll);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 14px; color: var(--ink2); line-height: 2;
+}
+.quote::before {
+  content: '「';
+  position: absolute; left: 1.05rem; top: .95rem;
+  color: var(--blue); font-size: 17px;
+}
+
+/* ── markdown notes ── */
+.md-body { font-size: 13.5px; color: var(--ink2); line-height: 2; }
+.md-body h2, .md-body h3, .md-body h4 {
+  font-family: 'Noto Serif SC', serif; font-weight: 400; color: var(--ink);
+  margin: 2.2rem 0 .9rem; line-height: 1.5;
+}
+.md-body h2 { font-size: 1.15rem; }
+.md-body h3 { font-size: 1.05rem; }
+.md-body h4 { font-size: .95rem; }
+.md-body > *:first-child { margin-top: 0; }
+.md-body p { margin-bottom: 1rem; }
+.md-body ul, .md-body ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+.md-body li { margin-bottom: .4rem; }
+.md-body blockquote {
+  margin: 0 0 1rem; padding: .15rem 1rem;
+  border-left: 2px solid var(--blue-l);
+  color: var(--ink3);
+}
+.md-body code {
+  font-family: Consolas, monospace; font-size: .9em;
+  background: var(--blue-ll); padding: .1em .45em; border-radius: 4px;
+}
+.md-body pre {
+  background: var(--blue-ll); border: 1px solid var(--line); border-radius: 10px;
+  padding: 1rem; overflow-x: auto; margin-bottom: 1rem;
+}
+.md-body pre code { background: none; padding: 0; }
+.md-body pre.mermaid {
+  background: transparent; border: none; padding: 1rem 0;
+  display: flex; justify-content: center;
+}
+.md-body hr { border: none; border-top: 1px solid var(--line); margin: 2rem 0; }
+.md-body a { color: var(--blue); text-decoration: none; }
+.md-body img { max-width: 100%; border-radius: 10px; }
+
 .not-found { padding: 6rem 0; text-align: center; }
 .not-found p { font-size: 13px; color: var(--ink4); margin-bottom: 1.5rem; }
 .not-found a { font-size: 12px; color: var(--blue); text-decoration: none; }
@@ -135,7 +182,6 @@ function render(b) {
       <div class="detail-info">
         <div class="detail-chips">
           <span class="book-type">${b.type || '其他'}</span>
-          ${b.status ? `<span class="detail-status">${b.status}</span>` : ''}
         </div>
         <h1 class="detail-name">${b.name || '未命名'}</h1>
         <p class="detail-author">${b.author || ''}</p>
@@ -151,8 +197,55 @@ function render(b) {
       <h2 class="detail-h">读后</h2>
       <p class="detail-review">${b.review}</p>
     </div>` : ''}
+    ${b.quotes && b.quotes.length ? `
+    <div class="detail-sec">
+      <h2 class="detail-h">书摘</h2>
+      <div class="quote-list">
+        ${b.quotes.map(q => `<blockquote class="quote"><p>${esc(q)}</p></blockquote>`).join('')}
+      </div>
+    </div>` : ''}
+    ${b.notes ? `
+    <div class="detail-sec">
+      <h2 class="detail-h">笔记</h2>
+      <div class="md-body" id="md-body"><p style="color:var(--ink4);font-size:12px">笔记加载中…</p></div>
+    </div>` : ''}
     ${FOOTER}
   `;
+  mountNotes(b);
+}
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+function mountNotes(b) {
+  if (!b.notes) return;
+  loadScript('https://cdn.jsdelivr.net/npm/marked@12/marked.min.js').then(() => {
+    const renderer = new marked.Renderer();
+    renderer.code = function (code, lang) {
+      if (code && typeof code === 'object') { lang = code.lang; code = code.text; }
+      if (lang === 'mermaid') return `<pre class="mermaid">${esc(code)}</pre>`;
+      return `<pre><code>${esc(code)}</code></pre>`;
+    };
+    document.getElementById('md-body').innerHTML = marked.parse(b.notes, { renderer });
+    const diagrams = document.querySelectorAll('.mermaid');
+    if (!diagrams.length) return;
+    loadScript('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js').then(() => {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'neutral'
+      });
+      mermaid.run({ nodes: diagrams });
+    });
+  }).catch(() => {
+    const el = document.getElementById('md-body');
+    if (el) el.innerHTML = '<p style="color:var(--ink4);font-size:12px">笔记加载失败</p>';
+  });
 }
 function renderMissing() {
   document.title = '没有找到这本书 — ling';
