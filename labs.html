@@ -31,7 +31,10 @@
   display: flex; align-items: center; justify-content: center;
   color: var(--blue);
   font-size: 18px;
+  overflow: hidden;
 }
+.lab-icon.lab-icon-img { background: var(--surface); }
+.lab-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .lab-name { font-size: 15px; font-weight: 500; color: var(--ink); }
 .lab-desc { font-size: 12px; color: var(--ink2); line-height: 1.6; }
 .lab-count { font-size: 10px; letter-spacing: 0.14em; color: var(--ink4); margin-top: 2px; }
@@ -160,11 +163,15 @@ fetch('labs/index.json')
     }
 
     // an entry with a `children` array renders as a group button; everything else is a plain link card
+    // icon starting with http(s) renders as an image, otherwise plain text/emoji
+    const labIcon = icon => /^https?:\/\//.test(icon || '')
+      ? `<div class="lab-icon lab-icon-img"><img src="${icon}" alt=""></div>`
+      : `<div class="lab-icon">${icon || '◆'}</div>`;
     grid.innerHTML = labs.map((l, i) => {
       if (l.children && l.children.length) {
         return `
       <button type="button" class="lab-card" data-group="${i}">
-        <div class="lab-icon">${l.icon || '◆'}</div>
+        ${labIcon(l.icon)}
         <div class="lab-text">
           <div class="lab-name">${l.name || '未命名'}</div>
           <div class="lab-desc">${l.desc || ''}</div>
@@ -174,7 +181,7 @@ fetch('labs/index.json')
       }
       return `
       <a href="${l.path || '#'}" class="lab-card"${/^https?:\/\//.test(l.path || '') ? ' target="_blank" rel="noopener"' : ''}>
-        <div class="lab-icon">${l.icon || '◆'}</div>
+        ${labIcon(l.icon)}
         <div class="lab-text">
           <div class="lab-name">${l.name || '未命名'}</div>
           <div class="lab-desc">${l.desc || ''}</div>
@@ -191,7 +198,7 @@ fetch('labs/index.json')
       document.getElementById('lab-modal-title').textContent = group.name || '';
       document.getElementById('lab-modal-list').innerHTML = group.children.map(c => `
         <a href="${c.path || '#'}" class="lab-modal-item"${/^https?:\/\//.test(c.path || '') ? ' target="_blank" rel="noopener"' : ''}>
-          <div class="lab-icon">${c.icon || '◆'}</div>
+          ${labIcon(c.icon)}
           <div class="lab-text">
             <div class="lab-name">${c.name || '未命名'}</div>
             <div class="lab-desc">${c.desc || ''}</div>
