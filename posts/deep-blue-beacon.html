@@ -11,24 +11,24 @@
 <link href="../css/post-blue.css" rel="stylesheet">
 <style>
 /* this post only: floated cover, text wraps on the right */
-.md-body > p:first-child {
+.md-body > .float-cover {
   float: left;
   width: min(44%, 300px);
   margin: .3rem 2.2rem 1.2rem 0;
 }
-.md-body > p:first-child img {
+.float-cover img {
   width: 100%; display: block;
   border-radius: 10px; border: 1px solid var(--line);
 }
-.md-body > p:first-child br { display: none; }
-.md-body > p:first-child em {
-  display: block; margin-top: .55rem;
+.md-body p.fc-cap {
+  font-family: 'Noto Sans SC', sans-serif;
   font-size: 11px; letter-spacing: .05em; color: var(--ink4);
   font-style: italic; text-align: center;
+  line-height: 1.5; margin: .55rem 0 0;
 }
 .article-footer { clear: both; }
 @media (max-width: 640px) {
-  .md-body > p:first-child { float: none; width: 100%; margin: 0 0 2rem; }
+  .md-body > .float-cover { float: none; width: 100%; margin: 0 0 2rem; }
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -68,8 +68,10 @@
   </footer>
 </div>
 <script id="md-src" type="text/plain">
+<div class="float-cover">
 <img src="https://img.lingyun2719.xyz/i/2026/08/08/ozxxxk.jpg" alt="仰望深蓝：世界尽头的信标">
-*画师：X @chocoshi3*
+<p class="fc-cap">画师：X @chocoshi3</p>
+</div>
 
 这已经是地图上不存在的高度了。
 
