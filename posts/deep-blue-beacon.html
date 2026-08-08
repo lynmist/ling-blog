@@ -9,6 +9,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400&family=Noto+Sans+SC:wght@300;400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="../css/post-blue.css" rel="stylesheet">
+<style>
+/* this post only: floated cover, text wraps on the right */
+.md-body > p:first-child {
+  float: left;
+  width: min(44%, 300px);
+  margin: .3rem 2.2rem 1.2rem 0;
+}
+.md-body > p:first-child img {
+  width: 100%; display: block;
+  border-radius: 10px; border: 1px solid var(--line);
+}
+.md-body > p:first-child br { display: none; }
+.md-body > p:first-child em {
+  display: block; margin-top: .55rem;
+  font-size: 11px; letter-spacing: .05em; color: var(--ink4);
+  font-style: italic; text-align: center;
+}
+.article-footer { clear: both; }
+@media (max-width: 640px) {
+  .md-body > p:first-child { float: none; width: 100%; margin: 0 0 2rem; }
+}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 </head>
 <body>
@@ -36,7 +58,6 @@
     <h1 class="ah-title">仰望深蓝：世界尽头的信标</h1>
     <p class="ah-lead">世界很大，而她很小。</p>
   </header>
-  <div class="cover-wrap"><div class="cover-box"><img src="https://img.lingyun2719.xyz/i/2026/08/08/ozxxxk.jpg" alt="cover"></div><p class="cover-cap">画师：X @chocoshi3</p></div>
   <article class="article-body">
     <div class="md-body" id="md-output"></div>
   </article>
@@ -47,6 +68,9 @@
   </footer>
 </div>
 <script id="md-src" type="text/plain">
+<img src="https://img.lingyun2719.xyz/i/2026/08/08/ozxxxk.jpg" alt="仰望深蓝：世界尽头的信标">
+*画师：X @chocoshi3*
+
 这已经是地图上不存在的高度了。
 
 脚下的岩石不再是温暖的土褐色，而是被高空的寒意冻结成了铁青。空气稀薄得让人每一次呼吸都需要拼尽全力，但少女还是稳稳地将那面红色的小旗帜插在了悬崖的边缘。
