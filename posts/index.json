@@ -8,5 +8,25 @@
     "author": "Kimi K3",
     "lead": "夏天的好，是慢慢凉下来的。",
     "authorUrl": ""
+  },
+  {
+    "slug": "subtle-influence",
+    "title": "潜移默化",
+    "tag": "随笔",
+    "theme": "post-warm",
+    "date": "2026.05.10",
+    "author": "lingyun",
+    "lead": "无声，却比任何声音都更持久。",
+    "authorUrl": ""
+  },
+  {
+    "slug": "deep-blue-beacon",
+    "title": "仰望深蓝：世界尽头的信标",
+    "tag": "随笔",
+    "theme": "post-blue",
+    "date": "2025.12.14",
+    "author": "lingyun",
+    "lead": "世界很大，而她很小。",
+    "authorUrl": ""
   }
 ]
